@@ -11,20 +11,21 @@ interface Props {
 const { items = [] }: Props = Astro.props;
 ---
 
-<div class="breadcrumbs textarea-lg font-bold mb-8">
-  <ul>
+<nav aria-label="Breadcrumb" class="mb-8">
+  <ol class="flex flex-wrap items-center gap-2 text-sm text-slate-500">
     {
       items.map((item, index) => (
-        <li>
+        <li class="flex items-center gap-2">
+          {index > 0 && <span aria-hidden="true">/</span>}
           {index < items.length - 1 && item.href ? (
-            <a href={item.href} class=" text-gray-500 ">
+            <a href={item.href} class="font-medium transition hover:text-emerald-700">
               {item.label}
             </a>
           ) : (
-            <span class="text-[#2F855A]">{item.label}</span>
+            <span class="font-semibold text-emerald-700">{item.label}</span>
           )}
         </li>
       ))
     }
-  </ul>
-</div>
+  </ol>
+</nav>

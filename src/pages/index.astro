@@ -1,16 +1,890 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Header from '../components/home/header.astro';
-import Empresas from '../components/home/Empresas.astro';
-import AboutHome from '../components/home/AboutHome.astro';
-import MisionVision from '../components/home/MisionVision.astro';
-import FAQ from '../components/home/FAQ.astro';
+import { Font } from "astro:assets";
+
+const features = [
+  {
+    tag: "Chạm / quét",
+    title: "NFC và QR cùng mở một hồ sơ",
+    body: "Chạm điện thoại vào thẻ hoặc quét mã QR để đi đến cùng một hồ sơ khẩn cấp, nên không cần giải thích nhiều bước khi đang vội.",
+  },
+  {
+    tag: "Hồ sơ y tế",
+    title: "Bệnh nền, dị ứng, thuốc đang dùng",
+    body: "Người dùng có thể lưu và cập nhật các thông tin quan trọng như bệnh nền, dị ứng thuốc, dị ứng thực phẩm, thuốc đang dùng và lịch sử điều trị.",
+  },
+  {
+    tag: "Liên hệ",
+    title: "Người thân và người hỗ trợ luôn rõ ràng",
+    body: "Thông tin liên hệ khẩn cấp được đặt cạnh hồ sơ y tế để người hỗ trợ hoặc nhân viên y tế có thể liên lạc nhanh khi cần.",
+  },
+  {
+    tag: "Theo dõi",
+    title: "Cập nhật online, ghi nhận truy cập",
+    body: "Dữ liệu được cập nhật theo thời gian thực qua website, lưu trên đám mây, và hệ thống ghi nhận lịch sử mở hồ sơ để chủ tài khoản nắm được.",
+  },
+];
+
+const audience = [
+  {
+    tag: "Người cao tuổi",
+    title: "Giữ hồ sơ y tế ở đúng nơi dễ lấy nhất",
+    body: "Thẻ nhỏ gọn, dễ mang theo trong ví, giúp người dùng cao tuổi không phải nhớ nhiều thao tác hay mở ứng dụng phức tạp.",
+  },
+  {
+    tag: "Bệnh mạn tính",
+    title: "Thông tin dị ứng và thuốc luôn sẵn",
+    body: "Bệnh nền, dị ứng thuốc, dị ứng thực phẩm và thuốc đang dùng đều có thể được lưu để nhân viên y tế nắm nhanh trong tình huống khẩn cấp.",
+  },
+  {
+    tag: "Sống một mình",
+    title: "Có một đường liên hệ khẩn cấp rõ ràng",
+    body: "EmerCard giúp người dùng sống một mình vẫn có kênh gọi hỗ trợ nhanh tới người thân hoặc người chăm sóc khi cần.",
+  },
+  {
+    tag: "Gia đình & người chăm sóc",
+    title: "Dễ cập nhật, dễ theo dõi, dễ yên tâm",
+    body: "Người thân có thể cập nhật hồ sơ online, quản lý lịch sử truy cập và biết rằng thông tin quan trọng luôn mới nhất.",
+  },
+];
+
+const techRows = [
+  ["Công nghệ kết nối", "NFC + mã QR"],
+  ["Chip NFC", "NTAG 216"],
+  ["Khả năng tương thích", "Android, iPhone"],
+  ["Phương thức truy cập", "Chạm NFC hoặc quét mã QR"],
+  ["Cập nhật dữ liệu", "Theo thời gian thực thông qua website"],
+  ["Lưu trữ dữ liệu", "Cơ sở dữ liệu đám mây"],
+  ["Bảo mật", "Mã hóa dữ liệu người dùng"],
+];
+
+const kitItems = [
+  "01 thẻ NFC EmerCard",
+  "01 tài liệu hướng dẫn sử dụng",
+  "Hộp giấy thân thiện với môi trường",
+  "Mã QR cá nhân hóa và mã định danh người dùng",
+  "Logo và bộ nhận diện EmerCard / Emerlink",
+];
 ---
 
-<Layout>
-    <Header />
-    <Empresas />
-    <AboutHome />
-    <MisionVision />
-    <FAQ />
-</Layout>
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="EmerCard là thẻ định danh y tế khẩn cấp tích hợp NFC và QR, cho phép mở hồ sơ sức khỏe được cấp quyền, cập nhật trực tuyến và theo dõi truy cập rõ ràng." />
+    <title>EmerCard · Đăng ký chờ ra mắt</title>
+    <Font cssVariable="--font-nunito" preload />
+    <Font cssVariable="--font-inconsolata" preload />
+    <style>
+      :root {
+        --bg: oklch(98.8% 0.009 236);
+        --surface: oklch(100% 0 0);
+        --surface-2: oklch(96.9% 0.012 236);
+        --fg: oklch(22.5% 0.045 258);
+        --muted: oklch(48% 0.024 252);
+        --border: oklch(90% 0.018 236);
+        --accent: oklch(61% 0.13 220);
+        --accent-2: oklch(72% 0.12 170);
+        --accent-soft: color-mix(in oklch, var(--accent) 14%, transparent);
+        --shadow: 0 24px 54px color-mix(in oklch, var(--fg) 8%, transparent);
+        --shadow-strong: 0 28px 72px color-mix(in oklch, var(--fg) 12%, transparent);
+        --font-display: var(--font-nunito);
+        --font-body: var(--font-nunito);
+        --font-tech: var(--font-inconsolata);
+        --container: 1140px;
+        --gutter: 24px;
+        --radius: 14px;
+        --radius-lg: 24px;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        color: var(--fg);
+        background:
+          radial-gradient(circle at 10% 0%, color-mix(in oklch, var(--accent) 8%, transparent) 0%, transparent 28%),
+          radial-gradient(circle at 100% 14%, color-mix(in oklch, var(--accent-2) 8%, transparent) 0%, transparent 26%),
+          var(--bg);
+        font-family: var(--font-body);
+        font-size: 16px;
+        line-height: 1.6;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+      }
+      img, svg { display: block; max-width: 100%; }
+      a { color: inherit; text-decoration: none; }
+      button, input { font: inherit; }
+      button { cursor: pointer; }
+      p { margin: 0; text-wrap: pretty; color: var(--muted); }
+      h1, h2, h3 { margin: 0; text-wrap: balance; font-family: var(--font-display); letter-spacing: -0.03em; color: var(--fg); }
+
+      .container {
+        max-width: var(--container);
+        margin-inline: auto;
+        padding-inline: var(--gutter);
+      }
+      .section { padding-block: clamp(52px, 8vw, 104px); }
+      .section + .section { border-top: 1px solid var(--border); }
+      .stack { display: flex; flex-direction: column; }
+      .stack > * + * { margin-top: 18px; }
+      .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+      .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+      @media (max-width: 960px) {
+        .grid-4, .grid-2 { grid-template-columns: 1fr; }
+      }
+
+      .eyebrow, .meta, .brand span, .tag, .btn, .footnote {
+        letter-spacing: 0.02em;
+      }
+      .eyebrow {
+        margin: 0;
+        color: var(--accent);
+        text-transform: uppercase;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+      }
+      .meta {
+        margin: 0;
+        color: var(--accent);
+        text-transform: uppercase;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+      }
+      .lead { font-size: 19px; line-height: 1.6; max-width: 62ch; }
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        padding: 5px 11px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        font-size: 12px;
+        color: var(--muted);
+        background: color-mix(in oklch, var(--surface) 82%, transparent);
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        padding: 5px 11px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 48px;
+        padding: 12px 20px;
+        border-radius: var(--radius);
+        border: 1px solid transparent;
+        font-size: 15px;
+        font-weight: 700;
+        transition: transform 0.12s ease, background 0.16s ease, border-color 0.16s ease;
+        white-space: nowrap;
+      }
+      .btn:active { transform: translateY(1px); }
+      .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+      .btn-primary:hover { background: color-mix(in oklch, var(--accent) 90%, black); }
+      .btn-secondary { background: transparent; border-color: var(--border); color: var(--fg); }
+      .btn-secondary:hover { border-color: var(--fg); }
+      .btn-dark { background: var(--fg); color: white; border-color: var(--fg); }
+      .btn-dark:hover { background: color-mix(in oklch, var(--fg) 90%, white); }
+      .btn-arrow::after { content: "→"; transition: transform 0.16s ease; }
+      .btn-arrow:hover::after { transform: translateX(2px); }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        box-shadow: var(--shadow);
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+      }
+      .brand-mark {
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--accent), color-mix(in oklch, var(--accent-2) 80%, white));
+        color: white;
+        font-weight: 800;
+        box-shadow: 0 12px 24px color-mix(in oklch, var(--accent) 25%, transparent);
+      }
+      .brand span {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--fg);
+      }
+      .topnav {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        backdrop-filter: blur(14px);
+        background: color-mix(in oklch, var(--bg) 84%, transparent);
+        border-bottom: 1px solid var(--border);
+      }
+      .topnav-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding-block: 14px;
+      }
+      .topnav nav {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 22px;
+        flex-wrap: wrap;
+      }
+      .topnav nav a {
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .topnav nav a:hover { color: var(--fg); }
+
+      .hero { padding-block: clamp(76px, 11vw, 144px); }
+      .hero-split {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: clamp(28px, 5vw, 64px);
+        align-items: center;
+      }
+      @media (max-width: 960px) { .hero-split { grid-template-columns: 1fr; } }
+      .hero-copy { display: grid; gap: 24px; }
+      .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+      .hero-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+
+      .visual-stage {
+        position: relative;
+        min-height: 620px;
+        padding: 22px;
+        border-radius: 30px;
+        border: 1px solid var(--border);
+        background:
+          radial-gradient(circle at 20% 18%, color-mix(in oklch, var(--accent) 16%, transparent) 0%, transparent 26%),
+          radial-gradient(circle at 82% 22%, color-mix(in oklch, var(--accent-2) 14%, transparent) 0%, transparent 24%),
+          linear-gradient(180deg, color-mix(in oklch, var(--surface) 90%, var(--accent) 10%), var(--surface-2));
+        box-shadow: var(--shadow-strong);
+        overflow: hidden;
+      }
+      .visual-stage::before,
+      .visual-stage::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+        background: color-mix(in oklch, var(--accent) 12%, transparent);
+        filter: blur(4px);
+      }
+      .visual-stage::before {
+        width: 180px;
+        height: 180px;
+        right: -50px;
+        top: -40px;
+      }
+      .visual-stage::after {
+        width: 240px;
+        height: 240px;
+        left: -60px;
+        bottom: -80px;
+      }
+      .product-card {
+        position: absolute;
+        width: min(82%, 430px);
+        border-radius: 28px;
+        border: 1px solid color-mix(in oklch, var(--border) 78%, white);
+        box-shadow: 0 26px 56px color-mix(in oklch, var(--fg) 14%, transparent);
+        backdrop-filter: blur(14px);
+      }
+      .product-card-back {
+        inset: auto auto 96px 28px;
+        transform: rotate(-7deg);
+        background: linear-gradient(180deg, #ffffff 0%, #f2f7ff 100%);
+      }
+      .product-card-front {
+        inset: auto 28px 28px auto;
+        transform: rotate(4deg);
+        background: linear-gradient(180deg, #132238 0%, #0d1726 100%);
+        color: white;
+      }
+      .product-card-inner {
+        display: grid;
+        gap: 16px;
+        padding: 22px;
+      }
+      .product-head, .product-foot, .product-meta-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .brand-mini {
+        font-size: 18px;
+        font-weight: 800;
+      }
+      .badge-dark {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        color: white;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .qr-art {
+        width: 136px;
+        aspect-ratio: 1;
+        border-radius: 20px;
+        background:
+          radial-gradient(circle at 18% 18%, #111 0 16%, transparent 17%),
+          radial-gradient(circle at 18% 18%, transparent 0 34%, #111 35% 44%, transparent 45%),
+          radial-gradient(circle at 82% 18%, #111 0 16%, transparent 17%),
+          radial-gradient(circle at 82% 18%, transparent 0 34%, #111 35% 44%, transparent 45%),
+          radial-gradient(circle at 18% 82%, #111 0 16%, transparent 17%),
+          radial-gradient(circle at 18% 82%, transparent 0 34%, #111 35% 44%, transparent 45%),
+          linear-gradient(90deg, #111 12%, transparent 12% 22%, #111 22% 32%, transparent 32% 42%, #111 42% 52%, transparent 52% 62%, #111 62% 72%, transparent 72% 82%, #111 82%),
+          linear-gradient(#111 12%, transparent 12% 22%, #111 22% 32%, transparent 32% 42%, #111 42% 52%, transparent 52% 62%, #111 62% 72%, transparent 72% 82%, #111 82%),
+          #fff;
+        box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--border) 70%, white);
+      }
+      .qr-art::before {
+        content: "";
+        display: block;
+        width: 100%;
+        height: 100%;
+        border-radius: 20px;
+        background:
+          linear-gradient(90deg, transparent 0 10%, #111 10% 16%, transparent 16% 28%, #111 28% 36%, transparent 36% 52%, #111 52% 60%, transparent 60% 72%, #111 72% 80%, transparent 80%),
+          linear-gradient(#111 0 12%, transparent 12% 24%, #111 24% 36%, transparent 36% 48%, #111 48% 60%, transparent 60% 72%, #111 72% 84%, transparent 84%);
+        opacity: 0.8;
+        mix-blend-mode: multiply;
+      }
+      .preview-copy { display: grid; gap: 8px; }
+      .preview-copy h3 { color: inherit; font-size: 24px; line-height: 1.15; letter-spacing: -0.03em; }
+      .preview-copy p { color: color-mix(in oklch, currentColor 70%, transparent); }
+      .product-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .metric {
+        padding: 14px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .metric span { display: block; font-size: 12px; color: color-mix(in oklch, white 70%, transparent); text-transform: uppercase; letter-spacing: 0.08em; }
+      .metric strong { display: block; margin-top: 6px; font-size: 17px; }
+      .front-accent {
+        display: grid;
+        gap: 16px;
+      }
+      .front-glow {
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, color-mix(in oklch, var(--accent) 70%, white), color-mix(in oklch, var(--accent-2) 65%, white));
+        box-shadow: 0 18px 30px color-mix(in oklch, var(--accent) 30%, transparent);
+      }
+      .front-copy h3 { color: white; font-size: 24px; line-height: 1.15; }
+      .front-copy p { color: color-mix(in oklch, white 72%, transparent); }
+      .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: #5af0ab;
+        box-shadow: 0 0 0 6px rgba(90, 240, 171, 0.12);
+      }
+
+      .feature-grid .card {
+        display: grid;
+        gap: 14px;
+        min-height: 100%;
+      }
+      .feature-mark {
+        width: 38px;
+        height: 38px;
+        display: grid;
+        place-items: center;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        color: var(--accent);
+        font-weight: 800;
+      }
+      .feature-grid h3 { font-size: 22px; line-height: 1.15; }
+      .feature-grid p { font-size: 15px; }
+
+      .spec-shell {
+        display: grid;
+        grid-template-columns: 1fr 1.1fr;
+        gap: clamp(24px, 5vw, 56px);
+        align-items: start;
+      }
+      @media (max-width: 960px) { .spec-shell { grid-template-columns: 1fr; } }
+      .spec-visual {
+        min-height: 620px;
+        position: relative;
+        border-radius: 30px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background:
+          radial-gradient(circle at 22% 18%, color-mix(in oklch, var(--accent) 14%, transparent) 0%, transparent 28%),
+          radial-gradient(circle at 90% 18%, color-mix(in oklch, var(--accent-2) 12%, transparent) 0%, transparent 26%),
+          linear-gradient(180deg, #ffffff 0%, #eef5ff 100%);
+        box-shadow: var(--shadow-strong);
+      }
+      .spec-visual::before {
+        content: "";
+        position: absolute;
+        inset: auto 0 0 0;
+        height: 50%;
+        background: linear-gradient(180deg, transparent 0%, color-mix(in oklch, var(--accent) 10%, transparent) 100%);
+      }
+      .spec-float {
+        position: absolute;
+        left: 24px;
+        right: 24px;
+        top: 24px;
+        display: grid;
+        gap: 14px;
+      }
+      .spec-card {
+        padding: 20px;
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.78);
+        border: 1px solid rgba(255, 255, 255, 0.65);
+        box-shadow: 0 18px 34px rgba(20, 40, 64, 0.08);
+        backdrop-filter: blur(14px);
+      }
+      .spec-card h3 { font-size: 28px; line-height: 1.05; }
+      .spec-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .spec-stat {
+        padding: 16px;
+        border-radius: 18px;
+        background: white;
+        border: 1px solid var(--border);
+      }
+      .spec-stat strong {
+        display: block;
+        font-size: 24px;
+        line-height: 1;
+        color: var(--fg);
+      }
+      .spec-stat span {
+        display: block;
+        margin-top: 6px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .spec-note-card {
+        position: absolute;
+        left: 24px;
+        right: 24px;
+        bottom: 24px;
+        padding: 20px;
+        border-radius: 22px;
+        background: rgba(15, 23, 42, 0.88);
+        color: white;
+        box-shadow: 0 20px 42px rgba(15, 23, 42, 0.26);
+      }
+      .spec-note-card p { color: color-mix(in oklch, white 72%, transparent); }
+      .tech-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      .tech-table th,
+      .tech-table td {
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+        font-family: var(--font-tech);
+        font-size: 14px;
+      }
+      .tech-table th {
+        color: var(--muted);
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 0.06em;
+      }
+      .tech-table td:last-child { text-align: right; }
+      .kit-list {
+        display: grid;
+        gap: 10px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .kit-list li {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+      }
+      .kit-list li::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--accent);
+        margin-top: 9px;
+        flex: none;
+      }
+      .audience-grid .card {
+        display: grid;
+        gap: 12px;
+        min-height: 100%;
+      }
+      .audience-grid h3 { font-size: 22px; line-height: 1.15; }
+      .waitlist-shell {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: clamp(24px, 5vw, 56px);
+        align-items: start;
+      }
+      @media (max-width: 960px) { .waitlist-shell { grid-template-columns: 1fr; } }
+      .closing-card {
+        border-radius: 30px;
+        padding: 28px;
+        background: linear-gradient(180deg, color-mix(in oklch, var(--surface) 92%, var(--accent) 8%), var(--surface));
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+      }
+      .closing-list { display: grid; margin-top: 10px; }
+      .closing-row {
+        display: grid;
+        grid-template-columns: 170px 1fr;
+        gap: 16px;
+        padding: 16px 0;
+        border-top: 1px solid var(--border);
+      }
+      .closing-row:first-child { border-top: 0; padding-top: 0; }
+      .closing-label {
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        font-weight: 700;
+      }
+      .closing-copy { color: var(--fg); }
+      .closing-note { margin-top: 8px; font-size: 14px; }
+      .waitlist-form {
+        display: grid;
+        gap: 12px;
+        padding: 24px;
+        border-radius: 28px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+      .field { display: grid; gap: 8px; }
+      .input {
+        width: 100%;
+        padding: 13px 16px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--fg);
+      }
+      .input:focus {
+        outline: 2px solid color-mix(in oklch, var(--accent) 18%, transparent);
+        border-color: var(--accent);
+      }
+      .input::placeholder { color: color-mix(in oklch, var(--muted) 72%, white); }
+      .actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+      .status-line {
+        min-height: 1.5em;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .pagefoot {
+        padding-block: 22px;
+        border-top: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .row-between {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      @media (max-width: 960px) {
+        .topnav-inner { flex-wrap: wrap; }
+        .topnav nav { justify-content: flex-start; }
+        .closing-row { grid-template-columns: 1fr; gap: 6px; }
+        .product-card { width: min(88%, 430px); }
+        .product-card-back { inset: auto auto 112px 18px; }
+        .product-card-front { inset: auto 18px 18px auto; }
+        .spec-stats { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topnav">
+      <div class="container topnav-inner">
+        <a class="brand" href="#top" aria-label="Trang chủ EmerCard">
+          <div class="brand-mark" aria-hidden="true">
+            <img src="/logo.png" alt="logo"/>
+          </div>
+          <span>EmerCard</span>
+        </a>
+        <nav aria-label="Điều hướng chính">
+          <a href="#top">Tổng quan</a>
+          <a href="#proof">Điểm nổi bật</a>
+          <a href="#specs">Thông số</a>
+          <a href="#audience">Đối tượng</a>
+          <a href="#join">Chờ ra mắt</a>
+        </nav>
+        <a class="btn btn-secondary" href="#join">Đăng ký</a>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="section hero">
+        <div class="container hero-split">
+          <div class="hero-copy">
+            <p class="eyebrow">Kết nối khẩn cấp</p>
+            <div class="stack">
+              <h1>Một chạm để mở hồ sơ y tế khi từng giây đều quan trọng.</h1>
+              <p class="lead">EmerCard là thẻ định danh y tế khẩn cấp tích hợp NFC và mã QR. Người dùng, người thân hoặc nhân viên y tế có thể mở hồ sơ sức khỏe được cấp quyền ngay trên website, trong khi dữ liệu vẫn được cập nhật trực tuyến theo thời gian thực.</p>
+            </div>
+            <div class="hero-cta">
+              <a class="btn btn-primary" href="#join">Đăng ký chờ ra mắt</a>
+              <a class="btn btn-secondary btn-arrow" href="#specs">Xem thông số</a>
+            </div>
+            <div class="hero-badges" aria-label="Thông tin nổi bật">
+              <span class="tag">Thẻ PVC chống nước</span>
+              <span class="tag">Chip NTAG216</span>
+              <span class="tag">Android · iPhone</span>
+              <span class="tag">Mã hóa dữ liệu người dùng</span>
+            </div>
+          </div>
+
+          <div class="visual-stage" aria-label="Mô phỏng mặt trước và mặt sau của thẻ EmerCard">
+            <article class="product-card product-card-back">
+              <div class="product-card-inner">
+                <div class="product-head">
+                  <span class="pill">Hồ sơ khẩn cấp</span>
+                  <span class="badge-dark">NFC + QR</span>
+                </div>
+                <div class="stack" style="gap: 14px;">
+                  <div class="qr-art" aria-hidden="true"></div>
+                  <div class="preview-copy">
+                    <p class="meta" style="color: var(--accent);">Dữ liệu được cấp quyền</p>
+                    <h3>Thông tin y tế ưu tiên khi mở thẻ</h3>
+                    <p>Bệnh nền, dị ứng, thuốc đang dùng và người hỗ trợ được hiển thị rõ ràng cho từng tình huống khẩn cấp.</p>
+                  </div>
+                </div>
+                <div class="product-foot">
+                  <span class="tag">NTAG 216</span>
+                  <span class="tag">Cập nhật trực tuyến</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="product-card product-card-front">
+              <div class="product-card-inner">
+                <div class="product-head">
+                  <div class="brand-mini">EmerCard</div>
+                  <span class="status-dot" aria-hidden="true"></span>
+                </div>
+                <div class="front-accent">
+                  <div class="front-glow" aria-hidden="true"></div>
+                  <div class="front-copy">
+                    <p class="meta" style="color: color-mix(in oklch, white 72%, transparent);">Thẻ định danh y tế</p>
+                    <h3>Gọn như thẻ ngân hàng, mạnh như một hồ sơ số.</h3>
+                    <p>Đủ nhỏ để mang theo mỗi ngày, đủ linh hoạt để cập nhật nội dung khi dữ liệu thay đổi.</p>
+                  </div>
+                </div>
+                <div class="product-meta-grid">
+                  <div class="metric">
+                    <span>NFC</span>
+                    <strong>NTAG 216</strong>
+                  </div>
+                  <div class="metric">
+                    <span>QR</span>
+                    <strong>Truy cập nhanh</strong>
+                  </div>
+                </div>
+                <div class="product-foot">
+                  <span class="badge-dark">Android · iPhone</span>
+                  <span class="badge-dark">Online sync</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section feature-grid" id="proof">
+        <div class="container stack">
+          <div style="max-width: 42ch;">
+            <p class="meta">Cách EmerCard làm việc</p>
+            <h2>Thông tin quan trọng được đưa lên trước, không để người dùng phải lục tìm.</h2>
+          </div>
+          <div class="grid-4">
+            {features.map((feature, index) => (
+              <article class="card">
+                <div class="feature-mark" aria-hidden="true">0{index + 1}</div>
+                <span class="tag">{feature.tag}</span>
+                <h3>{feature.title}</h3>
+                <p>{feature.body}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="specs">
+        <div class="container spec-shell">
+          <article class="spec-visual" aria-label="Bảng tóm tắt sản phẩm EmerCard">
+            <div class="spec-float">
+              <div class="spec-card">
+                <p class="meta">Cấu phần và thông số</p>
+                <h3>Thẻ vật lý nhỏ gọn, nền tảng web cập nhật liên tục.</h3>
+                <p class="lead" style="font-size: 16px; margin-top: 10px;">EmerCard được thiết kế như một vật dụng hằng ngày: gọn như thẻ ngân hàng, dễ mang theo trong ví hoặc balo, nhưng phần dữ liệu bên trong có thể thay đổi bất cứ lúc nào qua nền tảng web.</p>
+              </div>
+              <div class="spec-stats">
+                <div class="spec-stat">
+                  <strong>1</strong>
+                  <span>thẻ NFC EmerCard</span>
+                </div>
+                <div class="spec-stat">
+                  <strong>24/7</strong>
+                  <span>cập nhật trực tuyến</span>
+                </div>
+                <div class="spec-stat">
+                  <strong>2</strong>
+                  <span>đường truy cập NFC + QR</span>
+                </div>
+              </div>
+            </div>
+            <div class="spec-note-card">
+              <p class="meta" style="color: color-mix(in oklch, white 74%, transparent);">Mục tiêu</p>
+              <p>Giữ cho quá trình bàn giao đơn giản: nhìn là hiểu, chạm là mở, và mọi thứ đều có thể cập nhật mà không cần đổi thẻ.</p>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="stack">
+              <div>
+                <p class="meta">Thông số kỹ thuật</p>
+                <h2>Thẻ vật lý, nền tảng số, dữ liệu luôn mới.</h2>
+                <p class="lead">Dưới đây là các thông số chính của EmerCard, tập trung vào tính tương thích, khả năng truy cập và cách dữ liệu được quản lý.</p>
+              </div>
+              <table class="tech-table" aria-label="Thông số kỹ thuật EmerCard">
+                <thead>
+                  <tr>
+                    <th>Hạng mục</th>
+                    <th>Thông tin</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {techRows.map(([label, value]) => (
+                    <tr>
+                      <td>{label}</td>
+                      <td>{value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div class="stack" style="gap: 10px;">
+                <p class="meta">Trong bộ sản phẩm</p>
+                <ul class="kit-list">
+                  {kitItems.map((item) => (
+                    <li><span>{item}</span></li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section audience-grid" id="audience">
+        <div class="container stack">
+          <div style="max-width: 40ch;">
+            <p class="meta">Phù hợp cho ai</p>
+            <h2>Thiết kế cho những người cần thông tin y tế sẵn sàng trong túi.</h2>
+          </div>
+          <div class="grid-4">
+            {audience.map((item) => (
+              <article class="card">
+                <span class="tag">{item.tag}</span>
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="join">
+        <div class="container waitlist-shell">
+          <div class="closing-card stack">
+            <p class="meta">Chờ ra mắt</p>
+            <h2>Nhận thông báo khi EmerCard mở đợt đăng ký đầu tiên.</h2>
+            <p class="lead">Chúng tôi sẽ gửi ảnh sản phẩm, bản xem trước hồ sơ điện tử và hướng dẫn thiết lập ngay khi waitlist mở. Nội dung phù hợp cho người dùng cá nhân, gia đình và đội ngũ chăm sóc.</p>
+            <div class="closing-list" aria-label="Điều người đăng ký sẽ nhận">
+              <div class="closing-row">
+                <div class="closing-label">Ảnh sản phẩm</div>
+                <p class="closing-copy">Xem lại logo, thẻ vật lý, và các hình ảnh sản phẩm trước khi quyết định.</p>
+              </div>
+              <div class="closing-row">
+                <div class="closing-label">Bản xem trước</div>
+                <p class="closing-copy">Nhận bản preview của hồ sơ sức khỏe, các trường thông tin và cách cập nhật dữ liệu.</p>
+              </div>
+              <div class="closing-row">
+                <div class="closing-label">Hướng dẫn</div>
+                <p class="closing-copy">Tài liệu thiết lập ngắn gọn để bắt đầu nhanh và không bị rối khi mở đợt đầu.</p>
+              </div>
+            </div>
+            <p class="closing-note">Không spam. Chỉ gửi thông tin ra mắt và cập nhật quan trọng liên quan đến sản phẩm.</p>
+          </div>
+
+          <div>
+          <form class="waitlist-form" id="waitlist-form">
+            <div class="field">
+              <label class="meta" for="email">Email của bạn</label>
+              <input class="input" id="email" name="email" type="email" placeholder="ten@domain.com" autocomplete="email" required />
+            </div>
+            <div class="actions">
+              <button class="btn btn-dark" type="submit">Nhận thông báo</button>
+              <span class="meta" style="text-transform: none; letter-spacing: 0; color: var(--muted); font-weight: 600;">Chỉ cần email để bắt đầu.</span>
+            </div>
+            <div class="status-line" id="waitlist-status" aria-live="polite"></div>
+          </form>
+          <img src="/mockup-2.png" alt=""/>        
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="pagefoot">
+      <div class="container row-between">
+        <span>© EmerCard · kết nối khẩn cấp</span>
+        <span class="footnote">NFC, QR và thông tin y tế được cấp quyền</span>
+      </div>
+    </footer>
+  </body>
+</html>
