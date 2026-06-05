@@ -10,12 +10,13 @@ export default defineConfig({
   experimental: {
     fonts: [
       {
+        name: "Source Sans 3",
+        cssVariable: "--font-source-sans-3",
         provider: fontProviders.google(),
-        name: "Nunito",
-        cssVariable: "--font-nunito",
         weights: [400, 500, 600, 700],
-        styles: ["normal"],
-        subsets: ["latin", "latin-ext"],
+        styles: ["normal", "italic"],
+        subsets: ["latin", "vietnamese"],
+        fallbacks: ["sans-serif"],
       },
       {
         provider: fontProviders.google(),
@@ -23,7 +24,7 @@ export default defineConfig({
         cssVariable: "--font-inconsolata",
         weights: [400, 700],
         styles: ["normal"],
-        subsets: ["latin", "latin-ext"],
+        subsets: ["latin", "vietnamese"],
       },
     ],
   },
