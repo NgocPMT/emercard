@@ -1,0 +1,2 @@
+# Static fallback for bearer-token emergency URLs. Keep this route public.
+/e/*  /e/index.html  200

@@ -22,8 +22,41 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install, build, and upload Astro site
-        uses: withastro/action@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: emercard-frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: emercard-frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: emercard-frontend
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: emercard-frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Run verification checks
+        working-directory: emercard-frontend
+        run: |
+          npm run format:check
+          npm run check
+          npm run test
+          npm run api:check
+
+      - name: Build Astro site
+        working-directory: emercard-frontend
+        run: npm run build
+
+      - name: Run browser smoke tests
+        working-directory: emercard-frontend
+        run: npm run test:e2e
+
+      - name: Upload Astro site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: emercard-frontend/dist
 
   deploy:
     needs: build

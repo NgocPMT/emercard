@@ -1,0 +1,41 @@
+:root {
+  color-scheme: light;
+  --color-page-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1f5f9;
+  --color-text: #0f172a;
+  --color-text-muted: #475569;
+  --color-border: #cbd5e1;
+  --color-primary: #0f766e;
+  --color-primary-strong: #115e59;
+  --color-danger: #b91c1c;
+  --color-danger-soft: #fef2f2;
+  --color-warning: #b45309;
+  --color-warning-soft: #fffbeb;
+  --color-success: #047857;
+  --color-success-soft: #ecfdf5;
+  --color-focus: #14b8a6;
+  --shadow-soft: 0 10px 30px rgb(15 23 42 / 0.08);
+  --radius-panel: 1.25rem;
+  --radius-control: 0.875rem;
+  --space-touch: 2.75rem;
+}
+
+@theme inline {
+  --color-background: var(--color-page-bg);
+  --color-foreground: var(--color-text);
+  --color-card: var(--color-surface);
+  --color-card-foreground: var(--color-text);
+  --color-popover: var(--color-surface);
+  --color-popover-foreground: var(--color-text);
+  --color-muted: var(--color-surface-muted);
+  --color-muted-foreground: var(--color-text-muted);
+  --color-border: var(--color-border);
+  --color-primary: var(--color-primary);
+  --color-primary-foreground: #ffffff;
+  --color-destructive: var(--color-danger);
+  --color-destructive-foreground: #ffffff;
+  --color-ring: var(--color-focus);
+  --font-sans: var(--font-source-sans-3), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-inconsolata), ui-monospace, SFMono-Regular, monospace;
+}

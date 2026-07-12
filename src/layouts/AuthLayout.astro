@@ -1,0 +1,20 @@
+---
+import "../styles/global.css";
+
+const { title = "EmerCard | Authentication", description = "EmerCard authentication" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+  </head>
+  <body class="bg-background text-foreground">
+    <main class="min-h-screen px-4 py-8 sm:px-6 lg:px-8">
+      <slot />
+    </main>
+  </body>
+</html>

@@ -1,9 +1,8 @@
 ---
-import { Image } from "astro:assets";
-import type { CollectionEntry } from "astro:content";
+import type { BlogPost } from "../../data/blog";
 
 interface Props {
-  post: CollectionEntry<"blog">;
+  post: BlogPost;
 }
 
 const { post }: Props = Astro.props;
@@ -12,33 +11,39 @@ const date = new Intl.DateTimeFormat("en", {
   month: "short",
   day: "numeric",
   year: "numeric",
-}).format(post.data.pubDate);
+}).format(post.pubDate);
 ---
 
 <article class="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg">
   <a href={`/blog/${post.slug}`} class="block overflow-hidden">
-    <Image
-      src={post.data.cover}
-      alt={post.data.coverAlt}
-      class="h-56 w-full object-cover transition duration-300 group-hover:scale-105"
-      loading="lazy"
-    />
+    {
+      post.coverUrl ? (
+        <img
+          src={post.coverUrl}
+          alt={post.coverAlt}
+          class="h-56 w-full object-cover transition duration-300 group-hover:scale-105"
+          loading="lazy"
+        />
+      ) : (
+        <div class="flex h-56 w-full items-center justify-center bg-slate-100 text-sm text-slate-500">EmerCard Blog</div>
+      )
+    }
   </a>
 
   <div class="flex h-full flex-col p-6">
     <div class="mb-4 flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">
       <span>{date}</span>
       <span class="h-1 w-1 rounded-full bg-emerald-400"></span>
-      <span>{post.data.author}</span>
+      <span>{post.author}</span>
     </div>
 
     <div class="flex-1">
       <h2 class="mb-3 text-xl font-bold leading-tight text-slate-900">
         <a href={`/blog/${post.slug}`} class="transition hover:text-emerald-700">
-          {post.data.title}
+          {post.title}
         </a>
       </h2>
-      <p class="text-sm leading-6 text-slate-600">{post.data.description}</p>
+      <p class="text-sm leading-6 text-slate-600">{post.description}</p>
     </div>
 
     <a

@@ -1,0 +1,14 @@
+# Emergency URLs and API responses contain sensitive bearer-token/profile data.
+/e/*
+  Cache-Control: no-store
+  Pragma: no-cache
+  Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex, nofollow, noarchive
+  X-Content-Type-Options: nosniff
+
+/api/v1/emergency/*
+  Cache-Control: no-store
+  Pragma: no-cache
+  Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex, nofollow, noarchive
+  X-Content-Type-Options: nosniff

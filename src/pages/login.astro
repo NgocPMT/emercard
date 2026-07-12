@@ -1,0 +1,10 @@
+---
+import AuthLayout from "../layouts/AuthLayout.astro";
+import { AuthPageRoot } from "../features/auth";
+
+const returnTo = Astro.url.searchParams.get("returnTo");
+---
+
+<AuthLayout title="EmerCard | Đăng nhập" description="Đăng nhập EmerCard">
+  <AuthPageRoot client:load mode="login" returnTo={returnTo} brand="EmerCard" />
+</AuthLayout>

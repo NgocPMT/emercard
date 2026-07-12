@@ -1,18 +1,15 @@
 ---
 import Base from "../../layouts/Base.astro";
-import { getCollection } from "astro:content";
 import BlogCard from "../../components/blog/BlogCard.astro";
 import Breadcrumbs from "../../components/blog/Breadcrumbs.astro";
 import Pagination from "../../components/blog/Pagination.astro";
+import { getBlogPosts } from "../../data/blog";
 
 const url = new URL(Astro.request.url);
 const requestedPage = Number.parseInt(url.searchParams.get("page") ?? "1", 10);
 const currentPage = Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1;
 
-const posts = (await getCollection("blog")).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
-
+const posts = getBlogPosts();
 const postsPerPage = 6;
 const totalPages = Math.max(1, Math.ceil(posts.length / postsPerPage));
 const safePage = Math.min(currentPage, totalPages);
@@ -30,15 +27,9 @@ const currentPosts = posts.slice(start, start + postsPerPage);
         ]}
       />
 
-      <p class="mb-4 text-sm font-semibold uppercase tracking-[0.35em] text-emerald-600">
-        Blog
-      </p>
-      <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
-        Health insights, prevention, and care updates.
-      </h1>
-      <p class="mt-4 text-base leading-7 text-slate-600 md:text-lg">
-        Explore practical articles about coverage, prevention, and everyday wellbeing.
-      </p>
+      <p class="mb-4 text-sm font-semibold uppercase tracking-[0.35em] text-emerald-600">Blog</p>
+      <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">Health insights, prevention, and care updates.</h1>
+      <p class="mt-4 text-base leading-7 text-slate-600 md:text-lg">Explore practical articles about coverage, prevention, and everyday wellbeing.</p>
     </div>
 
     <div class="mt-12 grid gap-8 md:grid-cols-2 xl:grid-cols-3">

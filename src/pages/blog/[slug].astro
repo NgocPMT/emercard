@@ -1,88 +1,87 @@
 ---
-import { Image } from "astro:assets";
-import { getCollection, render } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import Breadcrumbs from "../../components/blog/Breadcrumbs.astro";
 import BlogCard from "../../components/blog/BlogCard.astro";
+import { getBlogPostBySlug, getBlogPostSlugs, getBlogPosts } from "../../data/blog";
 
-export async function getStaticPaths() {
-  const posts = (await getCollection("blog")).sort(
-    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-  );
-
-  return posts.map((post) => ({
-    params: { slug: post.slug },
-    props: { post },
-  }));
+export function getStaticPaths() {
+  return getBlogPostSlugs().map((slug) => ({ params: { slug } }));
 }
 
-const posts = (await getCollection("blog")).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
+const { slug } = Astro.params;
+const post = getBlogPostBySlug(slug ?? "");
+const posts = getBlogPosts();
+const relatedPosts = posts.filter((entry) => entry.slug !== post?.slug).slice(0, 2);
 
-const { post } = Astro.props;
-const { Content } = await render(post);
-const relatedPosts = posts.filter((entry) => entry.slug !== post.slug).slice(0, 2);
-
-const published = new Intl.DateTimeFormat("en", {
-  month: "long",
-  day: "numeric",
-  year: "numeric",
-}).format(post.data.pubDate);
+const published = post
+  ? new Intl.DateTimeFormat("en", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(post.pubDate)
+  : "";
 ---
 
-<Base title={post.data.title}>
-  <article class="mx-auto max-w-4xl px-6 py-20">
-    <Breadcrumbs
-      items={[
-        { label: "Inicio", href: "/" },
-        { label: "Blog", href: "/blog" },
-        { label: post.data.title },
-      ]}
-    />
+<Base title={post?.title ?? "Blog"}>
+  {
+    post ? (
+      <article class="mx-auto max-w-4xl px-6 py-20">
+        <Breadcrumbs
+          items={[
+            { label: "Inicio", href: "/" },
+            { label: "Blog", href: "/blog" },
+            { label: post.title },
+          ]}
+        />
 
-    <Image
-      src={post.data.cover}
-      alt={post.data.coverAlt}
-      class="mb-8 h-[28rem] w-full rounded-3xl object-cover shadow-lg"
-      loading="eager"
-    />
+        {post.coverUrl ? (
+          <img src={post.coverUrl} alt={post.coverAlt} class="mb-8 h-[28rem] w-full rounded-3xl object-cover shadow-lg" loading="eager" />
+        ) : null}
 
-    <div class="mb-4 flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">
-      <span>{published}</span>
-      <span class="h-1 w-1 rounded-full bg-emerald-400"></span>
-      <span>{post.data.author}</span>
-    </div>
+        <div class="mb-4 flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">
+          <span>{published}</span>
+          <span class="h-1 w-1 rounded-full bg-emerald-400"></span>
+          <span>{post.author}</span>
+        </div>
 
-    <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
-      {post.data.title}
-    </h1>
+        <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
+          {post.title}
+        </h1>
 
-    <div class="prose prose-lg prose-emerald mt-8 max-w-none text-slate-700">
-      <Content />
-    </div>
+        <div class="prose prose-lg prose-emerald mt-8 max-w-none text-slate-700">
+          {post.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+        </div>
 
-    <a
-      href="/blog"
-      class="mt-8 inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
-    >
-      Back to blog
-    </a>
+        <a
+          href="/blog"
+          class="mt-8 inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+        >
+          Back to blog
+        </a>
 
-    {
-      relatedPosts.length > 0 && (
-        <section class="mt-16">
-          <h2 class="mb-6 text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
-            Related articles
-          </h2>
+        {
+          relatedPosts.length > 0 && (
+            <section class="mt-16">
+              <h2 class="mb-6 text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">Related articles</h2>
 
-          <div class="grid gap-6 md:grid-cols-2">
-            {relatedPosts.map((relatedPost) => (
-              <BlogCard post={relatedPost} />
-            ))}
-          </div>
-        </section>
-      )
-    }
-  </article>
+              <div class="grid gap-6 md:grid-cols-2">
+                {relatedPosts.map((relatedPost) => <BlogCard post={relatedPost} />)}
+              </div>
+            </section>
+          )
+        }
+      </article>
+    ) : (
+      <article class="mx-auto max-w-4xl px-6 py-20">
+        <Breadcrumbs
+          items={[
+            { label: "Inicio", href: "/" },
+            { label: "Blog", href: "/blog" },
+          ]}
+        />
+        <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">Bài viết không tồn tại</h1>
+        <p class="mt-4 text-slate-600">Vui lòng quay lại danh sách blog.</p>
+      </article>
+    )
+  }
 </Base>

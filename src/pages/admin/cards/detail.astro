@@ -1,0 +1,10 @@
+---
+import ApplicationPageLayout from "../../../layouts/ApplicationPageLayout.astro";
+import { AdminApplicationRoot } from "../../../features/admin";
+
+const cardId = Astro.url.searchParams.get("cardId");
+---
+
+<ApplicationPageLayout title="EmerCard | Chi tiết thẻ" description="Chi tiết thẻ quản trị EmerCard">
+  <AdminApplicationRoot client:load section="detail" cardId={cardId} />
+</ApplicationPageLayout>

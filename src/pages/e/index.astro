@@ -1,0 +1,127 @@
+---
+import EmergencyLayout from "../../layouts/EmergencyLayout.astro";
+---
+
+<EmergencyLayout>
+  <main class="mx-auto flex min-h-screen max-w-2xl items-center px-4 py-8 sm:px-6">
+    <section class="w-full rounded-[1.5rem] border border-border bg-card p-6 shadow-sm sm:p-8">
+      <p class="text-sm font-semibold tracking-wide text-primary">EMERCARD</p>
+      <h1 class="mt-2 text-2xl font-bold text-foreground">Thông tin y tế khẩn cấp</h1>
+
+      <div id="loading" role="status" class="mt-8 text-muted-foreground">Đang tải thông tin khẩn cấp…</div>
+
+      <div id="unavailable" class="mt-8 hidden" role="alert">
+        <h2 class="text-lg font-semibold text-foreground">Thông tin hiện không khả dụng</h2>
+        <p class="mt-2 text-muted-foreground">Thẻ này không có thông tin y tế công khai để hiển thị. Vui lòng liên hệ chủ thẻ nếu cần.</p>
+      </div>
+
+      <article id="profile" class="mt-8 hidden" aria-live="polite">
+        <h2 id="display-name" class="text-2xl font-bold text-foreground"></h2>
+        <dl class="mt-6 grid gap-5">
+          <div id="blood-type-row" class="hidden">
+            <dt class="font-semibold text-foreground">Nhóm máu</dt>
+            <dd id="blood-type" class="mt-1 text-muted-foreground"></dd>
+          </div>
+          <div id="allergies-row" class="hidden">
+            <dt class="font-semibold text-foreground">Dị ứng quan trọng</dt>
+            <dd id="allergies" class="mt-1 whitespace-pre-line text-muted-foreground"></dd>
+          </div>
+          <div id="conditions-row" class="hidden">
+            <dt class="font-semibold text-foreground">Tình trạng bệnh quan trọng</dt>
+            <dd id="conditions" class="mt-1 whitespace-pre-line text-muted-foreground"></dd>
+          </div>
+          <div id="medications-row" class="hidden">
+            <dt class="font-semibold text-foreground">Thuốc đang sử dụng</dt>
+            <dd id="medications" class="mt-1 whitespace-pre-line text-muted-foreground"></dd>
+          </div>
+          <div id="note-row" class="hidden">
+            <dt class="font-semibold text-foreground">Ghi chú khẩn cấp</dt>
+            <dd id="note" class="mt-1 whitespace-pre-line text-muted-foreground"></dd>
+          </div>
+        </dl>
+
+        <section id="contacts-section" class="mt-8 hidden" aria-labelledby="contacts-title">
+          <h3 id="contacts-title" class="text-lg font-semibold text-foreground">Liên hệ khẩn cấp</h3>
+          <ul id="contacts" class="mt-3 space-y-3"></ul>
+        </section>
+      </article>
+    </section>
+  </main>
+
+  <script type="module">
+    import { extractEmergencyToken, getPublicEmergencyProfile } from "../../api/public-emergency";
+
+    const loading = document.querySelector("#loading");
+    const unavailable = document.querySelector("#unavailable");
+    const profileElement = document.querySelector("#profile");
+
+    const hide = (element) => element?.classList.add("hidden");
+    const show = (element) => element?.classList.remove("hidden");
+
+    const showUnavailable = () => {
+      hide(loading);
+      show(unavailable);
+    };
+
+    const setOptionalText = (rowId, valueId, value) => {
+      if (typeof value !== "string" || !value.trim()) return;
+      show(document.querySelector(`#${rowId}`));
+      const element = document.querySelector(`#${valueId}`);
+      if (element) element.textContent = value;
+    };
+
+    const renderProfile = (profile) => {
+      if (!profile || typeof profile.display_name !== "string") {
+        showUnavailable();
+        return;
+      }
+
+      document.querySelector("#display-name").textContent = profile.display_name;
+      setOptionalText("blood-type-row", "blood-type", profile.blood_type);
+      setOptionalText("allergies-row", "allergies", profile.critical_allergies);
+      setOptionalText("conditions-row", "conditions", profile.important_conditions);
+      setOptionalText("medications-row", "medications", profile.critical_medications);
+      setOptionalText("note-row", "note", profile.emergency_note);
+
+      if (Array.isArray(profile.emergency_contacts) && profile.emergency_contacts.length) {
+        const contacts = document.querySelector("#contacts");
+        for (const contact of profile.emergency_contacts) {
+          if (!contact || typeof contact.phone !== "string") continue;
+          const item = document.createElement("li");
+          item.className = "rounded-[1rem] border border-border p-4";
+          const name = document.createElement("p");
+          name.className = "font-semibold text-foreground";
+          name.textContent = contact.name || "Liên hệ khẩn cấp";
+          item.append(name);
+          if (typeof contact.relationship === "string" && contact.relationship) {
+            const relationship = document.createElement("p");
+            relationship.className = "mt-1 text-sm text-muted-foreground";
+            relationship.textContent = contact.relationship;
+            item.append(relationship);
+          }
+          const call = document.createElement("a");
+          call.className = "mt-3 inline-flex min-h-11 items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground";
+          call.href = `tel:${contact.phone}`;
+          call.textContent = "Gọi liên hệ";
+          item.append(call);
+          contacts?.append(item);
+        }
+        if (contacts?.childElementCount) {
+          show(document.querySelector("#contacts-section"));
+        }
+      }
+
+      hide(loading);
+      show(profileElement);
+    };
+
+    const token = extractEmergencyToken(window.location.pathname);
+    if (!token) {
+      showUnavailable();
+    } else {
+      getPublicEmergencyProfile(token)
+        .then((profile) => (profile ? renderProfile(profile) : showUnavailable()))
+        .catch(showUnavailable);
+    }
+  </script>
+</EmergencyLayout>

@@ -1,10 +1,16 @@
-image: node:20
+image: node:24
 
 pages:
   stage: deploy
   script:
     - npm ci
+    - npx playwright install --with-deps chromium
+    - npm run format:check
+    - npm run check
+    - npm run test
+    - npm run api:check
     - npm run build
+    - npm run test:e2e
     - rm -rf public
     - mv dist public
   artifacts:
