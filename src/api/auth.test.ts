@@ -80,8 +80,12 @@ describe("auth adapter", () => {
     await expect(getCurrentUser()).rejects.toBeInstanceOf(ApiError);
   });
 
-  it("allows logout to complete without a body", async () => {
-    vi.mocked(logoutApiV1AuthLogoutPost).mockResolvedValueOnce({ data: {}, error: undefined } as never);
+  it("allows logout to complete on a 204 response", async () => {
+    vi.mocked(logoutApiV1AuthLogoutPost).mockResolvedValueOnce({
+      data: undefined,
+      error: undefined,
+      response: new Response(null, { status: 204 }),
+    } as never);
     await expect(logout()).resolves.toBeUndefined();
   });
 });

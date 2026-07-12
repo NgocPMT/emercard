@@ -11,6 +11,7 @@ export function createPageQueryClient() {
           }
           return failureCount < 1;
         },
+        retryDelay: 0,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
         retryOnMount: true,

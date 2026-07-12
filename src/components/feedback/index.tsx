@@ -1,6 +1,6 @@
+import React, { type HTMLAttributes, type ReactNode } from "react";
 import { cn } from "../../lib/cn";
 import { Panel, Spinner } from "../primitives";
-import type { HTMLAttributes, ReactNode } from "react";
 
 export type PageStateProps = {
   title: ReactNode;

@@ -1,6 +1,6 @@
 # EmerCard frontend
 
-Static Astro frontend for the EmerCard application domain.
+Static Astro frontend for the EmerCard application domain. Browser auth/session traffic stays on the same origin through `/api/*`.
 
 ## Foundation baseline
 
@@ -33,7 +33,15 @@ Verified on 2026-07-12:
 | `/app/*`     | authenticated user | User application shells   |
 | `/admin/*`   | administrator      | Admin application shells  |
 | `/e/{token}` | public             | Emergency profile page    |
-| `/api/*`     | API                | Same-origin reverse proxy |
+| `/api/*`     | API                | Same-origin reverse proxy to FastAPI |
+
+## Authentication/session transport
+
+- Browser auth/session requests go to `/api/v1/*` through Astro's same-origin proxy.
+- The frontend uses `credentials: "same-origin"` and `cache: "no-store"` for auth/session calls; it never stores or reads session tokens in browser storage.
+- Local development and Playwright smoke tests use `EMERCARD_API_PROXY_TARGET` as the backend proxy target.
+- In production, the host must keep the app and `/api/*` on the same origin, with the browser receiving the session cookie as `HttpOnly`, `Secure`, host-only, and `SameSite=Lax` over HTTPS.
+- Logout clears the current browser session only; a copied stateless JWT cannot be globally revoked in Phase 1.
 
 ## Emergency page rules
 
@@ -64,7 +72,7 @@ Copy `.env.example` when configuring local development.
 - `PUBLIC_SITE_URL` — public site origin
 - `PUBLIC_API_BASE_PATH` — defaults to `/api`
 - `PUBLIC_DEMO_DATA_NOTICE` — optional demo banner copy
-- `EMERCARD_API_PROXY_TARGET` — local backend target for Astro/Vite proxying
+- `EMERCARD_API_PROXY_TARGET` — local backend target for Astro/Vite proxying and Playwright browser auth tests
 - `EMERCARD_OPENAPI_URL` — backend OpenAPI snapshot URL for `api:sync`
 
 ## Scripts
@@ -75,7 +83,7 @@ Copy `.env.example` when configuring local development.
 - `npm run lint` — ESLint for project config and script files only
 - `npm run format:check` — Prettier verification for the hand-edited foundation files
 - `npm run test` — Vitest
-- `npm run test:e2e` — Playwright smoke tests
+- `npm run test:e2e` — Playwright smoke tests against the same-origin `/api` proxy
 - `npm run api:sync` — fetch the backend OpenAPI snapshot
 - `npm run api:generate` — generate the typed client from the snapshot
 - `npm run api:check` — verify generated output is current
@@ -95,3 +103,5 @@ The build must produce `dist/e/index.html`, `_redirects`, and `_headers`.
 ## Deployment note
 
 GitHub Pages and other static-only hosts do not provide the required same-origin `/api/*` reverse proxy. Use them only for static preview unless a proxy-capable edge or host is configured separately.
+
+For production, keep the frontend origin, `/api/*`, and the session cookie aligned on HTTPS. If the deployment cannot preserve that same-origin surface, it must provide an equivalent proxy layer before the browser sees the app.

@@ -6,6 +6,7 @@ import { isApiError } from "../../api/http-client";
 import { createPageQueryClient } from "../../api/query-client";
 import { AccessDeniedState, PageLoadingState, RetryState, ServiceUnavailableState } from "../../components/feedback";
 import { AccountMenu, ApplicationShell, type NavigationItem } from "../../components/layout";
+import { assignLocation, reloadPage, replaceLocation } from "../../lib/navigation";
 
 export type SessionStatus = "loading" | "authenticated" | "unauthenticated" | "forbidden" | "unavailable";
 export type SessionRole = "user" | "admin";
@@ -125,7 +126,7 @@ export class PageErrorBoundary extends Component<{ children: ReactNode }, { hasE
           title="Đã xảy ra lỗi khi hiển thị trang"
           description="Vui lòng tải lại trang. Nội dung kỹ thuật nhạy cảm không được hiển thị ở đây."
           action={
-            <button className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground" onClick={() => window.location.reload()}>
+            <button className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground" onClick={() => reloadPage()}>
               Tải lại
             </button>
           }
@@ -150,7 +151,7 @@ export function RouteAccessGate({
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      window.location.replace(buildLoginRedirect(safeReturnTo, role));
+      replaceLocation(buildLoginRedirect(safeReturnTo, role));
     }
   }, [role, safeReturnTo, status]);
 
@@ -164,7 +165,7 @@ export function RouteAccessGate({
         title="Không thể tải phiên"
         description="Máy chủ xác thực tạm thời không phản hồi. Vui lòng thử lại sau."
         action={
-          <button className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground" onClick={() => window.location.reload()}>
+          <button className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground" onClick={() => reloadPage()}>
             Thử lại
           </button>
         }
@@ -280,7 +281,7 @@ function AuthenticatedShellFrame({
     setIsSigningOut(true);
     const confirmed = await logoutAndClear();
     setIsSigningOut(false);
-    window.location.assign(confirmed ? "/login" : "/login?notice=logout-unconfirmed");
+    assignLocation(confirmed ? "/login" : "/login?notice=logout-unconfirmed");
   };
 
   const identity = session ? (

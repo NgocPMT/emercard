@@ -58,6 +58,9 @@ async function resolveResult<TData, TError>(resultPromise: Promise<FieldsResult<
       return result.data;
     }
     if (result.response) {
+      if (result.response.ok) {
+        return undefined as TData;
+      }
       throw await readApiError(result.response);
     }
     throw networkError();

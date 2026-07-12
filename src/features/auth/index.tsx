@@ -1,7 +1,7 @@
 import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { login, registerAccount } from "../../api/auth";
@@ -12,6 +12,7 @@ import { PageTitle } from "../../components/layout";
 import { createPageQueryClient } from "../../api/query-client";
 import { sessionKeys } from "../../api/session";
 import { PageErrorBoundary, PublicAuthGate, SessionProvider, validateReturnTo } from "../session";
+import { assignLocation } from "../../lib/navigation";
 
 export type AuthMode = "login" | "register";
 
@@ -146,6 +147,12 @@ function LoginForm({ initialEmail, returnTo }: { initialEmail?: string | null; r
     mode: "onSubmit",
   });
 
+  useEffect(() => {
+    if (initialEmail) {
+      form.reset({ email: initialEmail.trim(), password: "" });
+    }
+  }, [form, initialEmail]);
+
   const onSubmit = form.handleSubmit(async (values) => {
     setRootMessage(null);
     form.clearErrors();
@@ -153,7 +160,7 @@ function LoginForm({ initialEmail, returnTo }: { initialEmail?: string | null; r
       const session = await login({ email: values.email.trim(), password: values.password });
       queryClient.setQueryData(sessionKeys.current, session);
       form.reset({ email: values.email.trim(), password: "" });
-      window.location.assign(validateReturnTo(returnTo, session.role));
+      assignLocation(validateReturnTo(returnTo, session.role));
     } catch (error) {
       handleLoginError(error, form.setError, form.setFocus, setRootMessage);
     }
@@ -212,13 +219,19 @@ function RegisterForm({ initialEmail }: { initialEmail?: string | null }) {
     mode: "onSubmit",
   });
 
+  useEffect(() => {
+    if (initialEmail) {
+      form.reset({ email: initialEmail.trim(), password: "", confirmPassword: "" });
+    }
+  }, [form, initialEmail]);
+
   const onSubmit = form.handleSubmit(async (values) => {
     setRootMessage(null);
     form.clearErrors();
     try {
       await registerAccount({ email: values.email.trim(), password: values.password });
       form.reset({ email: values.email.trim(), password: "", confirmPassword: "" });
-      window.location.assign(`/login?notice=registration-success&email=${encodeURIComponent(values.email.trim())}`);
+      assignLocation(`/login?notice=registration-success&email=${encodeURIComponent(values.email.trim())}`);
     } catch (error) {
       handleRegisterError(error, form.setError, form.setFocus, setRootMessage);
     }
