@@ -3,8 +3,10 @@ import AuthLayout from "../layouts/AuthLayout.astro";
 import { AuthPageRoot } from "../features/auth";
 
 const returnTo = Astro.url.searchParams.get("returnTo");
+const initialEmail = Astro.url.searchParams.get("email");
+const notice = Astro.url.searchParams.get("notice");
 ---
 
 <AuthLayout title="EmerCard | Đăng ký" description="Đăng ký EmerCard">
-  <AuthPageRoot client:load mode="register" returnTo={returnTo} brand="EmerCard" />
+  <AuthPageRoot client:load mode="register" returnTo={returnTo} initialEmail={initialEmail} notice={notice} brand="EmerCard" />
 </AuthLayout>

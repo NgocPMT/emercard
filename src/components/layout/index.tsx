@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
+import React, { type ReactNode } from "react";
 import { cn } from "../../lib/cn";
-import { LinkButton, StatusBadge } from "../primitives";
+import { Button } from "../primitives";
 
 export type NavigationItem = {
   href: string;
@@ -29,14 +29,27 @@ export function PageTitle({ title, description, eyebrow }: { title: ReactNode; d
   );
 }
 
-export function AccountMenu({ userLabel, signOutHref = "/login" }: { userLabel?: ReactNode; signOutHref?: string }) {
+export function AccountMenu({
+  busy = false,
+  label = "Đăng xuất",
+  onSignOut,
+}: {
+  busy?: boolean;
+  label?: string;
+  onSignOut: () => Promise<void> | void;
+}) {
   return (
-    <div className="flex items-center gap-3">
-      {userLabel ? <StatusBadge variant="primary">{userLabel}</StatusBadge> : null}
-      <LinkButton href={signOutHref} variant="secondary" size="sm">
-        Đăng xuất
-      </LinkButton>
-    </div>
+    <Button
+      type="button"
+      variant="secondary"
+      size="sm"
+      busy={busy}
+      onClick={() => {
+        void onSignOut();
+      }}
+    >
+      {label}
+    </Button>
   );
 }
 
@@ -96,6 +109,7 @@ export function ApplicationShell({
   description,
   navigation,
   userLabel,
+  actions,
   children,
   notifications,
   mainClassName,
@@ -105,6 +119,7 @@ export function ApplicationShell({
   description?: ReactNode;
   navigation: NavigationItem[];
   userLabel?: ReactNode;
+  actions?: ReactNode;
   children: ReactNode;
   notifications?: ReactNode;
   mainClassName?: string;
@@ -121,7 +136,10 @@ export function ApplicationShell({
           <div className="ml-auto hidden md:block">
             <ResponsiveNavigation items={navigation} />
           </div>
-          {userLabel ? <div className="ml-auto hidden lg:block"><StatusBadge variant="neutral">{userLabel}</StatusBadge></div> : null}
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-3">
+            {userLabel ? <div className="hidden sm:block">{userLabel}</div> : null}
+            {actions ? <div>{actions}</div> : null}
+          </div>
         </div>
         <div className="border-t border-border/60 px-4 py-3 sm:px-6 lg:px-8 md:hidden">
           <ResponsiveNavigation items={navigation} />
