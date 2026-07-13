@@ -222,6 +222,20 @@ export function PublicAuthGate({ children, returnTo }: { children: ReactNode; re
     }
   }, [safeReturnTo, session, status]);
 
+  if (status === "unavailable") {
+    return (
+      <ServiceUnavailableState
+        title="Không thể kiểm tra phiên"
+        description="Máy chủ xác thực tạm thời không phản hồi. Vui lòng thử lại sau."
+        action={
+          <button className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground" onClick={() => reloadPage()}>
+            Thử lại
+          </button>
+        }
+      />
+    );
+  }
+
   return <>{children}</>;
 }
 

@@ -365,6 +365,13 @@ export function AuthPageRoot({
 }) {
   const [queryClient] = useState(() => createPageQueryClient());
 
+  useEffect(() => {
+    document.body.dataset.authHydrated = "true";
+    return () => {
+      delete document.body.dataset.authHydrated;
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <PageErrorBoundary>

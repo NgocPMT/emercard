@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { expect, test } from "playwright/test";
+import { expect, test, type Page } from "playwright/test";
 
 const backendBaseUrl = process.env.EMERCARD_E2E_BACKEND_URL ?? "http://127.0.0.1:8000";
 let backendReady = false;
@@ -20,12 +20,17 @@ function authEmail() {
   return `auth-${randomUUID()}@example.com`;
 }
 
+async function waitForAuthHydration(page: Page) {
+  await page.waitForFunction(() => document.body.dataset.authHydrated === "true");
+}
+
 
 test("registers, logs in, restores the session, and logs out", async ({ page }) => {
   const email = authEmail();
   const password = "password123";
 
   await page.goto("/register");
+  await waitForAuthHydration(page);
   await expect(page.getByRole("heading", { name: /Tạo tài khoản EmerCard/i })).toBeVisible();
   await page.getByLabel(/Email/).fill(email);
   await page.getByLabel(/Mật khẩu/).first().fill(password);
@@ -33,6 +38,7 @@ test("registers, logs in, restores the session, and logs out", async ({ page }) 
   await page.getByRole("button", { name: "Tạo tài khoản" }).click();
 
   await expect(page).toHaveURL(/\/login\?notice=registration-success&email=/);
+  await waitForAuthHydration(page);
   await page.getByLabel(/Email/).fill(email);
   await page.getByLabel(/Mật khẩu/).first().fill(password);
   await page.getByRole("button", { name: "Đăng nhập" }).click();
@@ -57,6 +63,7 @@ test("rejects duplicate registration and invalid login with safe messages", asyn
   const password = "password123";
 
   await page.goto("/register");
+  await waitForAuthHydration(page);
   await page.getByLabel(/Email/).fill(email);
   await page.getByLabel(/Mật khẩu/).first().fill(password);
   await page.getByLabel(/Xác nhận mật khẩu/).fill(password);
@@ -70,6 +77,7 @@ test("rejects duplicate registration and invalid login with safe messages", asyn
   expect((await duplicate.json()).error.code).toBe("auth.email_already_registered");
 
   await page.goto("/login");
+  await waitForAuthHydration(page);
   await page.getByLabel(/Email/).fill("missing@example.com");
   await page.getByLabel(/Mật khẩu/).first().fill(password);
   await page.getByRole("button", { name: "Đăng nhập" }).click();
@@ -82,11 +90,13 @@ test("denies normal users from admin routes, keeps the cookie hidden, and redire
   const password = "password123";
 
   await page.goto("/register");
+  await waitForAuthHydration(page);
   await page.getByLabel(/Email/).fill(email);
   await page.getByLabel(/Mật khẩu/).first().fill(password);
   await page.getByLabel(/Xác nhận mật khẩu/).fill(password);
   await page.getByRole("button", { name: "Tạo tài khoản" }).click();
   await expect(page).toHaveURL(/\/login\?notice=registration-success&email=/);
+  await waitForAuthHydration(page);
   await page.getByLabel(/Email/).fill(email);
   await page.getByLabel(/Mật khẩu/).first().fill(password);
   await page.getByRole("button", { name: "Đăng nhập" }).click();
@@ -108,6 +118,7 @@ test("shows bootstrap failures as service unavailable and leaves /e/* public", a
   await page.route("**/api/v1/me", (route) => route.abort());
 
   await page.goto("/login");
+  await waitForAuthHydration(page);
   await expect(page.getByRole("heading", { name: /Không thể kiểm tra phiên/i })).toBeVisible();
 
   await page.unroute("**/api/v1/me");
