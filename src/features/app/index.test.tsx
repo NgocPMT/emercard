@@ -11,6 +11,8 @@ vi.mock("@tanstack/react-query", async () => {
   return {
     ...actual,
     useQuery: (...args: unknown[]) => useQueryMock(...args),
+    useQueryClient: () => ({ invalidateQueries: vi.fn() }),
+    useMutation: () => ({ isPending: false, mutate: vi.fn() }),
   };
 });
 
@@ -68,14 +70,14 @@ describe("UserApplicationRoot", () => {
     expect(screen.getByText("Đã xảy ra lỗi khi đọc hồ sơ y tế.")).toBeInTheDocument();
   });
 
-  it("does not render the UI status card on the cards screen", () => {
+  it("shows the cards loading state without the old placeholder", () => {
     useQueryMock.mockReturnValue({ isPending: true, error: undefined, data: undefined });
 
     render(<UserApplicationRoot section="cards" />);
 
     expect(screen.getByRole("img", { name: "EmerCard" })).toHaveAttribute("src", "/logo.png");
     expect(screen.getAllByRole("heading", { name: "Thẻ của tôi" })).toHaveLength(1);
-    expect(screen.getByText("Thẻ của tôi sắp ra mắt")).toBeInTheDocument();
-    expect(screen.queryByText("Trạng thái khung UI")).not.toBeInTheDocument();
+    expect(screen.getByText("Đang tải thẻ")).toBeInTheDocument();
+    expect(screen.queryByText("Thẻ của tôi sắp ra mắt")).not.toBeInTheDocument();
   });
 });

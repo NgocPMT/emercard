@@ -38,6 +38,10 @@ const profileViewSchema = z.object({
   readiness: profileReadinessSchema,
 });
 
+const publicPreviewLinkSchema = z.object({
+  public_url: z.string().min(1),
+});
+
 const profileUpsertInputSchema = z.object({
   display_name: z.string().nullable().optional(),
   birth_year: z.number().int().nullable().optional(),
@@ -61,6 +65,7 @@ const profileUpsertInputSchema = z.object({
 export type ProfileReadinessStatus = z.infer<typeof profileReadinessStatusSchema>;
 export type ProfileView = z.infer<typeof profileViewSchema>;
 export type ProfileUpsertInput = z.infer<typeof profileUpsertInputSchema>;
+export type PublicPreviewLink = z.infer<typeof publicPreviewLinkSchema>;
 
 export const profileKeys = {
   current: ["profile", "current"] as const,
@@ -111,4 +116,13 @@ export async function saveCurrentProfile(payload: ProfileUpsertInput, signal?: A
     signal,
   });
   return profileViewSchema.parse(response);
+}
+
+export async function createPublicPreviewLink(signal?: AbortSignal): Promise<PublicPreviewLink> {
+  const response = await requestJson<unknown>({
+    path: "/me/profile/public-preview-link",
+    method: "POST",
+    signal,
+  });
+  return publicPreviewLinkSchema.parse(response);
 }

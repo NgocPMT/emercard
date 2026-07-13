@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "../../api/errors";
 import { createPageQueryClient } from "../../api/query-client";
 import { assignLocation, reloadPage, replaceLocation } from "../../lib/navigation";
-import { PageApplicationRoot, RouteAccessGate, SessionProvider, homeRoutes, useSession, validateReturnTo } from ".";
+import { PageApplicationRoot, PublicAuthGate, RouteAccessGate, SessionProvider, homeRoutes, useSession, validateReturnTo } from ".";
 
 const getCurrentSessionMock = vi.fn();
 const logoutMock = vi.fn();
@@ -73,6 +73,22 @@ function deferred<T>() {
   return { promise, resolve, reject };
 }
 
+function mockMobileNavigation(matches: boolean) {
+  vi.stubGlobal(
+    "matchMedia",
+    vi.fn().mockImplementation((query: string) => ({
+      matches,
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  );
+}
+
 afterEach(() => {
   getCurrentSessionMock.mockReset();
   logoutMock.mockReset();
@@ -80,6 +96,7 @@ afterEach(() => {
   replaceLocationMock.mockReset();
   reloadPageMock.mockReset();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 describe("session provider and gates", () => {
@@ -106,6 +123,19 @@ describe("session provider and gates", () => {
 
     expect(await screen.findByText("Chuyển hướng đến đăng nhập")).toBeInTheDocument();
     await waitFor(() => expect(replaceLocationMock).toHaveBeenCalledWith("/login?returnTo=%2Fapp"));
+  });
+
+  it("renders auth children immediately while the session bootstrap is still pending", async () => {
+    const pending = deferred<unknown>();
+    getCurrentSessionMock.mockReturnValueOnce(pending.promise as Promise<unknown>);
+
+    renderWithSession(
+      <PublicAuthGate>
+        <div>Login Form</div>
+      </PublicAuthGate>,
+    );
+
+    expect(screen.getByText("Login Form")).toBeInTheDocument();
   });
 
   it("renders access denied for a 403 bootstrap failure", async () => {
@@ -173,6 +203,25 @@ describe("session provider and gates", () => {
     await waitFor(() => expect(logoutMock).toHaveBeenCalledOnce());
     await waitFor(() => expect(clearSpy).toHaveBeenCalled());
     expect(assignLocationMock).toHaveBeenCalledWith("/login");
+  });
+
+  it("moves sign out into the mobile navigation menu", async () => {
+    const user = userEvent.setup();
+    getCurrentSessionMock.mockResolvedValueOnce(userSession);
+    mockMobileNavigation(true);
+
+    render(
+      <PageApplicationRoot role="user" brand="EmerCard" navigation={[{ href: "/app", label: "Tổng quan" }]}>
+        <div>Body</div>
+      </PageApplicationRoot>,
+    );
+
+    const navLabel = await screen.findByText("Điều hướng");
+    await user.click(navLabel);
+
+    const mobileSignOutButton = await screen.findByRole("button", { name: "Đăng xuất" });
+    expect(mobileSignOutButton).toHaveClass("w-full");
+    expect(mobileSignOutButton).toHaveClass("rounded-[var(--radius-control)]");
   });
 
   it("falls back to an honest logout notice when server confirmation fails", async () => {

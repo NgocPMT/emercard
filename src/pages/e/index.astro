@@ -1,8 +1,6 @@
 ---
 import { publicEnv } from "../../config/public-env";
 import EmergencyLayout from "../../layouts/EmergencyLayout.astro";
-
-const demoNotice = publicEnv.PUBLIC_DEMO_DATA_NOTICE ?? "Dữ liệu minh họa chỉ dùng cho bản demo EmerCard.";
 ---
 
 <EmergencyLayout>
@@ -75,7 +73,7 @@ const demoNotice = publicEnv.PUBLIC_DEMO_DATA_NOTICE ?? "Dữ liệu minh họa 
           <p id="updated-at" class="mt-1 text-sm text-muted-foreground"></p>
         </section>
 
-        <p id="demo-notice" class="mt-6 text-sm text-muted-foreground">{demoNotice}</p>
+        
       </article>
     </section>
   </main>
@@ -143,21 +141,29 @@ const demoNotice = publicEnv.PUBLIC_DEMO_DATA_NOTICE ?? "Dữ liệu minh họa 
         const item = document.createElement("li");
         item.className = "rounded-[1rem] border border-border p-4";
 
+        const row = document.createElement("div");
+        row.className = "flex items-center justify-between gap-4";
+        item.append(row);
+
+        const details = document.createElement("div");
+        details.className = "min-w-0 flex-1";
+        row.append(details);
+
         const name = document.createElement("p");
-        name.className = "font-semibold text-foreground";
+        name.className = "truncate font-semibold text-foreground";
         name.textContent = contact.name || "Liên hệ khẩn cấp";
-        item.append(name);
+        details.append(name);
 
         const relationship = document.createElement("p");
         relationship.className = "mt-1 text-sm text-muted-foreground";
         relationship.textContent = contact.relationship || "Chưa cung cấp";
-        item.append(relationship);
+        details.append(relationship);
 
         const call = document.createElement("a");
-        call.className = "mt-3 inline-flex min-h-11 items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground";
+        call.className = "inline-flex min-h-11 shrink-0 items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground";
         call.href = `tel:${encodeURIComponent(contact.phone)}`;
         call.textContent = "Gọi liên hệ";
-        item.append(call);
+        row.append(call);
         container.append(item);
       }
       if (container.childElementCount > 0) {

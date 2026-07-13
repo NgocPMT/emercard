@@ -213,7 +213,7 @@ export function RouteAccessGate({
 }
 
 export function PublicAuthGate({ children, returnTo }: { children: ReactNode; returnTo?: string | null }) {
-  const { session, status, isUnavailable, isForbidden } = useSession();
+  const { session, status } = useSession();
   const safeReturnTo = session ? validateReturnTo(returnTo, session.role) : null;
 
   useEffect(() => {
@@ -221,37 +221,6 @@ export function PublicAuthGate({ children, returnTo }: { children: ReactNode; re
       window.location.replace(safeReturnTo ?? homeRoutes[session.role]);
     }
   }, [safeReturnTo, session, status]);
-
-  if (status === "loading") {
-    return <PageLoadingState title="Đang kiểm tra phiên" description="Nếu bạn đã đăng nhập, chúng tôi sẽ chuyển bạn tới khu vực phù hợp." />;
-  }
-
-  if (isUnavailable) {
-    return (
-      <ServiceUnavailableState
-        title="Không thể kiểm tra phiên"
-        description="Máy chủ xác thực tạm thời không phản hồi. Bạn vẫn có thể xem biểu mẫu nền tảng."
-      />
-    );
-  }
-
-  if (isForbidden) {
-    return (
-      <AccessDeniedState
-        title="Không thể xác thực quyền truy cập"
-        description="Phiên hiện tại không thể được sử dụng ở trang này."
-        action={
-          <a href={session ? homeRoutes[session.role] : "/"} className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
-            Trở về trang phù hợp
-          </a>
-        }
-      />
-    );
-  }
-
-  if (session) {
-    return <PageLoadingState title="Đang chuyển hướng" description="Bạn đã có phiên hợp lệ." />;
-  }
 
   return <>{children}</>;
 }
@@ -299,6 +268,7 @@ function AuthenticatedShellFrame({
       navigation={navigation}
       userLabel={identity}
       actions={<AccountMenu busy={isSigningOut} onSignOut={handleSignOut} />}
+      mobileActions={<AccountMenu busy={isSigningOut} compact onSignOut={handleSignOut} />}
       notifications={notifications}
     >
       {children}

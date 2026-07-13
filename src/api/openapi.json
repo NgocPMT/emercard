@@ -22,11 +22,7 @@
             "type": "string"
           },
           "encoding_state": {
-            "enum": [
-              "not_provisioned",
-              "link_generated",
-              "verified"
-            ],
+            "enum": ["not_provisioned", "link_generated", "verified"],
             "title": "Encoding State",
             "type": "string"
           },
@@ -124,9 +120,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "user_id"
-        ],
+        "required": ["user_id"],
         "title": "AssignCardInput",
         "type": "object"
       },
@@ -243,17 +237,7 @@
         "type": "object"
       },
       "BloodType": {
-        "enum": [
-          "A+",
-          "A-",
-          "B+",
-          "B-",
-          "AB+",
-          "AB-",
-          "O+",
-          "O-",
-          "unknown"
-        ],
+        "enum": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "unknown"],
         "title": "BloodType",
         "type": "string"
       },
@@ -279,9 +263,7 @@
             "title": "Next Cursor"
           }
         },
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "title": "CardListOutput",
         "type": "object"
       },
@@ -297,10 +279,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "id",
-          "email"
-        ],
+        "required": ["id", "email"],
         "title": "CardOwnerOutput",
         "type": "object"
       },
@@ -314,10 +293,7 @@
             "$ref": "#/components/schemas/ProvisioningOutput"
           }
         },
-        "required": [
-          "card",
-          "provisioning"
-        ],
+        "required": ["card", "provisioning"],
         "title": "CardProvisioningOutput",
         "type": "object"
       },
@@ -345,9 +321,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "public_url"
-        ],
+        "required": ["public_url"],
         "title": "ConfirmEncodingInput",
         "type": "object"
       },
@@ -369,10 +343,7 @@
             "type": "string"
           },
           "role": {
-            "enum": [
-              "user",
-              "admin"
-            ],
+            "enum": ["user", "admin"],
             "title": "Role",
             "type": "string"
           },
@@ -382,13 +353,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "id",
-          "email",
-          "role",
-          "created_at",
-          "updated_at"
-        ],
+        "required": ["id", "email", "role", "created_at", "updated_at"],
         "title": "CurrentUserOutput",
         "type": "object"
       },
@@ -409,11 +374,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "name",
-          "relationship",
-          "phone"
-        ],
+        "required": ["name", "relationship", "phone"],
         "title": "EmergencyContactInput",
         "type": "object"
       },
@@ -434,11 +395,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "name",
-          "relationship",
-          "phone"
-        ],
+        "required": ["name", "relationship", "phone"],
         "title": "EmergencyContactPublic",
         "type": "object"
       },
@@ -450,19 +407,12 @@
             "$ref": "#/components/schemas/PublicProfileOutput"
           }
         },
-        "required": [
-          "profile"
-        ],
+        "required": ["profile"],
         "title": "EmergencyProfileResponse",
         "type": "object"
       },
       "Gender": {
-        "enum": [
-          "female",
-          "male",
-          "other",
-          "prefer_not_to_say"
-        ],
+        "enum": ["female", "male", "other", "prefer_not_to_say"],
         "title": "Gender",
         "type": "string"
       },
@@ -499,11 +449,7 @@
             "type": "integer"
           },
           "status": {
-            "enum": [
-              "not_started",
-              "incomplete",
-              "ready"
-            ],
+            "enum": ["not_started", "incomplete", "ready"],
             "title": "Status",
             "type": "string"
           },
@@ -629,10 +575,7 @@
             "$ref": "#/components/schemas/ProfileReadiness"
           }
         },
-        "required": [
-          "profile",
-          "readiness"
-        ],
+        "required": ["profile", "readiness"],
         "title": "ProfileView",
         "type": "object"
       },
@@ -648,10 +591,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "public_token",
-          "public_url"
-        ],
+        "required": ["public_token", "public_url"],
         "title": "ProvisioningOutput",
         "type": "object"
       },
@@ -769,9 +709,7 @@
             "$ref": "#/components/schemas/PublicProfileOutput"
           }
         },
-        "required": [
-          "profile"
-        ],
+        "required": ["profile"],
         "title": "PublicProfileResponse",
         "type": "object"
       },
@@ -794,10 +732,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "new_owner_id",
-          "reason"
-        ],
+        "required": ["new_owner_id", "reason"],
         "title": "ReassignCardInput",
         "type": "object"
       },
@@ -818,10 +753,7 @@
             "type": "string"
           },
           "role": {
-            "enum": [
-              "user",
-              "admin"
-            ],
+            "enum": ["user", "admin"],
             "title": "Role",
             "type": "string"
           },
@@ -831,13 +763,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "id",
-          "email",
-          "role",
-          "created_at",
-          "updated_at"
-        ],
+        "required": ["id", "email", "role", "created_at", "updated_at"],
         "title": "SafeUserOutput",
         "type": "object"
       },
@@ -852,9 +778,7 @@
             "type": "array"
           }
         },
-        "required": [
-          "cards"
-        ],
+        "required": ["cards"],
         "title": "UserCardListOutput",
         "type": "object"
       },
@@ -957,10 +881,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "email",
-          "password"
-        ],
+        "required": ["email", "password"],
         "title": "UserLoginInput",
         "type": "object"
       },
@@ -981,10 +902,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "email",
-          "password"
-        ],
+        "required": ["email", "password"],
         "title": "UserRegistrationInput",
         "type": "object"
       },
@@ -1020,11 +938,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "loc",
-          "msg",
-          "type"
-        ],
+        "required": ["loc", "msg", "type"],
         "title": "ValidationError",
         "type": "object"
       }
@@ -1111,11 +1025,7 @@
             "schema": {
               "anyOf": [
                 {
-                  "enum": [
-                    "not_provisioned",
-                    "link_generated",
-                    "verified"
-                  ],
+                  "enum": ["not_provisioned", "link_generated", "verified"],
                   "type": "string"
                 },
                 {
@@ -1194,9 +1104,7 @@
           }
         },
         "summary": "List Cards",
-        "tags": [
-          "admin cards"
-        ]
+        "tags": ["admin cards"]
       },
       "post": {
         "operationId": "create_blank_card_api_v1_admin_cards_post",
@@ -1234,9 +1142,7 @@
           }
         },
         "summary": "Create Blank Card",
-        "tags": [
-          "admin cards"
-        ]
+        "tags": ["admin cards"]
       }
     },
     "/api/v1/admin/cards/{card_id}": {
@@ -1276,9 +1182,7 @@
           }
         },
         "summary": "Get Card",
-        "tags": [
-          "admin cards"
-        ]
+        "tags": ["admin cards"]
       }
     },
     "/api/v1/admin/cards/{card_id}/assign": {
@@ -1328,9 +1232,7 @@
           }
         },
         "summary": "Assign Card",
-        "tags": [
-          "admin cards"
-        ]
+        "tags": ["admin cards"]
       }
     },
     "/api/v1/admin/cards/{card_id}/confirm-encoding": {
@@ -1380,9 +1282,7 @@
           }
         },
         "summary": "Confirm Encoding",
-        "tags": [
-          "admin cards"
-        ]
+        "tags": ["admin cards"]
       }
     },
     "/api/v1/admin/cards/{card_id}/issue": {
@@ -1422,9 +1322,7 @@
           }
         },
         "summary": "Issue Card",
-        "tags": [
-          "admin cards"
-        ]
+        "tags": ["admin cards"]
       }
     },
     "/api/v1/admin/cards/{card_id}/provision-link": {
@@ -1464,9 +1362,7 @@
           }
         },
         "summary": "Provision Link",
-        "tags": [
-          "admin cards"
-        ]
+        "tags": ["admin cards"]
       }
     },
     "/api/v1/admin/cards/{card_id}/reassign": {
@@ -1516,9 +1412,7 @@
           }
         },
         "summary": "Reassign Card",
-        "tags": [
-          "admin cards"
-        ]
+        "tags": ["admin cards"]
       }
     },
     "/api/v1/admin/cards/{card_id}/reprovision-link": {
@@ -1558,9 +1452,7 @@
           }
         },
         "summary": "Reprovision Link",
-        "tags": [
-          "admin cards"
-        ]
+        "tags": ["admin cards"]
       }
     },
     "/api/v1/admin/cards/{card_id}/unassign": {
@@ -1600,9 +1492,7 @@
           }
         },
         "summary": "Unassign Card",
-        "tags": [
-          "admin cards"
-        ]
+        "tags": ["admin cards"]
       }
     },
     "/api/v1/admin/cards/{card_id}/void": {
@@ -1642,9 +1532,7 @@
           }
         },
         "summary": "Void Card",
-        "tags": [
-          "admin cards"
-        ]
+        "tags": ["admin cards"]
       }
     },
     "/api/v1/admin/users/lookup": {
@@ -1686,9 +1574,7 @@
           }
         },
         "summary": "Lookup User",
-        "tags": [
-          "admin cards"
-        ]
+        "tags": ["admin cards"]
       }
     },
     "/api/v1/auth/login": {
@@ -1727,9 +1613,7 @@
           }
         },
         "summary": "Login",
-        "tags": [
-          "authentication"
-        ]
+        "tags": ["authentication"]
       }
     },
     "/api/v1/auth/logout": {
@@ -1741,9 +1625,7 @@
           }
         },
         "summary": "Logout",
-        "tags": [
-          "authentication"
-        ]
+        "tags": ["authentication"]
       }
     },
     "/api/v1/auth/register": {
@@ -1782,9 +1664,7 @@
           }
         },
         "summary": "Register",
-        "tags": [
-          "authentication"
-        ]
+        "tags": ["authentication"]
       }
     },
     "/api/v1/emergency/{token}": {
@@ -1824,9 +1704,7 @@
           }
         },
         "summary": "Lookup Emergency Profile",
-        "tags": [
-          "emergency lookup"
-        ]
+        "tags": ["emergency lookup"]
       }
     },
     "/api/v1/me": {
@@ -1845,9 +1723,7 @@
           }
         },
         "summary": "Current User",
-        "tags": [
-          "authentication"
-        ]
+        "tags": ["authentication"]
       }
     },
     "/api/v1/me/cards": {
@@ -1866,9 +1742,7 @@
           }
         },
         "summary": "List My Cards",
-        "tags": [
-          "user cards"
-        ]
+        "tags": ["user cards"]
       }
     },
     "/api/v1/me/cards/{card_id}": {
@@ -1908,9 +1782,7 @@
           }
         },
         "summary": "Get My Card",
-        "tags": [
-          "user cards"
-        ]
+        "tags": ["user cards"]
       }
     },
     "/api/v1/me/cards/{card_id}/activate": {
@@ -1950,9 +1822,7 @@
           }
         },
         "summary": "Activate My Card",
-        "tags": [
-          "user cards"
-        ]
+        "tags": ["user cards"]
       }
     },
     "/api/v1/me/cards/{card_id}/disable": {
@@ -1992,9 +1862,7 @@
           }
         },
         "summary": "Disable My Card",
-        "tags": [
-          "user cards"
-        ]
+        "tags": ["user cards"]
       }
     },
     "/api/v1/me/profile": {
@@ -2013,9 +1881,7 @@
           }
         },
         "summary": "Get Profile",
-        "tags": [
-          "medical profile"
-        ]
+        "tags": ["medical profile"]
       },
       "put": {
         "operationId": "replace_profile_api_v1_me_profile_put",
@@ -2052,9 +1918,7 @@
           }
         },
         "summary": "Replace Profile",
-        "tags": [
-          "medical profile"
-        ]
+        "tags": ["medical profile"]
       }
     },
     "/api/v1/me/profile/public-preview": {
@@ -2073,9 +1937,7 @@
           }
         },
         "summary": "Public Preview",
-        "tags": [
-          "medical profile"
-        ]
+        "tags": ["medical profile"]
       }
     },
     "/api/v1/meta": {
@@ -2096,9 +1958,7 @@
           }
         },
         "summary": "Meta",
-        "tags": [
-          "infrastructure"
-        ]
+        "tags": ["infrastructure"]
       }
     },
     "/api/v1/public/{token}": {
@@ -2138,9 +1998,7 @@
           }
         },
         "summary": "Lookup Public Profile",
-        "tags": [
-          "public profile lookup"
-        ]
+        "tags": ["public profile lookup"]
       }
     },
     "/health": {
@@ -2164,9 +2022,7 @@
           }
         },
         "summary": "Health",
-        "tags": [
-          "infrastructure"
-        ]
+        "tags": ["infrastructure"]
       }
     },
     "/ready": {
@@ -2184,9 +2040,7 @@
           }
         },
         "summary": "Ready",
-        "tags": [
-          "infrastructure"
-        ]
+        "tags": ["infrastructure"]
       }
     }
   }

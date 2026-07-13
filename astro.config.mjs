@@ -8,12 +8,58 @@ import tailwindcss from "@tailwindcss/vite";
 const apiProxyTarget =
   process.env.EMERCARD_API_PROXY_TARGET ?? "http://127.0.0.1:8000";
 
+function emergencyPreviewRouteRewrite() {
+  /**
+   * @param {import("node:http").IncomingMessage & { url?: string }} request
+   */
+  const rewrite = (request) => {
+    const url = new URL(request.url ?? "/", "http://localhost");
+    if (
+      url.pathname.startsWith("/e/") &&
+      url.pathname !== "/e/index.html" &&
+      !url.pathname.includes(".")
+    ) {
+      request.url = "/e/index.html" + url.search;
+    }
+  };
+
+  return {
+    name: "emercard-emergency-preview-route-rewrite",
+    /**
+     * @param {import("vite").ViteDevServer} server
+     */
+    configureServer(server) {
+      /**
+       * @type {(request: import("node:http").IncomingMessage & { url?: string }, _response: import("node:http").ServerResponse, next: () => void) => void}
+       */
+      const middleware = (request, _response, next) => {
+        rewrite(request);
+        next();
+      };
+      server.middlewares.use(middleware);
+    },
+    /**
+     * @param {import("vite").ViteDevServer} server
+     */
+    configurePreviewServer(server) {
+      /**
+       * @type {(request: import("node:http").IncomingMessage & { url?: string }, _response: import("node:http").ServerResponse, next: () => void) => void}
+       */
+      const middleware = (request, _response, next) => {
+        rewrite(request);
+        next();
+      };
+      server.middlewares.use(middleware);
+    },
+  };
+}
+
 // https://astro.build/config
 export default defineConfig({
   output: "static",
   integrations: [react()],
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [tailwindcss(), emergencyPreviewRouteRewrite()],
     server: {
       proxy: {
         "/api": {

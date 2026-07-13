@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, type FieldPath, type UseFormSetError, type UseFormSetFocus } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Alert, Button, Panel, Select, StatusBadge, Textarea, TextInput } from "../../components/primitives";
 import { EmptyState, PageLoadingState, RetryState, ServiceUnavailableState } from "../../components/feedback";
 import { BrandMark } from "../../components/layout";
 import {
+  createPublicPreviewLink,
   getCurrentProfile,
   profileKeys,
   profileMissingFieldLabel,
@@ -159,6 +160,34 @@ function profileErrorMessage(error: ApiError) {
 
 function ProfileReadinessPanel({ profileView }: { profileView: ProfileView }) {
   const { profile, readiness } = profileView;
+  const { clearSessionCache } = useSession();
+  const previewMutation = useMutation({
+    mutationFn: () => createPublicPreviewLink(),
+  });
+  const [previewError, setPreviewError] = useState<string | null>(null);
+
+  const previewProfile = async () => {
+    setPreviewError(null);
+    try {
+      const result = await previewMutation.mutateAsync();
+      assignLocation(result.public_url);
+    } catch (error) {
+      if (isApiError(error) && error.status === 401) {
+        clearSessionCache();
+        assignLocation("/login?returnTo=/app/profile");
+        return;
+      }
+      if (isApiError(error) && error.code === "public_profile.not_ready") {
+        setPreviewError("Hồ sơ cần hoàn thiện trước khi xem trước.");
+        return;
+      }
+      if (isApiError(error) && (error.status === 503 || error.retryable)) {
+        setPreviewError("Máy chủ tạm thời không phản hồi. Vui lòng thử lại sau.");
+        return;
+      }
+      setPreviewError("Không thể tạo liên kết xem trước.");
+    }
+  };
 
   return (
     <Panel className="space-y-4">
@@ -196,6 +225,30 @@ function ProfileReadinessPanel({ profileView }: { profileView: ProfileView }) {
           </ul>
         </div>
       ) : null}
+
+      {previewError ? (
+        <Alert variant="danger" title="Không thể tạo liên kết xem trước">
+          {previewError}
+        </Alert>
+      ) : null}
+
+      <div className="space-y-3">
+        <Button
+          type="button"
+          variant="secondary"
+          className="w-full"
+          busy={previewMutation.isPending}
+          disabled={readiness.status !== "ready"}
+          onClick={() => void previewProfile()}
+        >
+          {previewMutation.isPending ? "Đang tạo liên kết..." : "Xem trước trang khẩn cấp"}
+        </Button>
+        <p className="text-xs text-muted-foreground">
+          {readiness.status === "ready"
+            ? "Mỗi lần bấm sẽ tạo một liên kết xem trước mới để mở trang khẩn cấp."
+            : "Hoàn thiện hồ sơ để mở liên kết xem trước."}
+        </p>
+      </div>
 
       <div className="text-sm text-muted-foreground">
         <p>Liên hệ bắt buộc: {readiness.required_contact_count}</p>

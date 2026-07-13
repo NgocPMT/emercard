@@ -25,14 +25,14 @@ Verified on 2026-07-12:
 
 ## Route map
 
-| Route        | Access             | Purpose                   |
-| ------------ | ------------------ | ------------------------- |
-| `/`          | public             | Marketing landing page    |
-| `/login`     | public             | Authentication shell      |
-| `/register`  | public             | Registration shell        |
-| `/app/*`     | authenticated user | User application shells   |
-| `/admin/*`   | administrator      | Admin application shells  |
-| `/e/{token}` | public             | Emergency profile page    |
+| Route        | Access             | Purpose                              |
+| ------------ | ------------------ | ------------------------------------ |
+| `/`          | public             | Marketing landing page               |
+| `/login`     | public             | Authentication shell                 |
+| `/register`  | public             | Registration shell                   |
+| `/app/*`     | authenticated user | User application shells              |
+| `/admin/*`   | administrator      | Admin application shells             |
+| `/e/{token}` | public             | Emergency profile page               |
 | `/api/*`     | API                | Same-origin reverse proxy to FastAPI |
 
 ## Authentication/session transport
