@@ -56,12 +56,23 @@ The emergency page remains a static Astro page. The hosting platform must apply 
 The static page reads the path token only in memory and calls the same-origin API:
 
 ```http
-GET /api/v1/emergency/{token}
+GET /api/v1/public/{token}
 ```
 
-It sends `credentials: "omit"`, `cache: "no-store"`, and `referrerPolicy: "no-referrer"`. It does not persist the token or returned medical profile in browser storage, service-worker caches, analytics, or error reporting.
+The legacy `GET /api/v1/emergency/{token}` route remains available for backend compatibility, but the browser demo uses `/api/v1/public/{token}`. Requests send `credentials: "omit"`, `cache: "no-store"`, and `referrerPolicy: "no-referrer"`. The page does not persist the token or returned medical profile in browser storage, service-worker caches, analytics, or error reporting.
 
 `public/_headers` applies no-store/noindex/referrer protections to `/e/*` and the public API route for compatible static hosts.
+
+## Demo workflow
+
+Use fictional data only.
+
+1. Log in as the demo user and complete the profile until it is ready.
+2. Run the backend public-profile command to generate the URL.
+3. Open the printed `/e/{token}` URL in a private browser window.
+4. Update one visible profile field and save.
+5. Refresh the same public URL and confirm the updated value appears.
+6. Disable or regenerate the link and confirm the old URL stops working while the new URL succeeds.
 
 ## Environment
 
@@ -94,6 +105,7 @@ Copy `.env.example` when configuring local development.
 npm ci
 npm run check
 npm run test
+npm run test:e2e
 npm run api:check
 npm run build
 ```
@@ -105,3 +117,7 @@ The build must produce `dist/e/index.html`, `_redirects`, and `_headers`.
 GitHub Pages and other static-only hosts do not provide the required same-origin `/api/*` reverse proxy. Use them only for static preview unless a proxy-capable edge or host is configured separately.
 
 For production, keep the frontend origin, `/api/*`, and the session cookie aligned on HTTPS. If the deployment cannot preserve that same-origin surface, it must provide an equivalent proxy layer before the browser sees the app.
+
+## Deferred work
+
+The quick demo does not include user-controlled link management, scan history, token expiry, versioning, analytics, realtime updates, or deployment verification beyond the static/browser checks above.

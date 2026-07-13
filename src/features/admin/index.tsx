@@ -1,11 +1,13 @@
 import { EmptyState } from "../../components/feedback";
-import { PageTitle } from "../../components/layout";
+import { BrandMark } from "../../components/layout";
 import { Panel, StatusBadge } from "../../components/primitives";
 import { PageApplicationRoot } from "../session";
 
 export type AdminAppSection = "overview" | "cards" | "detail";
 
 const navigation = [{ href: "/admin/cards", label: "Kho thẻ" }];
+
+const appBrand = <BrandMark />;
 
 const sectionCopy: Record<AdminAppSection, { title: string; description: string }> = {
   overview: {
@@ -28,7 +30,7 @@ export function AdminApplicationRoot({ section, cardId }: { section: AdminAppSec
   return (
     <PageApplicationRoot
       role="admin"
-      brand="EmerCard"
+      brand={appBrand}
       title={copy.title}
       description={copy.description}
       navigation={navigation.map((item) => ({ ...item, current: true }))}
@@ -36,7 +38,6 @@ export function AdminApplicationRoot({ section, cardId }: { section: AdminAppSec
     >
       <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
         <Panel className="space-y-4">
-          <PageTitle eyebrow="Giai đoạn nền tảng" title={copy.title} description={copy.description} />
           <EmptyState
             title="Chưa có hành động quản trị ở màn hình này"
             description={cardId ? `CardId hiện tại: ${cardId}` : "Khu vực này giữ chỗ cho các workflow quản trị về sau."}

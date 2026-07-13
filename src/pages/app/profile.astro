@@ -1,8 +1,8 @@
 ---
 import ApplicationPageLayout from "../../layouts/ApplicationPageLayout.astro";
-import { UserApplicationRoot } from "../../features/app";
+import { ProfilePageRoot } from "../../features/profile";
 ---
 
 <ApplicationPageLayout title="EmerCard | Hồ sơ y tế" description="Hồ sơ y tế người dùng EmerCard">
-  <UserApplicationRoot client:load section="profile" />
+  <ProfilePageRoot client:load />
 </ApplicationPageLayout>

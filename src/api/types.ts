@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 export const sessionRoleSchema = z.enum(["user", "admin"]);
+const genderSchema = z.enum(["female", "male", "other", "prefer_not_to_say"]);
+const bloodTypeSchema = z.enum(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "unknown"]);
 
 export const currentSessionSchema = z
   .object({
@@ -14,26 +16,32 @@ export const currentSessionSchema = z
 
 export type CurrentSession = z.infer<typeof currentSessionSchema>;
 
-export const emergencyContactSchema = z
+export const publicEmergencyContactSchema = z
   .object({
-    name: z.string().optional(),
-    relationship: z.string().optional(),
-    phone: z.string().min(1),
+    name: z.string(),
+    relationship: z.string(),
+    phone: z.string(),
   })
   .passthrough();
 
 export const publicEmergencyProfileSchema = z
   .object({
-    display_name: z.string().min(1),
-    blood_type: z.string().nullable().optional(),
-    critical_allergies: z.string().nullable().optional(),
-    important_conditions: z.string().nullable().optional(),
-    critical_medications: z.string().nullable().optional(),
-    emergency_note: z.string().nullable().optional(),
-    emergency_contacts: z.array(emergencyContactSchema).optional(),
+    display_name: z.string().nullable(),
+    birth_year: z.number().int().nullable(),
+    gender: genderSchema.nullable(),
+    blood_type: bloodTypeSchema.nullable(),
+    critical_allergies: z.array(z.string()),
+    important_conditions: z.array(z.string()),
+    critical_medications: z.array(z.string()),
+    emergency_note: z.string().nullable(),
+    emergency_contacts: z.array(publicEmergencyContactSchema),
+    profile_updated_at: z.string(),
   })
   .passthrough();
 
+export const publicEmergencyResponseSchema = z.object({ profile: publicEmergencyProfileSchema });
+
+export type PublicEmergencyContact = z.infer<typeof publicEmergencyContactSchema>;
 export type PublicEmergencyProfile = z.infer<typeof publicEmergencyProfileSchema>;
 
 export const validationDetailSchema = z

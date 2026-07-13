@@ -2,6 +2,15 @@ import React, { type ReactNode } from "react";
 import { cn } from "../../lib/cn";
 import { Button } from "../primitives";
 
+export function BrandMark({ label = "EmerCard" }: { label?: string }) {
+  return (
+    <span className="flex items-center gap-3">
+      <img src="/logo.png" alt={label} className="h-10 w-10 rounded-2xl border border-slate-200 bg-white object-contain shadow-sm" />
+      <span className="text-lg font-extrabold tracking-tight text-foreground">{label}</span>
+    </span>
+  );
+}
+
 export type NavigationItem = {
   href: string;
   label: string;
@@ -130,8 +139,7 @@ export function ApplicationShell({
       <header className="sticky top-0 z-30 border-b border-border/70 bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-4 px-4 py-4 sm:px-6 lg:px-8">
           <a href="/" className="flex items-center gap-3 font-black tracking-tight text-foreground">
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-sm text-primary-foreground shadow-sm">EC</span>
-            <span>{brand}</span>
+            {brand}
           </a>
           <div className="ml-auto hidden md:block">
             <ResponsiveNavigation items={navigation} />

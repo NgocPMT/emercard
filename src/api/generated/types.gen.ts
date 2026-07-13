@@ -9,47 +9,47 @@ export type ClientOptions = {
  */
 export type AdminCardOutput = {
     /**
-     * Id
+     * Assigned At
      */
-    id: string;
+    assigned_at?: string | null;
     /**
-     * Serial
+     * Created At
      */
-    serial: string;
-    status: CardStatus;
-    /**
-     * Is Current
-     */
-    is_current: boolean;
+    created_at: string;
     /**
      * Encoding State
      */
     encoding_state: 'not_provisioned' | 'link_generated' | 'verified';
     /**
-     * Token Revision
+     * Encoding Verified At
      */
-    token_revision: number;
+    encoding_verified_at?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Is Current
+     */
+    is_current: boolean;
+    /**
+     * Issued At
+     */
+    issued_at?: string | null;
     owner?: CardOwnerOutput | null;
     /**
      * Provisioned At
      */
     provisioned_at?: string | null;
     /**
-     * Encoding Verified At
+     * Serial
      */
-    encoding_verified_at?: string | null;
+    serial: string;
+    status: CardStatus;
     /**
-     * Assigned At
+     * Token Revision
      */
-    assigned_at?: string | null;
-    /**
-     * Issued At
-     */
-    issued_at?: string | null;
-    /**
-     * Created At
-     */
-    created_at: string;
+    token_revision: number;
     /**
      * Updated At
      */
@@ -69,47 +69,43 @@ export type AssignCardInput = {
 /**
  * AuthenticatedProfileOutput
  *
- * Sanitized current-user profile response without persistence metadata.
+ * Sanitized current-user profile response without ownership or readiness metadata.
  */
 export type AuthenticatedProfileOutput = {
-    /**
-     * Display Name
-     */
-    display_name: string | null;
     /**
      * Birth Year
      */
     birth_year: number | null;
-    gender: Gender | null;
     blood_type: BloodType | null;
+    /**
+     * Created At
+     */
+    created_at: string;
     /**
      * Critical Allergies
      */
     critical_allergies: Array<string>;
     /**
-     * Important Conditions
-     */
-    important_conditions: Array<string>;
-    /**
      * Critical Medications
      */
     critical_medications: Array<string>;
     /**
-     * Emergency Note
+     * Display Name
      */
-    emergency_note: string | null;
+    display_name: string | null;
     /**
      * Emergency Contacts
      */
     emergency_contacts: Array<EmergencyContactPublic>;
     /**
-     * State
+     * Emergency Note
      */
-    state: 'incomplete' | 'ready_to_publish';
+    emergency_note: string | null;
+    gender: Gender | null;
     /**
-     * Created At
+     * Important Conditions
      */
-    created_at: string;
+    important_conditions: Array<string>;
     /**
      * Updated At
      */
@@ -119,7 +115,7 @@ export type AuthenticatedProfileOutput = {
 /**
  * BloodType
  */
-export type BloodType = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
+export type BloodType = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-' | 'unknown';
 
 /**
  * CardListOutput
@@ -140,13 +136,13 @@ export type CardListOutput = {
  */
 export type CardOwnerOutput = {
     /**
-     * Id
-     */
-    id: string;
-    /**
      * Email
      */
     email: string;
+    /**
+     * Id
+     */
+    id: string;
 };
 
 /**
@@ -181,21 +177,21 @@ export type ConfirmEncodingInput = {
  */
 export type CurrentUserOutput = {
     /**
-     * Id
+     * Created At
      */
-    id: string;
+    created_at: string;
     /**
      * Email
      */
     email: string;
     /**
+     * Id
+     */
+    id: string;
+    /**
      * Role
      */
     role: 'user' | 'admin';
-    /**
-     * Created At
-     */
-    created_at: string;
     /**
      * Updated At
      */
@@ -213,13 +209,13 @@ export type EmergencyContactInput = {
      */
     name: string;
     /**
-     * Relationship
-     */
-    relationship: string;
-    /**
      * Phone
      */
     phone: string;
+    /**
+     * Relationship
+     */
+    relationship: string;
 };
 
 /**
@@ -233,13 +229,13 @@ export type EmergencyContactPublic = {
      */
     name: string;
     /**
-     * Relationship
-     */
-    relationship: string;
-    /**
      * Phone
      */
     phone: string;
+    /**
+     * Relationship
+     */
+    relationship: string;
 };
 
 /**
@@ -254,7 +250,7 @@ export type EmergencyProfileResponse = {
 /**
  * Gender
  */
-export type Gender = 'female' | 'male' | 'non_binary' | 'prefer_not_to_say';
+export type Gender = 'female' | 'male' | 'other' | 'prefer_not_to_say';
 
 /**
  * HTTPValidationError
@@ -267,41 +263,79 @@ export type HttpValidationError = {
 };
 
 /**
+ * ProfileReadiness
+ *
+ * Derived profile completion state for authenticated UI flows.
+ */
+export type ProfileReadiness = {
+    /**
+     * Completed Required Field Count
+     */
+    completed_required_field_count: number;
+    /**
+     * Missing Fields
+     */
+    missing_fields: Array<string>;
+    /**
+     * Required Contact Count
+     */
+    required_contact_count: number;
+    /**
+     * Status
+     */
+    status: 'not_started' | 'incomplete' | 'ready';
+    /**
+     * Total Required Field Count
+     */
+    total_required_field_count: number;
+};
+
+/**
  * ProfileUpsertInput
  *
  * Profile save input; ownership, timestamps, IDs, and public state are server-controlled.
  */
 export type ProfileUpsertInput = {
     /**
-     * Display Name
-     */
-    display_name?: string | null;
-    /**
      * Birth Year
      */
     birth_year?: number | null;
-    gender?: Gender | null;
     blood_type?: BloodType | null;
     /**
      * Critical Allergies
      */
     critical_allergies?: Array<string>;
     /**
-     * Important Conditions
-     */
-    important_conditions?: Array<string>;
-    /**
      * Critical Medications
      */
     critical_medications?: Array<string>;
     /**
-     * Emergency Note
+     * Display Name
      */
-    emergency_note?: string | null;
+    display_name?: string | null;
     /**
      * Emergency Contacts
      */
     emergency_contacts?: Array<EmergencyContactInput>;
+    /**
+     * Emergency Note
+     */
+    emergency_note?: string | null;
+    gender?: Gender | null;
+    /**
+     * Important Conditions
+     */
+    important_conditions?: Array<string>;
+};
+
+/**
+ * ProfileView
+ *
+ * Current-user profile envelope with explicit readiness metadata.
+ */
+export type ProfileView = {
+    profile: AuthenticatedProfileOutput | null;
+    readiness: ProfileReadiness;
 };
 
 /**
@@ -325,39 +359,48 @@ export type ProvisioningOutput = {
  */
 export type PublicProfileOutput = {
     /**
-     * Display Name
-     */
-    display_name: string | null;
-    /**
      * Birth Year
      */
     birth_year: number | null;
-    gender: Gender | null;
     blood_type: BloodType | null;
     /**
      * Critical Allergies
      */
     critical_allergies: Array<string>;
     /**
-     * Important Conditions
-     */
-    important_conditions: Array<string>;
-    /**
      * Critical Medications
      */
     critical_medications: Array<string>;
     /**
-     * Emergency Note
+     * Display Name
      */
-    emergency_note: string | null;
+    display_name: string | null;
     /**
      * Emergency Contacts
      */
     emergency_contacts: Array<EmergencyContactPublic>;
     /**
+     * Emergency Note
+     */
+    emergency_note: string | null;
+    gender: Gender | null;
+    /**
+     * Important Conditions
+     */
+    important_conditions: Array<string>;
+    /**
      * Profile Updated At
      */
     profile_updated_at: string;
+};
+
+/**
+ * PublicProfileResponse
+ *
+ * Envelope for the allowlisted public profile projection.
+ */
+export type PublicProfileResponse = {
+    profile: PublicProfileOutput;
 };
 
 /**
@@ -379,21 +422,21 @@ export type ReassignCardInput = {
  */
 export type SafeUserOutput = {
     /**
-     * Id
+     * Created At
      */
-    id: string;
+    created_at: string;
     /**
      * Email
      */
     email: string;
     /**
+     * Id
+     */
+    id: string;
+    /**
      * Role
      */
     role: 'user' | 'admin';
-    /**
-     * Created At
-     */
-    created_at: string;
     /**
      * Updated At
      */
@@ -417,14 +460,29 @@ export type UserCardListOutput = {
  */
 export type UserCardOutput = {
     /**
+     * Activated At
+     */
+    activated_at: string | null;
+    /**
+     * Can Activate
+     */
+    can_activate: boolean;
+    /**
+     * Can Disable
+     */
+    can_disable: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Disabled At
+     */
+    disabled_at: string | null;
+    /**
      * Id
      */
     id: string;
-    /**
-     * Serial
-     */
-    serial: string;
-    status: CardStatus;
     /**
      * Is Current
      */
@@ -434,29 +492,14 @@ export type UserCardOutput = {
      */
     issued_at: string;
     /**
-     * Activated At
+     * Serial
      */
-    activated_at: string | null;
-    /**
-     * Disabled At
-     */
-    disabled_at: string | null;
-    /**
-     * Created At
-     */
-    created_at: string;
+    serial: string;
+    status: CardStatus;
     /**
      * Updated At
      */
     updated_at: string;
-    /**
-     * Can Activate
-     */
-    can_activate: boolean;
-    /**
-     * Can Disable
-     */
-    can_disable: boolean;
 };
 
 /**
@@ -494,6 +537,16 @@ export type UserRegistrationInput = {
  */
 export type ValidationError = {
     /**
+     * Context
+     */
+    ctx?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Input
+     */
+    input?: unknown;
+    /**
      * Location
      */
     loc: Array<string | number>;
@@ -505,76 +558,396 @@ export type ValidationError = {
      * Error Type
      */
     type: string;
-    /**
-     * Input
-     */
-    input?: unknown;
-    /**
-     * Context
-     */
-    ctx?: {
-        [key: string]: unknown;
-    };
 };
 
-export type HealthHealthGetData = {
+export type ListCardsApiV1AdminCardsGetData = {
     body?: never;
     path?: never;
-    query?: never;
-    url: '/health';
-};
-
-export type HealthHealthGetResponses = {
-    /**
-     * Response Health Health Get
-     *
-     * Successful Response
-     */
-    200: {
-        [key: string]: string;
+    query?: {
+        /**
+         * Status
+         */
+        status?: CardStatus | null;
+        /**
+         * Owner Id
+         */
+        owner_id?: string | null;
+        /**
+         * Serial
+         */
+        serial?: string | null;
+        /**
+         * Is Current
+         */
+        is_current?: boolean | null;
+        /**
+         * Encoding State
+         */
+        encoding_state?: 'not_provisioned' | 'link_generated' | 'verified' | null;
+        /**
+         * Issued
+         */
+        issued?: boolean | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
     };
+    url: '/api/v1/admin/cards';
 };
 
-export type HealthHealthGetResponse = HealthHealthGetResponses[keyof HealthHealthGetResponses];
-
-export type ReadyReadyGetData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/ready';
-};
-
-export type ReadyReadyGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: unknown;
-};
-
-export type RegisterApiV1AuthRegisterPostData = {
-    body: UserRegistrationInput;
-    path?: never;
-    query?: never;
-    url: '/api/v1/auth/register';
-};
-
-export type RegisterApiV1AuthRegisterPostErrors = {
+export type ListCardsApiV1AdminCardsGetErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type RegisterApiV1AuthRegisterPostError = RegisterApiV1AuthRegisterPostErrors[keyof RegisterApiV1AuthRegisterPostErrors];
+export type ListCardsApiV1AdminCardsGetError = ListCardsApiV1AdminCardsGetErrors[keyof ListCardsApiV1AdminCardsGetErrors];
 
-export type RegisterApiV1AuthRegisterPostResponses = {
+export type ListCardsApiV1AdminCardsGetResponses = {
     /**
      * Successful Response
      */
-    201: CurrentUserOutput;
+    200: CardListOutput;
 };
 
-export type RegisterApiV1AuthRegisterPostResponse = RegisterApiV1AuthRegisterPostResponses[keyof RegisterApiV1AuthRegisterPostResponses];
+export type ListCardsApiV1AdminCardsGetResponse = ListCardsApiV1AdminCardsGetResponses[keyof ListCardsApiV1AdminCardsGetResponses];
+
+export type CreateBlankCardApiV1AdminCardsPostData = {
+    body?: never;
+    headers: {
+        /**
+         * Idempotency-Key
+         */
+        'Idempotency-Key': string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/cards';
+};
+
+export type CreateBlankCardApiV1AdminCardsPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateBlankCardApiV1AdminCardsPostError = CreateBlankCardApiV1AdminCardsPostErrors[keyof CreateBlankCardApiV1AdminCardsPostErrors];
+
+export type CreateBlankCardApiV1AdminCardsPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: AdminCardOutput;
+};
+
+export type CreateBlankCardApiV1AdminCardsPostResponse = CreateBlankCardApiV1AdminCardsPostResponses[keyof CreateBlankCardApiV1AdminCardsPostResponses];
+
+export type GetCardApiV1AdminCardsCardIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Card Id
+         */
+        card_id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/cards/{card_id}';
+};
+
+export type GetCardApiV1AdminCardsCardIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetCardApiV1AdminCardsCardIdGetError = GetCardApiV1AdminCardsCardIdGetErrors[keyof GetCardApiV1AdminCardsCardIdGetErrors];
+
+export type GetCardApiV1AdminCardsCardIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AdminCardOutput;
+};
+
+export type GetCardApiV1AdminCardsCardIdGetResponse = GetCardApiV1AdminCardsCardIdGetResponses[keyof GetCardApiV1AdminCardsCardIdGetResponses];
+
+export type AssignCardApiV1AdminCardsCardIdAssignPostData = {
+    body: AssignCardInput;
+    path: {
+        /**
+         * Card Id
+         */
+        card_id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/cards/{card_id}/assign';
+};
+
+export type AssignCardApiV1AdminCardsCardIdAssignPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AssignCardApiV1AdminCardsCardIdAssignPostError = AssignCardApiV1AdminCardsCardIdAssignPostErrors[keyof AssignCardApiV1AdminCardsCardIdAssignPostErrors];
+
+export type AssignCardApiV1AdminCardsCardIdAssignPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AdminCardOutput;
+};
+
+export type AssignCardApiV1AdminCardsCardIdAssignPostResponse = AssignCardApiV1AdminCardsCardIdAssignPostResponses[keyof AssignCardApiV1AdminCardsCardIdAssignPostResponses];
+
+export type ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostData = {
+    body: ConfirmEncodingInput;
+    path: {
+        /**
+         * Card Id
+         */
+        card_id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/cards/{card_id}/confirm-encoding';
+};
+
+export type ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostError = ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostErrors[keyof ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostErrors];
+
+export type ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AdminCardOutput;
+};
+
+export type ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponse = ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponses[keyof ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponses];
+
+export type IssueCardApiV1AdminCardsCardIdIssuePostData = {
+    body?: never;
+    path: {
+        /**
+         * Card Id
+         */
+        card_id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/cards/{card_id}/issue';
+};
+
+export type IssueCardApiV1AdminCardsCardIdIssuePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type IssueCardApiV1AdminCardsCardIdIssuePostError = IssueCardApiV1AdminCardsCardIdIssuePostErrors[keyof IssueCardApiV1AdminCardsCardIdIssuePostErrors];
+
+export type IssueCardApiV1AdminCardsCardIdIssuePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AdminCardOutput;
+};
+
+export type IssueCardApiV1AdminCardsCardIdIssuePostResponse = IssueCardApiV1AdminCardsCardIdIssuePostResponses[keyof IssueCardApiV1AdminCardsCardIdIssuePostResponses];
+
+export type ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostData = {
+    body?: never;
+    path: {
+        /**
+         * Card Id
+         */
+        card_id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/cards/{card_id}/provision-link';
+};
+
+export type ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostError = ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostErrors[keyof ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostErrors];
+
+export type ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: CardProvisioningOutput;
+};
+
+export type ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostResponse = ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostResponses[keyof ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostResponses];
+
+export type ReassignCardApiV1AdminCardsCardIdReassignPostData = {
+    body: ReassignCardInput;
+    path: {
+        /**
+         * Card Id
+         */
+        card_id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/cards/{card_id}/reassign';
+};
+
+export type ReassignCardApiV1AdminCardsCardIdReassignPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReassignCardApiV1AdminCardsCardIdReassignPostError = ReassignCardApiV1AdminCardsCardIdReassignPostErrors[keyof ReassignCardApiV1AdminCardsCardIdReassignPostErrors];
+
+export type ReassignCardApiV1AdminCardsCardIdReassignPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AdminCardOutput;
+};
+
+export type ReassignCardApiV1AdminCardsCardIdReassignPostResponse = ReassignCardApiV1AdminCardsCardIdReassignPostResponses[keyof ReassignCardApiV1AdminCardsCardIdReassignPostResponses];
+
+export type ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostData = {
+    body?: never;
+    path: {
+        /**
+         * Card Id
+         */
+        card_id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/cards/{card_id}/reprovision-link';
+};
+
+export type ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostError = ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostErrors[keyof ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostErrors];
+
+export type ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: CardProvisioningOutput;
+};
+
+export type ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostResponse = ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostResponses[keyof ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostResponses];
+
+export type UnassignCardApiV1AdminCardsCardIdUnassignPostData = {
+    body?: never;
+    path: {
+        /**
+         * Card Id
+         */
+        card_id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/cards/{card_id}/unassign';
+};
+
+export type UnassignCardApiV1AdminCardsCardIdUnassignPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UnassignCardApiV1AdminCardsCardIdUnassignPostError = UnassignCardApiV1AdminCardsCardIdUnassignPostErrors[keyof UnassignCardApiV1AdminCardsCardIdUnassignPostErrors];
+
+export type UnassignCardApiV1AdminCardsCardIdUnassignPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AdminCardOutput;
+};
+
+export type UnassignCardApiV1AdminCardsCardIdUnassignPostResponse = UnassignCardApiV1AdminCardsCardIdUnassignPostResponses[keyof UnassignCardApiV1AdminCardsCardIdUnassignPostResponses];
+
+export type VoidCardApiV1AdminCardsCardIdVoidPostData = {
+    body?: never;
+    path: {
+        /**
+         * Card Id
+         */
+        card_id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/cards/{card_id}/void';
+};
+
+export type VoidCardApiV1AdminCardsCardIdVoidPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type VoidCardApiV1AdminCardsCardIdVoidPostError = VoidCardApiV1AdminCardsCardIdVoidPostErrors[keyof VoidCardApiV1AdminCardsCardIdVoidPostErrors];
+
+export type VoidCardApiV1AdminCardsCardIdVoidPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AdminCardOutput;
+};
+
+export type VoidCardApiV1AdminCardsCardIdVoidPostResponse = VoidCardApiV1AdminCardsCardIdVoidPostResponses[keyof VoidCardApiV1AdminCardsCardIdVoidPostResponses];
+
+export type LookupUserApiV1AdminUsersLookupGetData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Email
+         */
+        email: string;
+    };
+    url: '/api/v1/admin/users/lookup';
+};
+
+export type LookupUserApiV1AdminUsersLookupGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type LookupUserApiV1AdminUsersLookupGetError = LookupUserApiV1AdminUsersLookupGetErrors[keyof LookupUserApiV1AdminUsersLookupGetErrors];
+
+export type LookupUserApiV1AdminUsersLookupGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: SafeUserOutput;
+};
+
+export type LookupUserApiV1AdminUsersLookupGetResponse = LookupUserApiV1AdminUsersLookupGetResponses[keyof LookupUserApiV1AdminUsersLookupGetResponses];
 
 export type LoginApiV1AuthLoginPostData = {
     body: UserLoginInput;
@@ -617,6 +990,61 @@ export type LogoutApiV1AuthLogoutPostResponses = {
 
 export type LogoutApiV1AuthLogoutPostResponse = LogoutApiV1AuthLogoutPostResponses[keyof LogoutApiV1AuthLogoutPostResponses];
 
+export type RegisterApiV1AuthRegisterPostData = {
+    body: UserRegistrationInput;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/register';
+};
+
+export type RegisterApiV1AuthRegisterPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RegisterApiV1AuthRegisterPostError = RegisterApiV1AuthRegisterPostErrors[keyof RegisterApiV1AuthRegisterPostErrors];
+
+export type RegisterApiV1AuthRegisterPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: CurrentUserOutput;
+};
+
+export type RegisterApiV1AuthRegisterPostResponse = RegisterApiV1AuthRegisterPostResponses[keyof RegisterApiV1AuthRegisterPostResponses];
+
+export type LookupEmergencyProfileApiV1EmergencyTokenGetData = {
+    body?: never;
+    path: {
+        /**
+         * Token
+         */
+        token: string;
+    };
+    query?: never;
+    url: '/api/v1/emergency/{token}';
+};
+
+export type LookupEmergencyProfileApiV1EmergencyTokenGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type LookupEmergencyProfileApiV1EmergencyTokenGetError = LookupEmergencyProfileApiV1EmergencyTokenGetErrors[keyof LookupEmergencyProfileApiV1EmergencyTokenGetErrors];
+
+export type LookupEmergencyProfileApiV1EmergencyTokenGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: EmergencyProfileResponse;
+};
+
+export type LookupEmergencyProfileApiV1EmergencyTokenGetResponse = LookupEmergencyProfileApiV1EmergencyTokenGetResponses[keyof LookupEmergencyProfileApiV1EmergencyTokenGetResponses];
+
 export type CurrentUserApiV1MeGetData = {
     body?: never;
     path?: never;
@@ -632,63 +1060,6 @@ export type CurrentUserApiV1MeGetResponses = {
 };
 
 export type CurrentUserApiV1MeGetResponse = CurrentUserApiV1MeGetResponses[keyof CurrentUserApiV1MeGetResponses];
-
-export type GetProfileApiV1MeProfileGetData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/me/profile';
-};
-
-export type GetProfileApiV1MeProfileGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: AuthenticatedProfileOutput;
-};
-
-export type GetProfileApiV1MeProfileGetResponse = GetProfileApiV1MeProfileGetResponses[keyof GetProfileApiV1MeProfileGetResponses];
-
-export type ReplaceProfileApiV1MeProfilePutData = {
-    body: ProfileUpsertInput;
-    path?: never;
-    query?: never;
-    url: '/api/v1/me/profile';
-};
-
-export type ReplaceProfileApiV1MeProfilePutErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReplaceProfileApiV1MeProfilePutError = ReplaceProfileApiV1MeProfilePutErrors[keyof ReplaceProfileApiV1MeProfilePutErrors];
-
-export type ReplaceProfileApiV1MeProfilePutResponses = {
-    /**
-     * Successful Response
-     */
-    200: AuthenticatedProfileOutput;
-};
-
-export type ReplaceProfileApiV1MeProfilePutResponse = ReplaceProfileApiV1MeProfilePutResponses[keyof ReplaceProfileApiV1MeProfilePutResponses];
-
-export type PublicPreviewApiV1MeProfilePublicPreviewGetData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/me/profile/public-preview';
-};
-
-export type PublicPreviewApiV1MeProfilePublicPreviewGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: PublicProfileOutput;
-};
-
-export type PublicPreviewApiV1MeProfilePublicPreviewGetResponse = PublicPreviewApiV1MeProfilePublicPreviewGetResponses[keyof PublicPreviewApiV1MeProfilePublicPreviewGetResponses];
 
 export type ListMyCardsApiV1MeCardsGetData = {
     body?: never;
@@ -796,424 +1167,62 @@ export type DisableMyCardApiV1MeCardsCardIdDisablePostResponses = {
 
 export type DisableMyCardApiV1MeCardsCardIdDisablePostResponse = DisableMyCardApiV1MeCardsCardIdDisablePostResponses[keyof DisableMyCardApiV1MeCardsCardIdDisablePostResponses];
 
-export type ListCardsApiV1AdminCardsGetData = {
+export type GetProfileApiV1MeProfileGetData = {
     body?: never;
     path?: never;
-    query?: {
-        /**
-         * Status
-         */
-        status?: CardStatus | null;
-        /**
-         * Owner Id
-         */
-        owner_id?: string | null;
-        /**
-         * Serial
-         */
-        serial?: string | null;
-        /**
-         * Is Current
-         */
-        is_current?: boolean | null;
-        /**
-         * Encoding State
-         */
-        encoding_state?: 'not_provisioned' | 'link_generated' | 'verified' | null;
-        /**
-         * Issued
-         */
-        issued?: boolean | null;
-        /**
-         * Limit
-         */
-        limit?: number;
-        /**
-         * Cursor
-         */
-        cursor?: string | null;
-    };
-    url: '/api/v1/admin/cards';
+    query?: never;
+    url: '/api/v1/me/profile';
 };
 
-export type ListCardsApiV1AdminCardsGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ListCardsApiV1AdminCardsGetError = ListCardsApiV1AdminCardsGetErrors[keyof ListCardsApiV1AdminCardsGetErrors];
-
-export type ListCardsApiV1AdminCardsGetResponses = {
+export type GetProfileApiV1MeProfileGetResponses = {
     /**
      * Successful Response
      */
-    200: CardListOutput;
+    200: ProfileView;
 };
 
-export type ListCardsApiV1AdminCardsGetResponse = ListCardsApiV1AdminCardsGetResponses[keyof ListCardsApiV1AdminCardsGetResponses];
+export type GetProfileApiV1MeProfileGetResponse = GetProfileApiV1MeProfileGetResponses[keyof GetProfileApiV1MeProfileGetResponses];
 
-export type CreateBlankCardApiV1AdminCardsPostData = {
-    body?: never;
-    headers: {
-        /**
-         * Idempotency-Key
-         */
-        'Idempotency-Key': string;
-    };
+export type ReplaceProfileApiV1MeProfilePutData = {
+    body: ProfileUpsertInput;
     path?: never;
     query?: never;
-    url: '/api/v1/admin/cards';
+    url: '/api/v1/me/profile';
 };
 
-export type CreateBlankCardApiV1AdminCardsPostErrors = {
+export type ReplaceProfileApiV1MeProfilePutErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type CreateBlankCardApiV1AdminCardsPostError = CreateBlankCardApiV1AdminCardsPostErrors[keyof CreateBlankCardApiV1AdminCardsPostErrors];
+export type ReplaceProfileApiV1MeProfilePutError = ReplaceProfileApiV1MeProfilePutErrors[keyof ReplaceProfileApiV1MeProfilePutErrors];
 
-export type CreateBlankCardApiV1AdminCardsPostResponses = {
+export type ReplaceProfileApiV1MeProfilePutResponses = {
     /**
      * Successful Response
      */
-    201: AdminCardOutput;
+    200: ProfileView;
 };
 
-export type CreateBlankCardApiV1AdminCardsPostResponse = CreateBlankCardApiV1AdminCardsPostResponses[keyof CreateBlankCardApiV1AdminCardsPostResponses];
+export type ReplaceProfileApiV1MeProfilePutResponse = ReplaceProfileApiV1MeProfilePutResponses[keyof ReplaceProfileApiV1MeProfilePutResponses];
 
-export type ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostData = {
-    body?: never;
-    path: {
-        /**
-         * Card Id
-         */
-        card_id: string;
-    };
-    query?: never;
-    url: '/api/v1/admin/cards/{card_id}/provision-link';
-};
-
-export type ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostError = ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostErrors[keyof ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostErrors];
-
-export type ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: CardProvisioningOutput;
-};
-
-export type ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostResponse = ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostResponses[keyof ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostResponses];
-
-export type ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostData = {
-    body?: never;
-    path: {
-        /**
-         * Card Id
-         */
-        card_id: string;
-    };
-    query?: never;
-    url: '/api/v1/admin/cards/{card_id}/reprovision-link';
-};
-
-export type ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostError = ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostErrors[keyof ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostErrors];
-
-export type ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: CardProvisioningOutput;
-};
-
-export type ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostResponse = ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostResponses[keyof ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostResponses];
-
-export type ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostData = {
-    body: ConfirmEncodingInput;
-    path: {
-        /**
-         * Card Id
-         */
-        card_id: string;
-    };
-    query?: never;
-    url: '/api/v1/admin/cards/{card_id}/confirm-encoding';
-};
-
-export type ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostError = ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostErrors[keyof ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostErrors];
-
-export type ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: AdminCardOutput;
-};
-
-export type ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponse = ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponses[keyof ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponses];
-
-export type LookupUserApiV1AdminUsersLookupGetData = {
+export type PublicPreviewApiV1MeProfilePublicPreviewGetData = {
     body?: never;
     path?: never;
-    query: {
-        /**
-         * Email
-         */
-        email: string;
-    };
-    url: '/api/v1/admin/users/lookup';
-};
-
-export type LookupUserApiV1AdminUsersLookupGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type LookupUserApiV1AdminUsersLookupGetError = LookupUserApiV1AdminUsersLookupGetErrors[keyof LookupUserApiV1AdminUsersLookupGetErrors];
-
-export type LookupUserApiV1AdminUsersLookupGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: SafeUserOutput;
-};
-
-export type LookupUserApiV1AdminUsersLookupGetResponse = LookupUserApiV1AdminUsersLookupGetResponses[keyof LookupUserApiV1AdminUsersLookupGetResponses];
-
-export type AssignCardApiV1AdminCardsCardIdAssignPostData = {
-    body: AssignCardInput;
-    path: {
-        /**
-         * Card Id
-         */
-        card_id: string;
-    };
     query?: never;
-    url: '/api/v1/admin/cards/{card_id}/assign';
+    url: '/api/v1/me/profile/public-preview';
 };
 
-export type AssignCardApiV1AdminCardsCardIdAssignPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type AssignCardApiV1AdminCardsCardIdAssignPostError = AssignCardApiV1AdminCardsCardIdAssignPostErrors[keyof AssignCardApiV1AdminCardsCardIdAssignPostErrors];
-
-export type AssignCardApiV1AdminCardsCardIdAssignPostResponses = {
+export type PublicPreviewApiV1MeProfilePublicPreviewGetResponses = {
     /**
      * Successful Response
      */
-    200: AdminCardOutput;
+    200: PublicProfileOutput;
 };
 
-export type AssignCardApiV1AdminCardsCardIdAssignPostResponse = AssignCardApiV1AdminCardsCardIdAssignPostResponses[keyof AssignCardApiV1AdminCardsCardIdAssignPostResponses];
-
-export type ReassignCardApiV1AdminCardsCardIdReassignPostData = {
-    body: ReassignCardInput;
-    path: {
-        /**
-         * Card Id
-         */
-        card_id: string;
-    };
-    query?: never;
-    url: '/api/v1/admin/cards/{card_id}/reassign';
-};
-
-export type ReassignCardApiV1AdminCardsCardIdReassignPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReassignCardApiV1AdminCardsCardIdReassignPostError = ReassignCardApiV1AdminCardsCardIdReassignPostErrors[keyof ReassignCardApiV1AdminCardsCardIdReassignPostErrors];
-
-export type ReassignCardApiV1AdminCardsCardIdReassignPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: AdminCardOutput;
-};
-
-export type ReassignCardApiV1AdminCardsCardIdReassignPostResponse = ReassignCardApiV1AdminCardsCardIdReassignPostResponses[keyof ReassignCardApiV1AdminCardsCardIdReassignPostResponses];
-
-export type UnassignCardApiV1AdminCardsCardIdUnassignPostData = {
-    body?: never;
-    path: {
-        /**
-         * Card Id
-         */
-        card_id: string;
-    };
-    query?: never;
-    url: '/api/v1/admin/cards/{card_id}/unassign';
-};
-
-export type UnassignCardApiV1AdminCardsCardIdUnassignPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UnassignCardApiV1AdminCardsCardIdUnassignPostError = UnassignCardApiV1AdminCardsCardIdUnassignPostErrors[keyof UnassignCardApiV1AdminCardsCardIdUnassignPostErrors];
-
-export type UnassignCardApiV1AdminCardsCardIdUnassignPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: AdminCardOutput;
-};
-
-export type UnassignCardApiV1AdminCardsCardIdUnassignPostResponse = UnassignCardApiV1AdminCardsCardIdUnassignPostResponses[keyof UnassignCardApiV1AdminCardsCardIdUnassignPostResponses];
-
-export type IssueCardApiV1AdminCardsCardIdIssuePostData = {
-    body?: never;
-    path: {
-        /**
-         * Card Id
-         */
-        card_id: string;
-    };
-    query?: never;
-    url: '/api/v1/admin/cards/{card_id}/issue';
-};
-
-export type IssueCardApiV1AdminCardsCardIdIssuePostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type IssueCardApiV1AdminCardsCardIdIssuePostError = IssueCardApiV1AdminCardsCardIdIssuePostErrors[keyof IssueCardApiV1AdminCardsCardIdIssuePostErrors];
-
-export type IssueCardApiV1AdminCardsCardIdIssuePostResponses = {
-    /**
-     * Successful Response
-     */
-    200: AdminCardOutput;
-};
-
-export type IssueCardApiV1AdminCardsCardIdIssuePostResponse = IssueCardApiV1AdminCardsCardIdIssuePostResponses[keyof IssueCardApiV1AdminCardsCardIdIssuePostResponses];
-
-export type VoidCardApiV1AdminCardsCardIdVoidPostData = {
-    body?: never;
-    path: {
-        /**
-         * Card Id
-         */
-        card_id: string;
-    };
-    query?: never;
-    url: '/api/v1/admin/cards/{card_id}/void';
-};
-
-export type VoidCardApiV1AdminCardsCardIdVoidPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type VoidCardApiV1AdminCardsCardIdVoidPostError = VoidCardApiV1AdminCardsCardIdVoidPostErrors[keyof VoidCardApiV1AdminCardsCardIdVoidPostErrors];
-
-export type VoidCardApiV1AdminCardsCardIdVoidPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: AdminCardOutput;
-};
-
-export type VoidCardApiV1AdminCardsCardIdVoidPostResponse = VoidCardApiV1AdminCardsCardIdVoidPostResponses[keyof VoidCardApiV1AdminCardsCardIdVoidPostResponses];
-
-export type GetCardApiV1AdminCardsCardIdGetData = {
-    body?: never;
-    path: {
-        /**
-         * Card Id
-         */
-        card_id: string;
-    };
-    query?: never;
-    url: '/api/v1/admin/cards/{card_id}';
-};
-
-export type GetCardApiV1AdminCardsCardIdGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GetCardApiV1AdminCardsCardIdGetError = GetCardApiV1AdminCardsCardIdGetErrors[keyof GetCardApiV1AdminCardsCardIdGetErrors];
-
-export type GetCardApiV1AdminCardsCardIdGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: AdminCardOutput;
-};
-
-export type GetCardApiV1AdminCardsCardIdGetResponse = GetCardApiV1AdminCardsCardIdGetResponses[keyof GetCardApiV1AdminCardsCardIdGetResponses];
-
-export type LookupEmergencyProfileApiV1EmergencyTokenGetData = {
-    body?: never;
-    path: {
-        /**
-         * Token
-         */
-        token: string;
-    };
-    query?: never;
-    url: '/api/v1/emergency/{token}';
-};
-
-export type LookupEmergencyProfileApiV1EmergencyTokenGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type LookupEmergencyProfileApiV1EmergencyTokenGetError = LookupEmergencyProfileApiV1EmergencyTokenGetErrors[keyof LookupEmergencyProfileApiV1EmergencyTokenGetErrors];
-
-export type LookupEmergencyProfileApiV1EmergencyTokenGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: EmergencyProfileResponse;
-};
-
-export type LookupEmergencyProfileApiV1EmergencyTokenGetResponse = LookupEmergencyProfileApiV1EmergencyTokenGetResponses[keyof LookupEmergencyProfileApiV1EmergencyTokenGetResponses];
+export type PublicPreviewApiV1MeProfilePublicPreviewGetResponse = PublicPreviewApiV1MeProfilePublicPreviewGetResponses[keyof PublicPreviewApiV1MeProfilePublicPreviewGetResponses];
 
 export type MetaApiV1MetaGetData = {
     body?: never;
@@ -1234,3 +1243,67 @@ export type MetaApiV1MetaGetResponses = {
 };
 
 export type MetaApiV1MetaGetResponse = MetaApiV1MetaGetResponses[keyof MetaApiV1MetaGetResponses];
+
+export type LookupPublicProfileApiV1PublicTokenGetData = {
+    body?: never;
+    path: {
+        /**
+         * Token
+         */
+        token: string;
+    };
+    query?: never;
+    url: '/api/v1/public/{token}';
+};
+
+export type LookupPublicProfileApiV1PublicTokenGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type LookupPublicProfileApiV1PublicTokenGetError = LookupPublicProfileApiV1PublicTokenGetErrors[keyof LookupPublicProfileApiV1PublicTokenGetErrors];
+
+export type LookupPublicProfileApiV1PublicTokenGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: PublicProfileResponse;
+};
+
+export type LookupPublicProfileApiV1PublicTokenGetResponse = LookupPublicProfileApiV1PublicTokenGetResponses[keyof LookupPublicProfileApiV1PublicTokenGetResponses];
+
+export type HealthHealthGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/health';
+};
+
+export type HealthHealthGetResponses = {
+    /**
+     * Response Health Health Get
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: string;
+    };
+};
+
+export type HealthHealthGetResponse = HealthHealthGetResponses[keyof HealthHealthGetResponses];
+
+export type ReadyReadyGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/ready';
+};
+
+export type ReadyReadyGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};

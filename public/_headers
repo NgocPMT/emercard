@@ -12,3 +12,10 @@
   Referrer-Policy: no-referrer
   X-Robots-Tag: noindex, nofollow, noarchive
   X-Content-Type-Options: nosniff
+
+/api/v1/public/*
+  Cache-Control: no-store
+  Pragma: no-cache
+  Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex, nofollow, noarchive
+  X-Content-Type-Options: nosniff
