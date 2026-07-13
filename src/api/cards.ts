@@ -53,6 +53,16 @@ const cardAssignmentSummarySchema = z
   })
   .passthrough();
 
+const safeUserSchema = z
+  .object({
+    id: z.string(),
+    email: z.string().email(),
+    role: z.enum(["user", "admin"]),
+    created_at: z.string(),
+    updated_at: z.string(),
+  })
+  .passthrough();
+
 const adminCardSchema = z
   .object({
     id: z.string(),
@@ -104,11 +114,15 @@ export type CardProvisioningResponse = z.infer<typeof provisioningResponseSchema
 export type UserCardsResponse = z.infer<typeof userCardsResponseSchema>;
 export type AdminCardsResponse = z.infer<typeof adminCardsResponseSchema>;
 export type PublicLinkListResponse = z.infer<typeof linkListResponseSchema>;
+export type SafeUser = z.infer<typeof safeUserSchema>;
 
 export const cardKeys = {
   myCards: ["cards", "my"] as const,
+  myCard: (cardId: string) => ["cards", "my", cardId] as const,
   myLinks: ["links", "my"] as const,
   adminCards: ["cards", "admin"] as const,
+  adminCard: (cardId: string) => ["cards", "admin", cardId] as const,
+  adminUserLookup: (email: string) => ["users", "admin", "lookup", email.trim().toLowerCase()] as const,
   adminUserLinks: (userId: string) => ["links", "admin", userId] as const,
 };
 
@@ -147,6 +161,14 @@ export async function provisionCardLink(cardId: string, signal?: AbortSignal): P
   return provisioningResponseSchema.parse(response);
 }
 
+export async function lookupAdminUserByEmail(email: string, signal?: AbortSignal): Promise<SafeUser> {
+  const response = await requestJson<unknown>({
+    path: `/admin/users/lookup?email=${encodeURIComponent(email.trim())}`,
+    signal,
+  });
+  return safeUserSchema.parse(response);
+}
+
 export async function listAdminUserLinks(userId: string, signal?: AbortSignal): Promise<PublicLinkListResponse> {
   const response = await requestJson<unknown>({ path: `/admin/users/${encodeURIComponent(userId)}/links`, signal });
   return linkListResponseSchema.parse(response);
@@ -164,6 +186,11 @@ export async function createAdminUserLink(
     signal,
   });
   return linkProvisioningResponseSchema.parse(response);
+}
+
+export async function getAdminCard(cardId: string, signal?: AbortSignal): Promise<AdminCard> {
+  const response = await requestJson<unknown>({ path: `/admin/cards/${encodeURIComponent(cardId)}`, signal });
+  return adminCardResponseSchema.parse(response);
 }
 
 export async function getAdminCardLink(cardId: string, signal?: AbortSignal): Promise<AdminCard> {

@@ -21,6 +21,21 @@ import EmergencyLayout from "../../layouts/EmergencyLayout.astro";
         <p class="mt-2 text-muted-foreground">Hồ sơ công khai này không còn được chia sẻ tại liên kết hiện tại.</p>
       </div>
 
+      <div id="pending" class="mt-8 hidden" role="alert">
+        <h2 class="text-lg font-semibold text-foreground">Liên kết hồ sơ đang chờ kích hoạt</h2>
+        <p class="mt-2 text-muted-foreground">Liên kết này chưa sẵn sàng để hiển thị công khai.</p>
+      </div>
+
+      <div id="revoked" class="mt-8 hidden" role="alert">
+        <h2 class="text-lg font-semibold text-foreground">Liên kết hồ sơ đã bị thu hồi</h2>
+        <p class="mt-2 text-muted-foreground">Liên kết hiện tại không còn hiệu lực công khai.</p>
+      </div>
+
+      <div id="expired" class="mt-8 hidden" role="alert">
+        <h2 class="text-lg font-semibold text-foreground">Liên kết hồ sơ đã hết hạn</h2>
+        <p class="mt-2 text-muted-foreground">Liên kết này đã quá thời hạn hiển thị công khai.</p>
+      </div>
+
       <div id="not-ready" class="mt-8 hidden" role="alert">
         <h2 class="text-lg font-semibold text-foreground">Hồ sơ công khai chưa sẵn sàng</h2>
         <p class="mt-2 text-muted-foreground">Hồ sơ hiện tại chưa đáp ứng điều kiện hiển thị công khai.</p>
@@ -86,6 +101,9 @@ import EmergencyLayout from "../../layouts/EmergencyLayout.astro";
     const notFound = document.querySelector("#not-found");
     const disabled = document.querySelector("#disabled");
     const notReady = document.querySelector("#not-ready");
+    const pending = document.querySelector("#pending");
+    const revoked = document.querySelector("#revoked");
+    const expired = document.querySelector("#expired");
     const serviceUnavailable = document.querySelector("#service-unavailable");
     const retryButton = document.querySelector("#retry");
     const profileElement = document.querySelector("#profile");
@@ -93,7 +111,7 @@ import EmergencyLayout from "../../layouts/EmergencyLayout.astro";
     const hide = (element) => element?.classList.add("hidden");
     const show = (element) => element?.classList.remove("hidden");
     const hideAll = () => {
-      for (const element of [loading, notFound, disabled, notReady, serviceUnavailable, profileElement]) {
+      for (const element of [loading, notFound, disabled, pending, revoked, expired, notReady, serviceUnavailable, profileElement]) {
         hide(element);
       }
     };
@@ -199,6 +217,15 @@ import EmergencyLayout from "../../layouts/EmergencyLayout.astro";
           break;
         case "disabled":
           show(disabled);
+          break;
+        case "pending":
+          show(pending);
+          break;
+        case "revoked":
+          show(revoked);
+          break;
+        case "expired":
+          show(expired);
           break;
         case "not_ready":
           show(notReady);

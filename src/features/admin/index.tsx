@@ -22,10 +22,15 @@ import {
 import { isApiError } from "../../api/http-client";
 import { assignLocation } from "../../lib/navigation";
 import { PageApplicationRoot, useSession } from "../session";
+import { AdminLinkManagerPanel } from "./link-manager";
+import { AdminCardDetailPanel } from "./card-detail";
 
-export type AdminAppSection = "overview" | "cards" | "detail";
+export type AdminAppSection = "overview" | "cards" | "links" | "detail";
 
-const navigation = [{ href: "/admin/cards", label: "Kho thẻ" }];
+const navigation = [
+  { href: "/admin/cards", label: "Kho thẻ" },
+  { href: "/admin/links", label: "Liên kết hồ sơ" },
+];
 
 const appBrand = <BrandMark />;
 
@@ -37,6 +42,10 @@ const sectionCopy: Record<AdminAppSection, { title: string; description: string 
   cards: {
     title: "Kho thẻ",
     description: "Quản lý thẻ vật lý, liên kết công khai và trạng thái phát hành.",
+  },
+  links: {
+    title: "Liên kết hồ sơ",
+    description: "Tra cứu hồ sơ và tạo liên kết an toàn cho hồ sơ công khai.",
   },
   detail: {
     title: "Chi tiết thẻ",
@@ -275,19 +284,31 @@ function AdminCardPanel({
           <Button type="button" variant="secondary" busy={busy.provision} onClick={actions.provision}>
             Cấp liên kết
           </Button>
+          <Button type="button" variant="ghost" onClick={() => assignLocation(`/admin/cards/detail?cardId=${encodeURIComponent(card.id)}`)}>
+            Chi tiết
+          </Button>
           <Button type="button" variant="secondary" busy={busy.reprovision} onClick={actions.reprovision}>
             Cấp lại liên kết
           </Button>
           <Button type="button" variant="secondary" busy={busy.issue} onClick={actions.issue}>
             Phát hành
           </Button>
-          <Button type="button" variant="ghost" busy={busy.lost} onClick={actions.lost}>
+          <Button type="button" variant="ghost" busy={busy.lost} onClick={() => {
+            if (!window.confirm("Bạn có chắc muốn báo mất thẻ này không?")) return;
+            actions.lost();
+          }}>
             Báo mất
           </Button>
-          <Button type="button" variant="ghost" busy={busy.void} onClick={actions.void}>
+          <Button type="button" variant="ghost" busy={busy.void} onClick={() => {
+            if (!window.confirm("Bạn có chắc muốn hủy thẻ này không?")) return;
+            actions.void();
+          }}>
             Hủy
           </Button>
-          <Button type="button" variant="danger" busy={busy.replace} onClick={actions.replace}>
+          <Button type="button" variant="danger" busy={busy.replace} onClick={() => {
+            if (!window.confirm("Bạn có chắc muốn thay thế thẻ này không?")) return;
+            actions.replace();
+          }}>
             Thay thế
           </Button>
         </div>
@@ -295,10 +316,18 @@ function AdminCardPanel({
           <Button type="button" variant="secondary" disabled={!card.link?.id} onClick={() => { if (card.link?.id) void attachAdminCardLink(card.id, card.link.id).then(onRefresh); }}>
             Gắn liên kết
           </Button>
-          <Button type="button" variant="ghost" disabled={!card.link?.id} onClick={() => { if (card.link?.id) void detachAdminCardLink(card.id).then(onRefresh); }}>
+          <Button type="button" variant="ghost" disabled={!card.link?.id} onClick={() => {
+            if (!card.link?.id) return;
+            if (!window.confirm("Bạn có chắc muốn gỡ liên kết khỏi thẻ này không?")) return;
+            void detachAdminCardLink(card.id).then(onRefresh);
+          }}>
             Gỡ liên kết
           </Button>
-          <Button type="button" variant="ghost" disabled={!card.link?.id} onClick={() => { if (card.link?.id) void revokeAdminCardLink(card.id).then(onRefresh); }}>
+          <Button type="button" variant="ghost" disabled={!card.link?.id} onClick={() => {
+            if (!card.link?.id) return;
+            if (!window.confirm("Bạn có chắc muốn thu hồi liên kết của thẻ này không?")) return;
+            void revokeAdminCardLink(card.id).then(onRefresh);
+          }}>
             Thu hồi
           </Button>
         </div>
@@ -319,17 +348,27 @@ function AdminCardPanel({
 export function AdminApplicationRoot({ section, cardId }: { section: AdminAppSection; cardId?: string | null }) {
   const copy = sectionCopy[section];
 
+  const currentPath = section === "overview" ? "/admin" : section === "cards" || section === "detail" ? "/admin/cards" : "/admin/links";
+
   return (
     <PageApplicationRoot
       role="admin"
       brand={appBrand}
       title={copy.title}
       description={copy.description}
-      navigation={navigation.map((item) => ({ ...item, current: true }))}
+      navigation={navigation.map((item) => ({ ...item, current: item.href === currentPath }))}
       userLabel={<StatusBadge variant="danger">Quản trị viên</StatusBadge>}
     >
       {section === "cards" ? (
         <AdminCardsPanel />
+      ) : section === "links" ? (
+        <AdminLinkManagerPanel />
+      ) : section === "detail" ? (
+        cardId ? (
+          <AdminCardDetailPanel cardId={cardId} />
+        ) : (
+          <EmptyState title="Thiếu cardId" description="Mở màn hình chi tiết từ một thẻ cụ thể trong kho thẻ quản trị." />
+        )
       ) : (
         <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
           <Panel className="space-y-4">

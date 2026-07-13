@@ -3,8 +3,10 @@ import {
   activateMyCard,
   createAdminUserLink,
   createBlankCard,
+  getAdminCard,
   getMyCards,
   listAdminUserLinks,
+  lookupAdminUserByEmail,
   provisionCardLink,
   reportMyCardLost,
 } from "./cards";
@@ -56,7 +58,22 @@ describe("cards api helpers", () => {
     );
   });
 
-  it("parses admin user link listings and one-time link provisioning", async () => {
+  it("parses admin user lookup, link listings and one-time link provisioning", async () => {
+    requestJsonMock.mockResolvedValueOnce({
+      id: "user-1",
+      email: "nurse@example.com",
+      role: "user",
+      created_at: "2026-01-01T00:00:00Z",
+      updated_at: "2026-01-01T00:00:00Z",
+    });
+    await expect(lookupAdminUserByEmail("nurse@example.com")).resolves.toMatchObject({
+      id: "user-1",
+      email: "nurse@example.com",
+    });
+    expect(requestJsonMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ path: "/admin/users/lookup?email=nurse%40example.com" }),
+    );
+
     requestJsonMock.mockResolvedValueOnce({
       items: [
         {
@@ -91,6 +108,18 @@ describe("cards api helpers", () => {
     await expect(createAdminUserLink("user-1", { purpose: "standalone" })).resolves.toMatchObject({
       public_url: "https://app.example/e/standalone-token",
     });
+
+    requestJsonMock.mockResolvedValueOnce({
+      id: "card-1",
+      serial: "EMC-0000-0000-0000-0",
+      status: "active",
+      is_current: true,
+      encoding_state: "verified",
+      created_at: "2026-01-01T00:00:00Z",
+      updated_at: "2026-01-01T00:00:00Z",
+      token_revision: 1,
+    });
+    await expect(getAdminCard("card-1")).resolves.toMatchObject({ id: "card-1", serial: "EMC-0000-0000-0000-0" });
   });
 
   it("calls the user card lifecycle endpoints", async () => {

@@ -42,6 +42,9 @@ describe("public emergency helper", () => {
   it.each([
     [404, "public_profile.not_found", { kind: "not_found" }],
     [410, "public_profile.disabled", { kind: "disabled" }],
+    [409, "public_profile.pending", { kind: "pending" }],
+    [409, "public_profile.revoked", { kind: "revoked" }],
+    [409, "public_profile.expired", { kind: "expired" }],
     [409, "public_profile.not_ready", { kind: "not_ready" }],
     [503, "public_profile.service_unavailable", { kind: "service_unavailable", retryable: true }],
   ])("maps %s/%s to a safe state", async (status, code, expected) => {

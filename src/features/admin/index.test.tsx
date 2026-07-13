@@ -42,4 +42,13 @@ describe("AdminApplicationRoot", () => {
     expect(screen.getByText("Đang tải kho thẻ")).toBeInTheDocument();
     expect(screen.queryByText("Chưa có hành động quản trị ở màn hình này")).not.toBeInTheDocument();
   });
+
+  it("renders the link lookup section", () => {
+    useQueryMock.mockReturnValue({ isPending: false, error: undefined, data: undefined });
+
+    render(<AdminApplicationRoot section="links" />);
+
+    expect(screen.getByRole("heading", { name: "Liên kết hồ sơ" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Tìm hồ sơ" })).toBeInTheDocument();
+  });
 });

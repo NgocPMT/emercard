@@ -16,13 +16,15 @@ import { isApiError } from "../../api/http-client";
 import { assignLocation } from "../../lib/navigation";
 import { bloodTypeLabel, genderLabel } from "../../lib/profile-labels";
 import { PageApplicationRoot, useSession } from "../session";
+import { StandaloneLinksPanel } from "./standalone-links";
 
-export type UserAppSection = "overview" | "profile" | "cards";
+export type UserAppSection = "overview" | "profile" | "cards" | "links";
 
 const navigation = [
   { href: "/app", label: "Tổng quan" },
   { href: "/app/profile", label: "Hồ sơ y tế" },
   { href: "/app/cards", label: "Thẻ của tôi" },
+  { href: "/app/links", label: "Liên kết công khai" },
 ];
 
 const appBrand = <BrandMark />;
@@ -39,6 +41,10 @@ const sectionCopy: Record<UserAppSection, { title: string; description: string }
   cards: {
     title: "Thẻ của tôi",
     description: "Quản lý trạng thái thẻ đã cấp cho tài khoản hiện tại.",
+  },
+  links: {
+    title: "Liên kết công khai",
+    description: "Quản lý liên kết standalone tách biệt khỏi thẻ vật lý.",
   },
 };
 
@@ -241,6 +247,7 @@ function MyCardsPanel() {
             <p>Cho phép kích hoạt: {card.can_activate ? "Có" : "Không"}</p>
             <p>Cho phép vô hiệu hóa: {card.can_disable ? "Có" : "Không"}</p>
             <p>Liên kết: {card.link_status ?? "chưa có"}</p>
+            <p>Loại liên kết: {card.link_purpose ?? "chưa có"}</p>
             <p>Nhãn liên kết: {card.link_label ?? "không có"}</p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -249,7 +256,10 @@ function MyCardsPanel() {
               variant="secondary"
               disabled={!card.can_activate || activateMutation.isPending}
               busy={activateMutation.isPending}
-              onClick={() => activateMutation.mutate(card.id)}
+              onClick={() => {
+                if (!window.confirm("Bạn có chắc muốn kích hoạt thẻ này không?")) return;
+                activateMutation.mutate(card.id);
+              }}
             >
               Kích hoạt
             </Button>
@@ -258,7 +268,10 @@ function MyCardsPanel() {
               variant="secondary"
               disabled={!card.can_disable || disableMutation.isPending}
               busy={disableMutation.isPending}
-              onClick={() => disableMutation.mutate(card.id)}
+              onClick={() => {
+                if (!window.confirm("Bạn có chắc muốn vô hiệu hóa thẻ này không?")) return;
+                disableMutation.mutate(card.id);
+              }}
             >
               Vô hiệu hóa
             </Button>
@@ -267,7 +280,10 @@ function MyCardsPanel() {
               variant="ghost"
               disabled={lostMutation.isPending}
               busy={lostMutation.isPending}
-              onClick={() => lostMutation.mutate(card.id)}
+              onClick={() => {
+                if (!window.confirm("Bạn có chắc muốn báo mất thẻ này không?")) return;
+                lostMutation.mutate(card.id);
+              }}
             >
               Báo mất
             </Button>
@@ -290,7 +306,15 @@ export function UserApplicationRoot({ section }: { section: UserAppSection }) {
       navigation={navigation.map((item) => ({ ...item, current: item.href === (section === "overview" ? "/app" : `/app/${section}`) }))}
       userLabel={<StatusBadge variant="primary">Người dùng</StatusBadge>}
     >
-      {section === "overview" ? <ProfileSummaryCard /> : section === "cards" ? <MyCardsPanel /> : <EmptyState title="Hồ sơ y tế" description={copy.description} />}
+      {section === "overview" ? (
+        <ProfileSummaryCard />
+      ) : section === "cards" ? (
+        <MyCardsPanel />
+      ) : section === "links" ? (
+        <StandaloneLinksPanel />
+      ) : (
+        <EmptyState title="Hồ sơ y tế" description={copy.description} />
+      )}
     </PageApplicationRoot>
   );
 }

@@ -80,4 +80,13 @@ describe("UserApplicationRoot", () => {
     expect(screen.getByText("Đang tải thẻ")).toBeInTheDocument();
     expect(screen.queryByText("Thẻ của tôi sắp ra mắt")).not.toBeInTheDocument();
   });
+
+  it("renders the standalone link section", () => {
+    useQueryMock.mockReturnValue({ isPending: false, error: undefined, data: undefined });
+
+    render(<UserApplicationRoot section="links" />);
+
+    expect(screen.getByRole("heading", { name: "Liên kết công khai" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Xem trước công khai" })).toBeInTheDocument();
+  });
 });

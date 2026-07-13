@@ -9,6 +9,9 @@ export type PublicEmergencyLookupState =
   | { kind: "available"; profile: PublicEmergencyProfile }
   | { kind: "not_found" }
   | { kind: "disabled" }
+  | { kind: "pending" }
+  | { kind: "revoked" }
+  | { kind: "expired" }
   | { kind: "not_ready" }
   | { kind: "service_unavailable"; retryable: boolean };
 
@@ -43,10 +46,22 @@ export async function getPublicEmergencyProfile(
     if (isApiError(error)) {
       switch (error.code) {
         case "public_profile.not_found":
+        case "emergency_profile.not_found":
           return { kind: "not_found" };
         case "public_profile.disabled":
+        case "emergency_profile.disabled":
           return { kind: "disabled" };
+        case "public_profile.pending":
+        case "emergency_profile.pending":
+          return { kind: "pending" };
+        case "public_profile.revoked":
+        case "emergency_profile.revoked":
+          return { kind: "revoked" };
+        case "public_profile.expired":
+        case "emergency_profile.expired":
+          return { kind: "expired" };
         case "public_profile.not_ready":
+        case "emergency_profile.not_ready":
           return { kind: "not_ready" };
         default:
           return { kind: "service_unavailable", retryable: error.retryable };
