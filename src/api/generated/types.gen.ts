@@ -493,26 +493,6 @@ export type PublicLinkSummaryOutput = {
 };
 
 /**
- * PublicProfileLinkOperationResponse
- *
- * Safe envelope for standalone link lifecycle operations.
- */
-export type PublicProfileLinkOperationResponse = {
-    /**
-     * Action
-     */
-    action: string;
-    /**
-     * Status
-     */
-    status: string;
-    /**
-     * Public Url
-     */
-    public_url?: string | null;
-};
-
-/**
  * PublicProfileOutput
  *
  * Explicit emergency-page allowlist with no persistence or ownership metadata.
@@ -552,18 +532,6 @@ export type PublicProfileOutput = {
      * Profile Updated At
      */
     profile_updated_at: string;
-};
-
-/**
- * PublicProfilePreviewLinkResponse
- *
- * Envelope for an authenticated preview URL.
- */
-export type PublicProfilePreviewLinkResponse = {
-    /**
-     * Public Url
-     */
-    public_url: string;
 };
 
 /**
@@ -918,70 +886,6 @@ export type PublicPreviewApiV1MeProfilePublicPreviewGetResponses = {
 };
 
 export type PublicPreviewApiV1MeProfilePublicPreviewGetResponse = PublicPreviewApiV1MeProfilePublicPreviewGetResponses[keyof PublicPreviewApiV1MeProfilePublicPreviewGetResponses];
-
-export type PublicPreviewLinkApiV1MeProfilePublicPreviewLinkPostData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/me/profile/public-preview-link';
-};
-
-export type PublicPreviewLinkApiV1MeProfilePublicPreviewLinkPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: PublicProfilePreviewLinkResponse;
-};
-
-export type PublicPreviewLinkApiV1MeProfilePublicPreviewLinkPostResponse = PublicPreviewLinkApiV1MeProfilePublicPreviewLinkPostResponses[keyof PublicPreviewLinkApiV1MeProfilePublicPreviewLinkPostResponses];
-
-export type GeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkGeneratePostData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/me/profile/public-preview-link/generate';
-};
-
-export type GeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkGeneratePostResponses = {
-    /**
-     * Successful Response
-     */
-    200: PublicProfileLinkOperationResponse;
-};
-
-export type GeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkGeneratePostResponse = GeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkGeneratePostResponses[keyof GeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkGeneratePostResponses];
-
-export type RegeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkRegeneratePostData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/me/profile/public-preview-link/regenerate';
-};
-
-export type RegeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkRegeneratePostResponses = {
-    /**
-     * Successful Response
-     */
-    200: PublicProfileLinkOperationResponse;
-};
-
-export type RegeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkRegeneratePostResponse = RegeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkRegeneratePostResponses[keyof RegeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkRegeneratePostResponses];
-
-export type DisablePublicPreviewLinkApiV1MeProfilePublicPreviewLinkDisablePostData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/me/profile/public-preview-link/disable';
-};
-
-export type DisablePublicPreviewLinkApiV1MeProfilePublicPreviewLinkDisablePostResponses = {
-    /**
-     * Successful Response
-     */
-    200: PublicProfileLinkOperationResponse;
-};
-
-export type DisablePublicPreviewLinkApiV1MeProfilePublicPreviewLinkDisablePostResponse = DisablePublicPreviewLinkApiV1MeProfilePublicPreviewLinkDisablePostResponses[keyof DisablePublicPreviewLinkApiV1MeProfilePublicPreviewLinkDisablePostResponses];
 
 export type ListMyCardsApiV1MeCardsGetData = {
     body?: never;
