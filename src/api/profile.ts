@@ -38,16 +38,6 @@ const profileViewSchema = z.object({
   readiness: profileReadinessSchema,
 });
 
-const publicPreviewLinkSchema = z.object({
-  public_url: z.string().min(1),
-});
-
-const publicPreviewLinkOperationSchema = z.object({
-  action: z.string(),
-  status: z.string(),
-  public_url: z.string().nullable().optional(),
-});
-
 const profileUpsertInputSchema = z.object({
   display_name: z.string().nullable().optional(),
   birth_year: z.number().int().nullable().optional(),
@@ -71,12 +61,8 @@ const profileUpsertInputSchema = z.object({
 export type ProfileReadinessStatus = z.infer<typeof profileReadinessStatusSchema>;
 export type ProfileView = z.infer<typeof profileViewSchema>;
 export type ProfileUpsertInput = z.infer<typeof profileUpsertInputSchema>;
-export type PublicPreviewLink = z.infer<typeof publicPreviewLinkSchema>;
-export type PublicPreviewLinkOperation = z.infer<typeof publicPreviewLinkOperationSchema>;
-
 export const profileKeys = {
   current: ["profile", "current"] as const,
-  previewLink: ["profile", "preview-link"] as const,
 };
 
 export function profileReadinessLabel(status: ProfileReadinessStatus) {
@@ -126,38 +112,3 @@ export async function saveCurrentProfile(payload: ProfileUpsertInput, signal?: A
   return profileViewSchema.parse(response);
 }
 
-export async function createPublicPreviewLink(signal?: AbortSignal): Promise<PublicPreviewLink> {
-  const response = await requestJson<unknown>({
-    path: "/me/profile/public-preview-link",
-    method: "POST",
-    signal,
-  });
-  return publicPreviewLinkSchema.parse(response);
-}
-
-export async function generatePublicPreviewLink(signal?: AbortSignal): Promise<PublicPreviewLinkOperation> {
-  const response = await requestJson<unknown>({
-    path: "/me/profile/public-preview-link/generate",
-    method: "POST",
-    signal,
-  });
-  return publicPreviewLinkOperationSchema.parse(response);
-}
-
-export async function regeneratePublicPreviewLink(signal?: AbortSignal): Promise<PublicPreviewLinkOperation> {
-  const response = await requestJson<unknown>({
-    path: "/me/profile/public-preview-link/regenerate",
-    method: "POST",
-    signal,
-  });
-  return publicPreviewLinkOperationSchema.parse(response);
-}
-
-export async function disablePublicPreviewLink(signal?: AbortSignal): Promise<PublicPreviewLinkOperation> {
-  const response = await requestJson<unknown>({
-    path: "/me/profile/public-preview-link/disable",
-    method: "POST",
-    signal,
-  });
-  return publicPreviewLinkOperationSchema.parse(response);
-}

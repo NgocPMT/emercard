@@ -5,7 +5,6 @@ import { Alert, Button, Panel, Select, StatusBadge, Textarea, TextInput } from "
 import { EmptyState, PageLoadingState, RetryState, ServiceUnavailableState } from "../../components/feedback";
 import { BrandMark } from "../../components/layout";
 import {
-  createPublicPreviewLink,
   getCurrentProfile,
   profileKeys,
   profileMissingFieldLabel,
@@ -49,6 +48,7 @@ const bloodTypeOptions = [
 
 type ProfileGender = (typeof genderOptions)[number]["value"];
 type ProfileBloodType = (typeof bloodTypeOptions)[number]["value"];
+type ProfilePreviewContact = NonNullable<NonNullable<ProfileView["profile"]>["emergency_contacts"]>[number];
 
 type ProfileContactRow = {
   name: string;
@@ -158,62 +158,93 @@ function profileErrorMessage(error: ApiError) {
   return "Đã xảy ra lỗi khi lưu hồ sơ.";
 }
 
+function previewValue(value: string | null | undefined, fallback: string) {
+  if (!value || value.trim() === "") {
+    return fallback;
+  }
+  return value;
+}
+
+function previewList(values: string[], fallback: string) {
+  return values.length > 0 ? values.join("\n") : fallback;
+}
+
+function PreviewRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="rounded-[1rem] border border-border p-4">
+      <dt className="text-sm font-semibold text-foreground">{label}</dt>
+      <dd className="mt-1 text-muted-foreground">{value}</dd>
+    </div>
+  );
+}
+
+function PreviewContactList({ contacts }: { contacts: ProfilePreviewContact[] }) {
+  if (!contacts.length) {
+    return <p className="mt-1 text-muted-foreground">Chưa có liên hệ.</p>;
+  }
+
+  return (
+    <ul className="mt-2 space-y-3">
+      {contacts.map((contact) => (
+        <li key={`${contact.name}-${contact.phone}-${contact.relationship}`} className="rounded-[0.9rem] border border-border bg-card p-3">
+          <p className="font-semibold text-foreground">{contact.name}</p>
+          <p className="text-sm text-muted-foreground">{contact.relationship}</p>
+          <p className="text-sm text-muted-foreground">{contact.phone}</p>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function ProfileReadinessPanel({ profileView }: { profileView: ProfileView }) {
   const { profile, readiness } = profileView;
-  const { clearSessionCache } = useSession();
-  const previewMutation = useMutation({
-    mutationFn: () => createPublicPreviewLink(),
-  });
-  const [previewError, setPreviewError] = useState<string | null>(null);
-
-  const previewProfile = async () => {
-    setPreviewError(null);
-    try {
-      const result = await previewMutation.mutateAsync();
-      assignLocation(result.public_url);
-    } catch (error) {
-      if (isApiError(error) && error.status === 401) {
-        clearSessionCache();
-        assignLocation("/login?returnTo=/app/profile");
-        return;
-      }
-      if (isApiError(error) && error.code === "public_profile.not_ready") {
-        setPreviewError("Hồ sơ cần hoàn thiện trước khi xem trước.");
-        return;
-      }
-      if (isApiError(error) && (error.status === 503 || error.retryable)) {
-        setPreviewError("Máy chủ tạm thời không phản hồi. Vui lòng thử lại sau.");
-        return;
-      }
-      setPreviewError("Không thể tạo liên kết xem trước.");
-    }
-  };
 
   return (
     <Panel className="space-y-4">
       <div className="space-y-2">
-        <p className="text-sm font-semibold uppercase tracking-[0.12em] text-muted-foreground">Trạng thái</p>
+        <h2 className="text-xl font-semibold text-foreground">Xem trước trang khẩn cấp</h2>
         <div className="flex flex-wrap items-center gap-3">
           <StatusBadge variant={readiness.status === "ready" ? "success" : readiness.status === "not_started" ? "warning" : "primary"}>
             {profileReadinessLabel(readiness.status)}
           </StatusBadge>
-          <span className="text-sm text-muted-foreground">
-            {readiness.completed_required_field_count}/{readiness.total_required_field_count} trường bắt buộc
-          </span>
+          <span className="text-sm text-muted-foreground">Chỉ xem trong ứng dụng, không tạo liên kết.</span>
         </div>
       </div>
 
-      {profile ? (
-        <div className="space-y-2 text-sm text-muted-foreground">
-          <p className="text-foreground">{profile.display_name ?? "Chưa đặt tên hiển thị"}</p>
-          <p>Năm sinh: {profile.birth_year ?? "chưa cung cấp"}</p>
-          <p>Giới tính: {genderLabel(profile.gender)}</p>
-          <p>Nhóm máu: {bloodTypeLabel(profile.blood_type)}</p>
-          <p>Người liên hệ khẩn cấp: {profile.emergency_contacts.length}</p>
-        </div>
-      ) : (
-        <EmptyState title="Chưa có hồ sơ" description="Lưu hồ sơ lần đầu để tạo dữ liệu y tế cá nhân." />
-      )}
+      <article className="space-y-4 rounded-[1.5rem] border border-border bg-card p-4 shadow-sm">
+        <header className="space-y-2">
+          <p className="text-sm font-semibold tracking-wide text-primary">EMERCARD</p>
+          <h2 className="text-2xl font-bold text-foreground">{previewValue(profile?.display_name, "Chưa đặt tên hiển thị")}</h2>
+          <p className="text-sm text-muted-foreground">
+            {profile?.birth_year ? `Năm sinh: ${profile.birth_year}` : "Năm sinh: chưa cung cấp"}
+            {" • "}
+            {genderLabel(profile?.gender)}
+            {" • "}
+            {bloodTypeLabel(profile?.blood_type)}
+          </p>
+        </header>
+
+        {profile ? (
+          <dl className="grid gap-4">
+            <PreviewRow label="Nhóm máu" value={bloodTypeLabel(profile.blood_type)} />
+            <PreviewRow label="Dị ứng quan trọng" value={<div className="whitespace-pre-line">{previewList(profile.critical_allergies, "Chưa ghi nhận")}</div>} />
+            <PreviewRow label="Tình trạng bệnh quan trọng" value={<div className="whitespace-pre-line">{previewList(profile.important_conditions, "Chưa ghi nhận")}</div>} />
+            <PreviewRow label="Thuốc đang sử dụng" value={<div className="whitespace-pre-line">{previewList(profile.critical_medications, "Chưa ghi nhận")}</div>} />
+            <PreviewRow label="Ghi chú khẩn cấp" value={<div className="whitespace-pre-line">{previewValue(profile.emergency_note, "Chưa có ghi chú")}</div>} />
+            <PreviewRow
+              label="Liên hệ khẩn cấp"
+              value={<PreviewContactList contacts={profile.emergency_contacts} />}
+            />
+          </dl>
+        ) : (
+          <EmptyState title="Chưa có hồ sơ" description="Lưu hồ sơ lần đầu để xem trước dữ liệu khẩn cấp." />
+        )}
+
+        <section className="rounded-[1rem] border border-border bg-muted/30 p-4">
+          <p className="text-sm font-semibold text-foreground">Cập nhật gần nhất</p>
+          <p className="mt-1 text-sm text-muted-foreground">{profile?.updated_at ? new Date(profile.updated_at).toLocaleString("vi-VN") : "chưa có"}</p>
+        </section>
+      </article>
 
       {readiness.missing_fields.length > 0 ? (
         <div className="rounded-[var(--radius-panel)] border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
@@ -226,33 +257,11 @@ function ProfileReadinessPanel({ profileView }: { profileView: ProfileView }) {
         </div>
       ) : null}
 
-      {previewError ? (
-        <Alert variant="danger" title="Không thể tạo liên kết xem trước">
-          {previewError}
-        </Alert>
-      ) : null}
-
-      <div className="space-y-3">
-        <Button
-          type="button"
-          variant="secondary"
-          className="w-full"
-          busy={previewMutation.isPending}
-          disabled={readiness.status !== "ready"}
-          onClick={() => void previewProfile()}
-        >
-          {previewMutation.isPending ? "Đang tạo liên kết..." : "Xem trước trang khẩn cấp"}
-        </Button>
-        <p className="text-xs text-muted-foreground">
-          {readiness.status === "ready"
-            ? "Mỗi lần bấm sẽ tạo một liên kết xem trước mới để mở trang khẩn cấp."
-            : "Hoàn thiện hồ sơ để mở liên kết xem trước."}
-        </p>
-      </div>
-
       <div className="text-sm text-muted-foreground">
         <p>Liên hệ bắt buộc: {readiness.required_contact_count}</p>
-        <p className="mt-1">Cập nhật cuối: {profile?.updated_at ? new Date(profile.updated_at).toLocaleString("vi-VN") : "chưa có"}</p>
+        <p className="mt-1">
+          Trường bắt buộc: {readiness.completed_required_field_count}/{readiness.total_required_field_count}
+        </p>
       </div>
     </Panel>
   );

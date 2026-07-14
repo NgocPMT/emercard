@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ProfilePageRoot } from ".";
 
@@ -7,7 +7,6 @@ const useQueryMock = vi.fn();
 const useMutationMock = vi.fn();
 const assignLocationMock = vi.fn();
 const clearSessionCacheMock = vi.fn();
-const previewLinkMock = vi.fn();
 
 vi.mock("@tanstack/react-query", async () => {
   const actual = await vi.importActual<typeof import("@tanstack/react-query")>("@tanstack/react-query");
@@ -40,11 +39,10 @@ afterEach(() => {
   useMutationMock.mockReset();
   assignLocationMock.mockReset();
   clearSessionCacheMock.mockReset();
-  previewLinkMock.mockReset();
 });
 
 describe("ProfilePageRoot", () => {
-  it("creates and opens a preview link", async () => {
+  it("renders the in-page emergency preview without navigation", () => {
     useQueryMock.mockReturnValue({
       isPending: false,
       error: undefined,
@@ -71,16 +69,16 @@ describe("ProfilePageRoot", () => {
         },
       },
     });
-    useMutationMock.mockReturnValue({ isPending: false, mutateAsync: previewLinkMock });
-    previewLinkMock.mockResolvedValue({ public_url: "https://app.example/e/demo-token" });
+    useMutationMock.mockReturnValue({ isPending: false, error: undefined, mutateAsync: vi.fn() });
 
     render(<ProfilePageRoot />);
 
-    screen.getByRole("button", { name: "Xem trước trang khẩn cấp" }).click();
-
-    await waitFor(() => {
-      expect(previewLinkMock).toHaveBeenCalledTimes(1);
-      expect(assignLocationMock).toHaveBeenCalledWith("https://app.example/e/demo-token");
-    });
+    expect(screen.getByRole("heading", { name: "Hồ sơ y tế" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Xem trước trang khẩn cấp" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Alex Example" })).toBeInTheDocument();
+    expect(screen.getByText("Chỉ xem trong ứng dụng, không tạo liên kết.")).toBeInTheDocument();
+    expect(screen.getByText("Dị ứng quan trọng", { selector: "dt" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Xem trước trang khẩn cấp" })).not.toBeInTheDocument();
+    expect(assignLocationMock).not.toHaveBeenCalled();
   });
 });

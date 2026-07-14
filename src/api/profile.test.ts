@@ -1,12 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  createPublicPreviewLink,
-  disablePublicPreviewLink,
-  generatePublicPreviewLink,
-  profileMissingFieldLabel,
-  profileReadinessLabel,
-  regeneratePublicPreviewLink,
-} from "./profile";
+import { profileMissingFieldLabel, profileReadinessLabel } from "./profile";
 
 const requestJsonMock = vi.fn();
 
@@ -35,23 +28,4 @@ describe("profile api helpers", () => {
     expect(profileMissingFieldLabel("other")).toBe("other");
   });
 
-  it("creates and manages standalone preview links", async () => {
-    requestJsonMock.mockResolvedValueOnce({ public_url: "https://app.example/e/demo-token" });
-    await expect(createPublicPreviewLink()).resolves.toEqual({ public_url: "https://app.example/e/demo-token" });
-    expect(requestJsonMock).toHaveBeenCalledWith(
-      expect.objectContaining({ path: "/me/profile/public-preview-link", method: "POST" }),
-    );
-
-    requestJsonMock.mockResolvedValueOnce({ action: "generate", status: "active", public_url: "https://app.example/e/link-1" });
-    await expect(generatePublicPreviewLink()).resolves.toMatchObject({ action: "generate", status: "active" });
-    expect(requestJsonMock).toHaveBeenCalledWith(
-      expect.objectContaining({ path: "/me/profile/public-preview-link/generate", method: "POST" }),
-    );
-
-    requestJsonMock.mockResolvedValueOnce({ action: "regenerate", status: "active", public_url: "https://app.example/e/link-2" });
-    await expect(regeneratePublicPreviewLink()).resolves.toMatchObject({ action: "regenerate", status: "active" });
-
-    requestJsonMock.mockResolvedValueOnce({ action: "disable", status: "disabled", public_url: null });
-    await expect(disablePublicPreviewLink()).resolves.toMatchObject({ action: "disable", status: "disabled" });
-  });
 });

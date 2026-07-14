@@ -16,15 +16,13 @@ import { isApiError } from "../../api/http-client";
 import { assignLocation } from "../../lib/navigation";
 import { bloodTypeLabel, genderLabel } from "../../lib/profile-labels";
 import { PageApplicationRoot, useSession } from "../session";
-import { StandaloneLinksPanel } from "./standalone-links";
 
-export type UserAppSection = "overview" | "profile" | "cards" | "links";
+export type UserAppSection = "overview" | "profile" | "cards";
 
 const navigation = [
   { href: "/app", label: "Tổng quan" },
   { href: "/app/profile", label: "Hồ sơ y tế" },
   { href: "/app/cards", label: "Thẻ của tôi" },
-  { href: "/app/links", label: "Liên kết công khai" },
 ];
 
 const appBrand = <BrandMark />;
@@ -41,10 +39,6 @@ const sectionCopy: Record<UserAppSection, { title: string; description: string }
   cards: {
     title: "Thẻ của tôi",
     description: "Quản lý trạng thái thẻ đã cấp cho tài khoản hiện tại.",
-  },
-  links: {
-    title: "Liên kết công khai",
-    description: "Quản lý liên kết standalone tách biệt khỏi thẻ vật lý.",
   },
 };
 
@@ -316,8 +310,6 @@ export function UserApplicationRoot({ section }: { section: UserAppSection }) {
         <ProfileSummaryCard />
       ) : section === "cards" ? (
         <MyCardsPanel />
-      ) : section === "links" ? (
-        <StandaloneLinksPanel />
       ) : (
         <EmptyState title="Hồ sơ y tế" description={copy.description} />
       )}
