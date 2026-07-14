@@ -18,6 +18,8 @@ const userCardSchema = z
     updated_at: z.string(),
     can_activate: z.boolean(),
     can_disable: z.boolean(),
+    can_report_lost: z.boolean(),
+    blocking_reason: z.string().nullable().optional(),
     link_status: publicLinkStatusSchema.nullable().optional(),
     link_purpose: publicLinkPurposeSchema.nullable().optional(),
     link_label: z.string().nullable().optional(),
@@ -213,6 +215,24 @@ export async function detachAdminCardLink(cardId: string, reason?: string | null
     path: `/admin/cards/${encodeURIComponent(cardId)}/link/detach`,
     method: "POST",
     body: { reason: reason ?? null },
+    signal,
+  });
+  return adminCardResponseSchema.parse(response);
+}
+
+export async function activateAdminCardLink(cardId: string, signal?: AbortSignal): Promise<AdminCard> {
+  const response = await requestJson<unknown>({
+    path: `/admin/cards/${encodeURIComponent(cardId)}/link/activate`,
+    method: "POST",
+    signal,
+  });
+  return adminCardResponseSchema.parse(response);
+}
+
+export async function disableAdminCardLink(cardId: string, signal?: AbortSignal): Promise<AdminCard> {
+  const response = await requestJson<unknown>({
+    path: `/admin/cards/${encodeURIComponent(cardId)}/link/disable`,
+    method: "POST",
     signal,
   });
   return adminCardResponseSchema.parse(response);

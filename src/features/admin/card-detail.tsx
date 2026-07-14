@@ -4,10 +4,12 @@ import { Alert, Button, Panel, Select, StatusBadge, TextInput } from "../../comp
 import { EmptyState, PageLoadingState, RetryState, ServiceUnavailableState } from "../../components/feedback";
 import {
   assignCard,
+  activateAdminCardLink,
   attachAdminCardLink,
   cardKeys,
   confirmCardEncoding,
   detachAdminCardLink,
+  disableAdminCardLink,
   getAdminCard,
   issueCard,
   lookupAdminUserByEmail,
@@ -141,6 +143,20 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
       void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(cardId) });
     },
   });
+  const activateLinkMutation = useMutation({
+    mutationFn: () => activateAdminCardLink(cardId),
+    onSuccess: () => {
+      setMessage("Đã kích hoạt liên kết của thẻ.");
+      void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(cardId) });
+    },
+  });
+  const disableLinkMutation = useMutation({
+    mutationFn: () => disableAdminCardLink(cardId),
+    onSuccess: () => {
+      setMessage("Đã vô hiệu hóa liên kết của thẻ.");
+      void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(cardId) });
+    },
+  });
   const detachMutation = useMutation({
     mutationFn: (reason: string | null) => detachAdminCardLink(cardId, reason),
     onSuccess: () => {
@@ -170,6 +186,8 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
       replaceMutation.error ??
       voidMutation.error ??
       attachMutation.error ??
+      activateLinkMutation.error ??
+      disableLinkMutation.error ??
       detachMutation.error ??
       revokeMutation.error;
     if (!isApiError(error) || error.status !== 401) {
@@ -180,9 +198,11 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
   }, [
     assignMutation.error,
     attachMutation.error,
+    activateLinkMutation.error,
     clearSessionCache,
     confirmMutation.error,
     detachMutation.error,
+    disableLinkMutation.error,
     issueMutation.error,
     lostMutation.error,
     lookupMutation.error,
@@ -327,6 +347,12 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
           </Button>
           <Button type="button" variant="ghost" busy={attachMutation.isPending} disabled={!linkId} onClick={() => attachMutation.mutate(linkId)}>
             Gắn liên kết
+          </Button>
+          <Button type="button" variant="ghost" busy={activateLinkMutation.isPending} disabled={!card.link} onClick={() => activateLinkMutation.mutate()}>
+            Kích hoạt liên kết
+          </Button>
+          <Button type="button" variant="ghost" busy={disableLinkMutation.isPending} disabled={!card.link} onClick={() => disableLinkMutation.mutate()}>
+            Vô hiệu hóa liên kết
           </Button>
           <Button type="button" variant="ghost" busy={detachMutation.isPending} onClick={() => {
             if (!window.confirm("Bạn có chắc muốn gỡ liên kết khỏi thẻ này không?")) return;

@@ -257,7 +257,7 @@ function MyCardsPanel() {
               disabled={!card.can_activate || activateMutation.isPending}
               busy={activateMutation.isPending}
               onClick={() => {
-                if (!window.confirm("Bạn có chắc muốn kích hoạt thẻ này không?")) return;
+                if (!window.confirm("Bạn có chắc muốn kích hoạt public URL của thẻ này không?")) return;
                 activateMutation.mutate(card.id);
               }}
             >
@@ -269,7 +269,12 @@ function MyCardsPanel() {
               disabled={!card.can_disable || disableMutation.isPending}
               busy={disableMutation.isPending}
               onClick={() => {
-                if (!window.confirm("Bạn có chắc muốn vô hiệu hóa thẻ này không?")) return;
+                if (
+                  !window.confirm(
+                    "Bạn có chắc muốn tạm dừng public URL của thẻ này không? Bạn có thể kích hoạt lại cùng một URL sau đó.",
+                  )
+                )
+                  return;
                 disableMutation.mutate(card.id);
               }}
             >
@@ -278,7 +283,7 @@ function MyCardsPanel() {
             <Button
               type="button"
               variant="ghost"
-              disabled={lostMutation.isPending}
+              disabled={!card.can_report_lost || lostMutation.isPending}
               busy={lostMutation.isPending}
               onClick={() => {
                 if (!window.confirm("Bạn có chắc muốn báo mất thẻ này không?")) return;
@@ -288,6 +293,7 @@ function MyCardsPanel() {
               Báo mất
             </Button>
           </div>
+          {card.blocking_reason ? <p className="text-xs text-muted-foreground">Lý do chặn: {card.blocking_reason}</p> : null}
         </Panel>
       ))}
     </div>

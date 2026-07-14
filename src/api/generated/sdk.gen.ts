@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { ActivateMyCardApiV1MeCardsCardIdActivatePostData, ActivateMyCardApiV1MeCardsCardIdActivatePostErrors, ActivateMyCardApiV1MeCardsCardIdActivatePostResponses, AssignCardApiV1AdminCardsCardIdAssignPostData, AssignCardApiV1AdminCardsCardIdAssignPostErrors, AssignCardApiV1AdminCardsCardIdAssignPostResponses, ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostData, ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostErrors, ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponses, CreateBlankCardApiV1AdminCardsPostData, CreateBlankCardApiV1AdminCardsPostErrors, CreateBlankCardApiV1AdminCardsPostResponses, CurrentUserApiV1MeGetData, CurrentUserApiV1MeGetResponses, DisableMyCardApiV1MeCardsCardIdDisablePostData, DisableMyCardApiV1MeCardsCardIdDisablePostErrors, DisableMyCardApiV1MeCardsCardIdDisablePostResponses, GetCardApiV1AdminCardsCardIdGetData, GetCardApiV1AdminCardsCardIdGetErrors, GetCardApiV1AdminCardsCardIdGetResponses, GetMyCardApiV1MeCardsCardIdGetData, GetMyCardApiV1MeCardsCardIdGetErrors, GetMyCardApiV1MeCardsCardIdGetResponses, GetProfileApiV1MeProfileGetData, GetProfileApiV1MeProfileGetResponses, HealthHealthGetData, HealthHealthGetResponses, IssueCardApiV1AdminCardsCardIdIssuePostData, IssueCardApiV1AdminCardsCardIdIssuePostErrors, IssueCardApiV1AdminCardsCardIdIssuePostResponses, ListCardsApiV1AdminCardsGetData, ListCardsApiV1AdminCardsGetErrors, ListCardsApiV1AdminCardsGetResponses, ListMyCardsApiV1MeCardsGetData, ListMyCardsApiV1MeCardsGetResponses, LoginApiV1AuthLoginPostData, LoginApiV1AuthLoginPostErrors, LoginApiV1AuthLoginPostResponses, LogoutApiV1AuthLogoutPostData, LogoutApiV1AuthLogoutPostResponses, LookupEmergencyProfileApiV1EmergencyTokenGetData, LookupEmergencyProfileApiV1EmergencyTokenGetErrors, LookupEmergencyProfileApiV1EmergencyTokenGetResponses, LookupPublicProfileApiV1PublicTokenGetData, LookupPublicProfileApiV1PublicTokenGetErrors, LookupPublicProfileApiV1PublicTokenGetResponses, LookupUserApiV1AdminUsersLookupGetData, LookupUserApiV1AdminUsersLookupGetErrors, LookupUserApiV1AdminUsersLookupGetResponses, MetaApiV1MetaGetData, MetaApiV1MetaGetResponses, ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostData, ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostErrors, ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostResponses, PublicPreviewApiV1MeProfilePublicPreviewGetData, PublicPreviewApiV1MeProfilePublicPreviewGetResponses, ReadyReadyGetData, ReadyReadyGetResponses, ReassignCardApiV1AdminCardsCardIdReassignPostData, ReassignCardApiV1AdminCardsCardIdReassignPostErrors, ReassignCardApiV1AdminCardsCardIdReassignPostResponses, RegisterApiV1AuthRegisterPostData, RegisterApiV1AuthRegisterPostErrors, RegisterApiV1AuthRegisterPostResponses, ReplaceProfileApiV1MeProfilePutData, ReplaceProfileApiV1MeProfilePutErrors, ReplaceProfileApiV1MeProfilePutResponses, ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostData, ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostErrors, ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostResponses, UnassignCardApiV1AdminCardsCardIdUnassignPostData, UnassignCardApiV1AdminCardsCardIdUnassignPostErrors, UnassignCardApiV1AdminCardsCardIdUnassignPostResponses, VoidCardApiV1AdminCardsCardIdVoidPostData, VoidCardApiV1AdminCardsCardIdVoidPostErrors, VoidCardApiV1AdminCardsCardIdVoidPostResponses } from './types.gen';
+import type { ActivateCardLinkApiV1AdminCardsCardIdLinkActivatePostData, ActivateCardLinkApiV1AdminCardsCardIdLinkActivatePostErrors, ActivateCardLinkApiV1AdminCardsCardIdLinkActivatePostResponses, ActivateMyCardApiV1MeCardsCardIdActivatePostData, ActivateMyCardApiV1MeCardsCardIdActivatePostErrors, ActivateMyCardApiV1MeCardsCardIdActivatePostResponses, AssignCardApiV1AdminCardsCardIdAssignPostData, AssignCardApiV1AdminCardsCardIdAssignPostErrors, AssignCardApiV1AdminCardsCardIdAssignPostResponses, AttachCardLinkApiV1AdminCardsCardIdLinkAttachPostData, AttachCardLinkApiV1AdminCardsCardIdLinkAttachPostErrors, AttachCardLinkApiV1AdminCardsCardIdLinkAttachPostResponses, ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostData, ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostErrors, ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponses, CreateBlankCardApiV1AdminCardsPostData, CreateBlankCardApiV1AdminCardsPostErrors, CreateBlankCardApiV1AdminCardsPostResponses, CreateUserLinkApiV1AdminUsersUserIdLinksPostData, CreateUserLinkApiV1AdminUsersUserIdLinksPostErrors, CreateUserLinkApiV1AdminUsersUserIdLinksPostResponses, CurrentUserApiV1MeGetData, CurrentUserApiV1MeGetResponses, DetachCardLinkApiV1AdminCardsCardIdLinkDetachPostData, DetachCardLinkApiV1AdminCardsCardIdLinkDetachPostErrors, DetachCardLinkApiV1AdminCardsCardIdLinkDetachPostResponses, DisableCardLinkApiV1AdminCardsCardIdLinkDisablePostData, DisableCardLinkApiV1AdminCardsCardIdLinkDisablePostErrors, DisableCardLinkApiV1AdminCardsCardIdLinkDisablePostResponses, DisableMyCardApiV1MeCardsCardIdDisablePostData, DisableMyCardApiV1MeCardsCardIdDisablePostErrors, DisableMyCardApiV1MeCardsCardIdDisablePostResponses, DisablePublicPreviewLinkApiV1MeProfilePublicPreviewLinkDisablePostData, DisablePublicPreviewLinkApiV1MeProfilePublicPreviewLinkDisablePostResponses, GeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkGeneratePostData, GeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkGeneratePostResponses, GetCardApiV1AdminCardsCardIdGetData, GetCardApiV1AdminCardsCardIdGetErrors, GetCardApiV1AdminCardsCardIdGetResponses, GetCardLinkApiV1AdminCardsCardIdLinkGetData, GetCardLinkApiV1AdminCardsCardIdLinkGetErrors, GetCardLinkApiV1AdminCardsCardIdLinkGetResponses, GetMyCardApiV1MeCardsCardIdGetData, GetMyCardApiV1MeCardsCardIdGetErrors, GetMyCardApiV1MeCardsCardIdGetResponses, GetProfileApiV1MeProfileGetData, GetProfileApiV1MeProfileGetResponses, HealthHealthGetData, HealthHealthGetResponses, IssueCardApiV1AdminCardsCardIdIssuePostData, IssueCardApiV1AdminCardsCardIdIssuePostErrors, IssueCardApiV1AdminCardsCardIdIssuePostResponses, ListCardsApiV1AdminCardsGetData, ListCardsApiV1AdminCardsGetErrors, ListCardsApiV1AdminCardsGetResponses, ListMyCardsApiV1MeCardsGetData, ListMyCardsApiV1MeCardsGetResponses, ListUserLinksApiV1AdminUsersUserIdLinksGetData, ListUserLinksApiV1AdminUsersUserIdLinksGetErrors, ListUserLinksApiV1AdminUsersUserIdLinksGetResponses, LoginApiV1AuthLoginPostData, LoginApiV1AuthLoginPostErrors, LoginApiV1AuthLoginPostResponses, LogoutApiV1AuthLogoutPostData, LogoutApiV1AuthLogoutPostResponses, LookupEmergencyProfileApiV1EmergencyTokenGetData, LookupEmergencyProfileApiV1EmergencyTokenGetErrors, LookupEmergencyProfileApiV1EmergencyTokenGetResponses, LookupPublicProfileApiV1PublicTokenGetData, LookupPublicProfileApiV1PublicTokenGetErrors, LookupPublicProfileApiV1PublicTokenGetResponses, LookupUserApiV1AdminUsersLookupGetData, LookupUserApiV1AdminUsersLookupGetErrors, LookupUserApiV1AdminUsersLookupGetResponses, LostCardApiV1AdminCardsCardIdLostPostData, LostCardApiV1AdminCardsCardIdLostPostErrors, LostCardApiV1AdminCardsCardIdLostPostResponses, MetaApiV1MetaGetData, MetaApiV1MetaGetResponses, ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostData, ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostErrors, ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostResponses, PublicPreviewApiV1MeProfilePublicPreviewGetData, PublicPreviewApiV1MeProfilePublicPreviewGetResponses, PublicPreviewLinkApiV1MeProfilePublicPreviewLinkPostData, PublicPreviewLinkApiV1MeProfilePublicPreviewLinkPostResponses, ReadyReadyGetData, ReadyReadyGetResponses, ReassignCardApiV1AdminCardsCardIdReassignPostData, ReassignCardApiV1AdminCardsCardIdReassignPostErrors, ReassignCardApiV1AdminCardsCardIdReassignPostResponses, RegeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkRegeneratePostData, RegeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkRegeneratePostResponses, RegisterApiV1AuthRegisterPostData, RegisterApiV1AuthRegisterPostErrors, RegisterApiV1AuthRegisterPostResponses, ReplaceCardApiV1AdminCardsCardIdReplacePostData, ReplaceCardApiV1AdminCardsCardIdReplacePostErrors, ReplaceCardApiV1AdminCardsCardIdReplacePostResponses, ReplaceProfileApiV1MeProfilePutData, ReplaceProfileApiV1MeProfilePutErrors, ReplaceProfileApiV1MeProfilePutResponses, ReportMyCardLostApiV1MeCardsCardIdLostPostData, ReportMyCardLostApiV1MeCardsCardIdLostPostErrors, ReportMyCardLostApiV1MeCardsCardIdLostPostResponses, ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostData, ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostErrors, ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostResponses, RevokeCardLinkApiV1AdminCardsCardIdLinkRevokePostData, RevokeCardLinkApiV1AdminCardsCardIdLinkRevokePostErrors, RevokeCardLinkApiV1AdminCardsCardIdLinkRevokePostResponses, UnassignCardApiV1AdminCardsCardIdUnassignPostData, UnassignCardApiV1AdminCardsCardIdUnassignPostErrors, UnassignCardApiV1AdminCardsCardIdUnassignPostResponses, VoidCardApiV1AdminCardsCardIdVoidPostData, VoidCardApiV1AdminCardsCardIdVoidPostErrors, VoidCardApiV1AdminCardsCardIdVoidPostResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -19,85 +19,30 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 };
 
 /**
- * List Cards
+ * Health
+ *
+ * Return process liveness without contacting MongoDB.
  */
-export const listCardsApiV1AdminCardsGet = <ThrowOnError extends boolean = false>(options?: Options<ListCardsApiV1AdminCardsGetData, ThrowOnError>): RequestResult<ListCardsApiV1AdminCardsGetResponses, ListCardsApiV1AdminCardsGetErrors, ThrowOnError> => (options?.client ?? client).get<ListCardsApiV1AdminCardsGetResponses, ListCardsApiV1AdminCardsGetErrors, ThrowOnError>({ url: '/api/v1/admin/cards', ...options });
+export const healthHealthGet = <ThrowOnError extends boolean = false>(options?: Options<HealthHealthGetData, ThrowOnError>): RequestResult<HealthHealthGetResponses, unknown, ThrowOnError> => (options?.client ?? client).get<HealthHealthGetResponses, unknown, ThrowOnError>({ url: '/health', ...options });
 
 /**
- * Create Blank Card
+ * Ready
+ *
+ * Return readiness only when the managed database answers a ping.
  */
-export const createBlankCardApiV1AdminCardsPost = <ThrowOnError extends boolean = false>(options: Options<CreateBlankCardApiV1AdminCardsPostData, ThrowOnError>): RequestResult<CreateBlankCardApiV1AdminCardsPostResponses, CreateBlankCardApiV1AdminCardsPostErrors, ThrowOnError> => (options.client ?? client).post<CreateBlankCardApiV1AdminCardsPostResponses, CreateBlankCardApiV1AdminCardsPostErrors, ThrowOnError>({ url: '/api/v1/admin/cards', ...options });
+export const readyReadyGet = <ThrowOnError extends boolean = false>(options?: Options<ReadyReadyGetData, ThrowOnError>): RequestResult<ReadyReadyGetResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ReadyReadyGetResponses, unknown, ThrowOnError>({ url: '/ready', ...options });
 
 /**
- * Get Card
+ * Register
  */
-export const getCardApiV1AdminCardsCardIdGet = <ThrowOnError extends boolean = false>(options: Options<GetCardApiV1AdminCardsCardIdGetData, ThrowOnError>): RequestResult<GetCardApiV1AdminCardsCardIdGetResponses, GetCardApiV1AdminCardsCardIdGetErrors, ThrowOnError> => (options.client ?? client).get<GetCardApiV1AdminCardsCardIdGetResponses, GetCardApiV1AdminCardsCardIdGetErrors, ThrowOnError>({ url: '/api/v1/admin/cards/{card_id}', ...options });
-
-/**
- * Assign Card
- */
-export const assignCardApiV1AdminCardsCardIdAssignPost = <ThrowOnError extends boolean = false>(options: Options<AssignCardApiV1AdminCardsCardIdAssignPostData, ThrowOnError>): RequestResult<AssignCardApiV1AdminCardsCardIdAssignPostResponses, AssignCardApiV1AdminCardsCardIdAssignPostErrors, ThrowOnError> => (options.client ?? client).post<AssignCardApiV1AdminCardsCardIdAssignPostResponses, AssignCardApiV1AdminCardsCardIdAssignPostErrors, ThrowOnError>({
-    url: '/api/v1/admin/cards/{card_id}/assign',
+export const registerApiV1AuthRegisterPost = <ThrowOnError extends boolean = false>(options: Options<RegisterApiV1AuthRegisterPostData, ThrowOnError>): RequestResult<RegisterApiV1AuthRegisterPostResponses, RegisterApiV1AuthRegisterPostErrors, ThrowOnError> => (options.client ?? client).post<RegisterApiV1AuthRegisterPostResponses, RegisterApiV1AuthRegisterPostErrors, ThrowOnError>({
+    url: '/api/v1/auth/register',
     ...options,
     headers: {
         'Content-Type': 'application/json',
         ...options.headers
     }
 });
-
-/**
- * Confirm Encoding
- */
-export const confirmEncodingApiV1AdminCardsCardIdConfirmEncodingPost = <ThrowOnError extends boolean = false>(options: Options<ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostData, ThrowOnError>): RequestResult<ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponses, ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostErrors, ThrowOnError> => (options.client ?? client).post<ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponses, ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostErrors, ThrowOnError>({
-    url: '/api/v1/admin/cards/{card_id}/confirm-encoding',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * Issue Card
- */
-export const issueCardApiV1AdminCardsCardIdIssuePost = <ThrowOnError extends boolean = false>(options: Options<IssueCardApiV1AdminCardsCardIdIssuePostData, ThrowOnError>): RequestResult<IssueCardApiV1AdminCardsCardIdIssuePostResponses, IssueCardApiV1AdminCardsCardIdIssuePostErrors, ThrowOnError> => (options.client ?? client).post<IssueCardApiV1AdminCardsCardIdIssuePostResponses, IssueCardApiV1AdminCardsCardIdIssuePostErrors, ThrowOnError>({ url: '/api/v1/admin/cards/{card_id}/issue', ...options });
-
-/**
- * Provision Link
- */
-export const provisionLinkApiV1AdminCardsCardIdProvisionLinkPost = <ThrowOnError extends boolean = false>(options: Options<ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostData, ThrowOnError>): RequestResult<ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostResponses, ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostErrors, ThrowOnError> => (options.client ?? client).post<ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostResponses, ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostErrors, ThrowOnError>({ url: '/api/v1/admin/cards/{card_id}/provision-link', ...options });
-
-/**
- * Reassign Card
- */
-export const reassignCardApiV1AdminCardsCardIdReassignPost = <ThrowOnError extends boolean = false>(options: Options<ReassignCardApiV1AdminCardsCardIdReassignPostData, ThrowOnError>): RequestResult<ReassignCardApiV1AdminCardsCardIdReassignPostResponses, ReassignCardApiV1AdminCardsCardIdReassignPostErrors, ThrowOnError> => (options.client ?? client).post<ReassignCardApiV1AdminCardsCardIdReassignPostResponses, ReassignCardApiV1AdminCardsCardIdReassignPostErrors, ThrowOnError>({
-    url: '/api/v1/admin/cards/{card_id}/reassign',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * Reprovision Link
- */
-export const reprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPost = <ThrowOnError extends boolean = false>(options: Options<ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostData, ThrowOnError>): RequestResult<ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostResponses, ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostErrors, ThrowOnError> => (options.client ?? client).post<ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostResponses, ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostErrors, ThrowOnError>({ url: '/api/v1/admin/cards/{card_id}/reprovision-link', ...options });
-
-/**
- * Unassign Card
- */
-export const unassignCardApiV1AdminCardsCardIdUnassignPost = <ThrowOnError extends boolean = false>(options: Options<UnassignCardApiV1AdminCardsCardIdUnassignPostData, ThrowOnError>): RequestResult<UnassignCardApiV1AdminCardsCardIdUnassignPostResponses, UnassignCardApiV1AdminCardsCardIdUnassignPostErrors, ThrowOnError> => (options.client ?? client).post<UnassignCardApiV1AdminCardsCardIdUnassignPostResponses, UnassignCardApiV1AdminCardsCardIdUnassignPostErrors, ThrowOnError>({ url: '/api/v1/admin/cards/{card_id}/unassign', ...options });
-
-/**
- * Void Card
- */
-export const voidCardApiV1AdminCardsCardIdVoidPost = <ThrowOnError extends boolean = false>(options: Options<VoidCardApiV1AdminCardsCardIdVoidPostData, ThrowOnError>): RequestResult<VoidCardApiV1AdminCardsCardIdVoidPostResponses, VoidCardApiV1AdminCardsCardIdVoidPostErrors, ThrowOnError> => (options.client ?? client).post<VoidCardApiV1AdminCardsCardIdVoidPostResponses, VoidCardApiV1AdminCardsCardIdVoidPostErrors, ThrowOnError>({ url: '/api/v1/admin/cards/{card_id}/void', ...options });
-
-/**
- * Lookup User
- */
-export const lookupUserApiV1AdminUsersLookupGet = <ThrowOnError extends boolean = false>(options: Options<LookupUserApiV1AdminUsersLookupGetData, ThrowOnError>): RequestResult<LookupUserApiV1AdminUsersLookupGetResponses, LookupUserApiV1AdminUsersLookupGetErrors, ThrowOnError> => (options.client ?? client).get<LookupUserApiV1AdminUsersLookupGetResponses, LookupUserApiV1AdminUsersLookupGetErrors, ThrowOnError>({ url: '/api/v1/admin/users/lookup', ...options });
 
 /**
  * Login
@@ -117,46 +62,9 @@ export const loginApiV1AuthLoginPost = <ThrowOnError extends boolean = false>(op
 export const logoutApiV1AuthLogoutPost = <ThrowOnError extends boolean = false>(options?: Options<LogoutApiV1AuthLogoutPostData, ThrowOnError>): RequestResult<LogoutApiV1AuthLogoutPostResponses, unknown, ThrowOnError> => (options?.client ?? client).post<LogoutApiV1AuthLogoutPostResponses, unknown, ThrowOnError>({ url: '/api/v1/auth/logout', ...options });
 
 /**
- * Register
- */
-export const registerApiV1AuthRegisterPost = <ThrowOnError extends boolean = false>(options: Options<RegisterApiV1AuthRegisterPostData, ThrowOnError>): RequestResult<RegisterApiV1AuthRegisterPostResponses, RegisterApiV1AuthRegisterPostErrors, ThrowOnError> => (options.client ?? client).post<RegisterApiV1AuthRegisterPostResponses, RegisterApiV1AuthRegisterPostErrors, ThrowOnError>({
-    url: '/api/v1/auth/register',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * Lookup Emergency Profile
- */
-export const lookupEmergencyProfileApiV1EmergencyTokenGet = <ThrowOnError extends boolean = false>(options: Options<LookupEmergencyProfileApiV1EmergencyTokenGetData, ThrowOnError>): RequestResult<LookupEmergencyProfileApiV1EmergencyTokenGetResponses, LookupEmergencyProfileApiV1EmergencyTokenGetErrors, ThrowOnError> => (options.client ?? client).get<LookupEmergencyProfileApiV1EmergencyTokenGetResponses, LookupEmergencyProfileApiV1EmergencyTokenGetErrors, ThrowOnError>({ url: '/api/v1/emergency/{token}', ...options });
-
-/**
  * Current User
  */
 export const currentUserApiV1MeGet = <ThrowOnError extends boolean = false>(options?: Options<CurrentUserApiV1MeGetData, ThrowOnError>): RequestResult<CurrentUserApiV1MeGetResponses, unknown, ThrowOnError> => (options?.client ?? client).get<CurrentUserApiV1MeGetResponses, unknown, ThrowOnError>({ url: '/api/v1/me', ...options });
-
-/**
- * List My Cards
- */
-export const listMyCardsApiV1MeCardsGet = <ThrowOnError extends boolean = false>(options?: Options<ListMyCardsApiV1MeCardsGetData, ThrowOnError>): RequestResult<ListMyCardsApiV1MeCardsGetResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ListMyCardsApiV1MeCardsGetResponses, unknown, ThrowOnError>({ url: '/api/v1/me/cards', ...options });
-
-/**
- * Get My Card
- */
-export const getMyCardApiV1MeCardsCardIdGet = <ThrowOnError extends boolean = false>(options: Options<GetMyCardApiV1MeCardsCardIdGetData, ThrowOnError>): RequestResult<GetMyCardApiV1MeCardsCardIdGetResponses, GetMyCardApiV1MeCardsCardIdGetErrors, ThrowOnError> => (options.client ?? client).get<GetMyCardApiV1MeCardsCardIdGetResponses, GetMyCardApiV1MeCardsCardIdGetErrors, ThrowOnError>({ url: '/api/v1/me/cards/{card_id}', ...options });
-
-/**
- * Activate My Card
- */
-export const activateMyCardApiV1MeCardsCardIdActivatePost = <ThrowOnError extends boolean = false>(options: Options<ActivateMyCardApiV1MeCardsCardIdActivatePostData, ThrowOnError>): RequestResult<ActivateMyCardApiV1MeCardsCardIdActivatePostResponses, ActivateMyCardApiV1MeCardsCardIdActivatePostErrors, ThrowOnError> => (options.client ?? client).post<ActivateMyCardApiV1MeCardsCardIdActivatePostResponses, ActivateMyCardApiV1MeCardsCardIdActivatePostErrors, ThrowOnError>({ url: '/api/v1/me/cards/{card_id}/activate', ...options });
-
-/**
- * Disable My Card
- */
-export const disableMyCardApiV1MeCardsCardIdDisablePost = <ThrowOnError extends boolean = false>(options: Options<DisableMyCardApiV1MeCardsCardIdDisablePostData, ThrowOnError>): RequestResult<DisableMyCardApiV1MeCardsCardIdDisablePostResponses, DisableMyCardApiV1MeCardsCardIdDisablePostErrors, ThrowOnError> => (options.client ?? client).post<DisableMyCardApiV1MeCardsCardIdDisablePostResponses, DisableMyCardApiV1MeCardsCardIdDisablePostErrors, ThrowOnError>({ url: '/api/v1/me/cards/{card_id}/disable', ...options });
 
 /**
  * Get Profile
@@ -181,9 +89,208 @@ export const replaceProfileApiV1MeProfilePut = <ThrowOnError extends boolean = f
 export const publicPreviewApiV1MeProfilePublicPreviewGet = <ThrowOnError extends boolean = false>(options?: Options<PublicPreviewApiV1MeProfilePublicPreviewGetData, ThrowOnError>): RequestResult<PublicPreviewApiV1MeProfilePublicPreviewGetResponses, unknown, ThrowOnError> => (options?.client ?? client).get<PublicPreviewApiV1MeProfilePublicPreviewGetResponses, unknown, ThrowOnError>({ url: '/api/v1/me/profile/public-preview', ...options });
 
 /**
- * Meta
+ * Public Preview Link
  */
-export const metaApiV1MetaGet = <ThrowOnError extends boolean = false>(options?: Options<MetaApiV1MetaGetData, ThrowOnError>): RequestResult<MetaApiV1MetaGetResponses, unknown, ThrowOnError> => (options?.client ?? client).get<MetaApiV1MetaGetResponses, unknown, ThrowOnError>({ url: '/api/v1/meta', ...options });
+export const publicPreviewLinkApiV1MeProfilePublicPreviewLinkPost = <ThrowOnError extends boolean = false>(options?: Options<PublicPreviewLinkApiV1MeProfilePublicPreviewLinkPostData, ThrowOnError>): RequestResult<PublicPreviewLinkApiV1MeProfilePublicPreviewLinkPostResponses, unknown, ThrowOnError> => (options?.client ?? client).post<PublicPreviewLinkApiV1MeProfilePublicPreviewLinkPostResponses, unknown, ThrowOnError>({ url: '/api/v1/me/profile/public-preview-link', ...options });
+
+/**
+ * Generate Public Preview Link
+ */
+export const generatePublicPreviewLinkApiV1MeProfilePublicPreviewLinkGeneratePost = <ThrowOnError extends boolean = false>(options?: Options<GeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkGeneratePostData, ThrowOnError>): RequestResult<GeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkGeneratePostResponses, unknown, ThrowOnError> => (options?.client ?? client).post<GeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkGeneratePostResponses, unknown, ThrowOnError>({ url: '/api/v1/me/profile/public-preview-link/generate', ...options });
+
+/**
+ * Regenerate Public Preview Link
+ */
+export const regeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkRegeneratePost = <ThrowOnError extends boolean = false>(options?: Options<RegeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkRegeneratePostData, ThrowOnError>): RequestResult<RegeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkRegeneratePostResponses, unknown, ThrowOnError> => (options?.client ?? client).post<RegeneratePublicPreviewLinkApiV1MeProfilePublicPreviewLinkRegeneratePostResponses, unknown, ThrowOnError>({ url: '/api/v1/me/profile/public-preview-link/regenerate', ...options });
+
+/**
+ * Disable Public Preview Link
+ */
+export const disablePublicPreviewLinkApiV1MeProfilePublicPreviewLinkDisablePost = <ThrowOnError extends boolean = false>(options?: Options<DisablePublicPreviewLinkApiV1MeProfilePublicPreviewLinkDisablePostData, ThrowOnError>): RequestResult<DisablePublicPreviewLinkApiV1MeProfilePublicPreviewLinkDisablePostResponses, unknown, ThrowOnError> => (options?.client ?? client).post<DisablePublicPreviewLinkApiV1MeProfilePublicPreviewLinkDisablePostResponses, unknown, ThrowOnError>({ url: '/api/v1/me/profile/public-preview-link/disable', ...options });
+
+/**
+ * List My Cards
+ */
+export const listMyCardsApiV1MeCardsGet = <ThrowOnError extends boolean = false>(options?: Options<ListMyCardsApiV1MeCardsGetData, ThrowOnError>): RequestResult<ListMyCardsApiV1MeCardsGetResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ListMyCardsApiV1MeCardsGetResponses, unknown, ThrowOnError>({ url: '/api/v1/me/cards', ...options });
+
+/**
+ * Get My Card
+ */
+export const getMyCardApiV1MeCardsCardIdGet = <ThrowOnError extends boolean = false>(options: Options<GetMyCardApiV1MeCardsCardIdGetData, ThrowOnError>): RequestResult<GetMyCardApiV1MeCardsCardIdGetResponses, GetMyCardApiV1MeCardsCardIdGetErrors, ThrowOnError> => (options.client ?? client).get<GetMyCardApiV1MeCardsCardIdGetResponses, GetMyCardApiV1MeCardsCardIdGetErrors, ThrowOnError>({ url: '/api/v1/me/cards/{card_id}', ...options });
+
+/**
+ * Activate My Card
+ */
+export const activateMyCardApiV1MeCardsCardIdActivatePost = <ThrowOnError extends boolean = false>(options: Options<ActivateMyCardApiV1MeCardsCardIdActivatePostData, ThrowOnError>): RequestResult<ActivateMyCardApiV1MeCardsCardIdActivatePostResponses, ActivateMyCardApiV1MeCardsCardIdActivatePostErrors, ThrowOnError> => (options.client ?? client).post<ActivateMyCardApiV1MeCardsCardIdActivatePostResponses, ActivateMyCardApiV1MeCardsCardIdActivatePostErrors, ThrowOnError>({ url: '/api/v1/me/cards/{card_id}/activate', ...options });
+
+/**
+ * Disable My Card
+ */
+export const disableMyCardApiV1MeCardsCardIdDisablePost = <ThrowOnError extends boolean = false>(options: Options<DisableMyCardApiV1MeCardsCardIdDisablePostData, ThrowOnError>): RequestResult<DisableMyCardApiV1MeCardsCardIdDisablePostResponses, DisableMyCardApiV1MeCardsCardIdDisablePostErrors, ThrowOnError> => (options.client ?? client).post<DisableMyCardApiV1MeCardsCardIdDisablePostResponses, DisableMyCardApiV1MeCardsCardIdDisablePostErrors, ThrowOnError>({ url: '/api/v1/me/cards/{card_id}/disable', ...options });
+
+/**
+ * Report My Card Lost
+ */
+export const reportMyCardLostApiV1MeCardsCardIdLostPost = <ThrowOnError extends boolean = false>(options: Options<ReportMyCardLostApiV1MeCardsCardIdLostPostData, ThrowOnError>): RequestResult<ReportMyCardLostApiV1MeCardsCardIdLostPostResponses, ReportMyCardLostApiV1MeCardsCardIdLostPostErrors, ThrowOnError> => (options.client ?? client).post<ReportMyCardLostApiV1MeCardsCardIdLostPostResponses, ReportMyCardLostApiV1MeCardsCardIdLostPostErrors, ThrowOnError>({ url: '/api/v1/me/cards/{card_id}/lost', ...options });
+
+/**
+ * List Cards
+ */
+export const listCardsApiV1AdminCardsGet = <ThrowOnError extends boolean = false>(options?: Options<ListCardsApiV1AdminCardsGetData, ThrowOnError>): RequestResult<ListCardsApiV1AdminCardsGetResponses, ListCardsApiV1AdminCardsGetErrors, ThrowOnError> => (options?.client ?? client).get<ListCardsApiV1AdminCardsGetResponses, ListCardsApiV1AdminCardsGetErrors, ThrowOnError>({ url: '/api/v1/admin/cards', ...options });
+
+/**
+ * Create Blank Card
+ */
+export const createBlankCardApiV1AdminCardsPost = <ThrowOnError extends boolean = false>(options: Options<CreateBlankCardApiV1AdminCardsPostData, ThrowOnError>): RequestResult<CreateBlankCardApiV1AdminCardsPostResponses, CreateBlankCardApiV1AdminCardsPostErrors, ThrowOnError> => (options.client ?? client).post<CreateBlankCardApiV1AdminCardsPostResponses, CreateBlankCardApiV1AdminCardsPostErrors, ThrowOnError>({ url: '/api/v1/admin/cards', ...options });
+
+/**
+ * Provision Link
+ */
+export const provisionLinkApiV1AdminCardsCardIdProvisionLinkPost = <ThrowOnError extends boolean = false>(options: Options<ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostData, ThrowOnError>): RequestResult<ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostResponses, ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostErrors, ThrowOnError> => (options.client ?? client).post<ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostResponses, ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostErrors, ThrowOnError>({ url: '/api/v1/admin/cards/{card_id}/provision-link', ...options });
+
+/**
+ * Reprovision Link
+ */
+export const reprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPost = <ThrowOnError extends boolean = false>(options: Options<ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostData, ThrowOnError>): RequestResult<ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostResponses, ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostErrors, ThrowOnError> => (options.client ?? client).post<ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostResponses, ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostErrors, ThrowOnError>({ url: '/api/v1/admin/cards/{card_id}/reprovision-link', ...options });
+
+/**
+ * Confirm Encoding
+ */
+export const confirmEncodingApiV1AdminCardsCardIdConfirmEncodingPost = <ThrowOnError extends boolean = false>(options: Options<ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostData, ThrowOnError>): RequestResult<ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponses, ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostErrors, ThrowOnError> => (options.client ?? client).post<ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponses, ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostErrors, ThrowOnError>({
+    url: '/api/v1/admin/cards/{card_id}/confirm-encoding',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Lookup User
+ */
+export const lookupUserApiV1AdminUsersLookupGet = <ThrowOnError extends boolean = false>(options: Options<LookupUserApiV1AdminUsersLookupGetData, ThrowOnError>): RequestResult<LookupUserApiV1AdminUsersLookupGetResponses, LookupUserApiV1AdminUsersLookupGetErrors, ThrowOnError> => (options.client ?? client).get<LookupUserApiV1AdminUsersLookupGetResponses, LookupUserApiV1AdminUsersLookupGetErrors, ThrowOnError>({ url: '/api/v1/admin/users/lookup', ...options });
+
+/**
+ * Assign Card
+ */
+export const assignCardApiV1AdminCardsCardIdAssignPost = <ThrowOnError extends boolean = false>(options: Options<AssignCardApiV1AdminCardsCardIdAssignPostData, ThrowOnError>): RequestResult<AssignCardApiV1AdminCardsCardIdAssignPostResponses, AssignCardApiV1AdminCardsCardIdAssignPostErrors, ThrowOnError> => (options.client ?? client).post<AssignCardApiV1AdminCardsCardIdAssignPostResponses, AssignCardApiV1AdminCardsCardIdAssignPostErrors, ThrowOnError>({
+    url: '/api/v1/admin/cards/{card_id}/assign',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Reassign Card
+ */
+export const reassignCardApiV1AdminCardsCardIdReassignPost = <ThrowOnError extends boolean = false>(options: Options<ReassignCardApiV1AdminCardsCardIdReassignPostData, ThrowOnError>): RequestResult<ReassignCardApiV1AdminCardsCardIdReassignPostResponses, ReassignCardApiV1AdminCardsCardIdReassignPostErrors, ThrowOnError> => (options.client ?? client).post<ReassignCardApiV1AdminCardsCardIdReassignPostResponses, ReassignCardApiV1AdminCardsCardIdReassignPostErrors, ThrowOnError>({
+    url: '/api/v1/admin/cards/{card_id}/reassign',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Unassign Card
+ */
+export const unassignCardApiV1AdminCardsCardIdUnassignPost = <ThrowOnError extends boolean = false>(options: Options<UnassignCardApiV1AdminCardsCardIdUnassignPostData, ThrowOnError>): RequestResult<UnassignCardApiV1AdminCardsCardIdUnassignPostResponses, UnassignCardApiV1AdminCardsCardIdUnassignPostErrors, ThrowOnError> => (options.client ?? client).post<UnassignCardApiV1AdminCardsCardIdUnassignPostResponses, UnassignCardApiV1AdminCardsCardIdUnassignPostErrors, ThrowOnError>({ url: '/api/v1/admin/cards/{card_id}/unassign', ...options });
+
+/**
+ * Issue Card
+ */
+export const issueCardApiV1AdminCardsCardIdIssuePost = <ThrowOnError extends boolean = false>(options: Options<IssueCardApiV1AdminCardsCardIdIssuePostData, ThrowOnError>): RequestResult<IssueCardApiV1AdminCardsCardIdIssuePostResponses, IssueCardApiV1AdminCardsCardIdIssuePostErrors, ThrowOnError> => (options.client ?? client).post<IssueCardApiV1AdminCardsCardIdIssuePostResponses, IssueCardApiV1AdminCardsCardIdIssuePostErrors, ThrowOnError>({ url: '/api/v1/admin/cards/{card_id}/issue', ...options });
+
+/**
+ * Void Card
+ */
+export const voidCardApiV1AdminCardsCardIdVoidPost = <ThrowOnError extends boolean = false>(options: Options<VoidCardApiV1AdminCardsCardIdVoidPostData, ThrowOnError>): RequestResult<VoidCardApiV1AdminCardsCardIdVoidPostResponses, VoidCardApiV1AdminCardsCardIdVoidPostErrors, ThrowOnError> => (options.client ?? client).post<VoidCardApiV1AdminCardsCardIdVoidPostResponses, VoidCardApiV1AdminCardsCardIdVoidPostErrors, ThrowOnError>({ url: '/api/v1/admin/cards/{card_id}/void', ...options });
+
+/**
+ * Lost Card
+ */
+export const lostCardApiV1AdminCardsCardIdLostPost = <ThrowOnError extends boolean = false>(options: Options<LostCardApiV1AdminCardsCardIdLostPostData, ThrowOnError>): RequestResult<LostCardApiV1AdminCardsCardIdLostPostResponses, LostCardApiV1AdminCardsCardIdLostPostErrors, ThrowOnError> => (options.client ?? client).post<LostCardApiV1AdminCardsCardIdLostPostResponses, LostCardApiV1AdminCardsCardIdLostPostErrors, ThrowOnError>({ url: '/api/v1/admin/cards/{card_id}/lost', ...options });
+
+/**
+ * Replace Card
+ */
+export const replaceCardApiV1AdminCardsCardIdReplacePost = <ThrowOnError extends boolean = false>(options: Options<ReplaceCardApiV1AdminCardsCardIdReplacePostData, ThrowOnError>): RequestResult<ReplaceCardApiV1AdminCardsCardIdReplacePostResponses, ReplaceCardApiV1AdminCardsCardIdReplacePostErrors, ThrowOnError> => (options.client ?? client).post<ReplaceCardApiV1AdminCardsCardIdReplacePostResponses, ReplaceCardApiV1AdminCardsCardIdReplacePostErrors, ThrowOnError>({ url: '/api/v1/admin/cards/{card_id}/replace', ...options });
+
+/**
+ * Get Card
+ */
+export const getCardApiV1AdminCardsCardIdGet = <ThrowOnError extends boolean = false>(options: Options<GetCardApiV1AdminCardsCardIdGetData, ThrowOnError>): RequestResult<GetCardApiV1AdminCardsCardIdGetResponses, GetCardApiV1AdminCardsCardIdGetErrors, ThrowOnError> => (options.client ?? client).get<GetCardApiV1AdminCardsCardIdGetResponses, GetCardApiV1AdminCardsCardIdGetErrors, ThrowOnError>({ url: '/api/v1/admin/cards/{card_id}', ...options });
+
+/**
+ * List User Links
+ */
+export const listUserLinksApiV1AdminUsersUserIdLinksGet = <ThrowOnError extends boolean = false>(options: Options<ListUserLinksApiV1AdminUsersUserIdLinksGetData, ThrowOnError>): RequestResult<ListUserLinksApiV1AdminUsersUserIdLinksGetResponses, ListUserLinksApiV1AdminUsersUserIdLinksGetErrors, ThrowOnError> => (options.client ?? client).get<ListUserLinksApiV1AdminUsersUserIdLinksGetResponses, ListUserLinksApiV1AdminUsersUserIdLinksGetErrors, ThrowOnError>({ url: '/api/v1/admin/users/{user_id}/links', ...options });
+
+/**
+ * Create User Link
+ */
+export const createUserLinkApiV1AdminUsersUserIdLinksPost = <ThrowOnError extends boolean = false>(options: Options<CreateUserLinkApiV1AdminUsersUserIdLinksPostData, ThrowOnError>): RequestResult<CreateUserLinkApiV1AdminUsersUserIdLinksPostResponses, CreateUserLinkApiV1AdminUsersUserIdLinksPostErrors, ThrowOnError> => (options.client ?? client).post<CreateUserLinkApiV1AdminUsersUserIdLinksPostResponses, CreateUserLinkApiV1AdminUsersUserIdLinksPostErrors, ThrowOnError>({
+    url: '/api/v1/admin/users/{user_id}/links',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get Card Link
+ */
+export const getCardLinkApiV1AdminCardsCardIdLinkGet = <ThrowOnError extends boolean = false>(options: Options<GetCardLinkApiV1AdminCardsCardIdLinkGetData, ThrowOnError>): RequestResult<GetCardLinkApiV1AdminCardsCardIdLinkGetResponses, GetCardLinkApiV1AdminCardsCardIdLinkGetErrors, ThrowOnError> => (options.client ?? client).get<GetCardLinkApiV1AdminCardsCardIdLinkGetResponses, GetCardLinkApiV1AdminCardsCardIdLinkGetErrors, ThrowOnError>({ url: '/api/v1/admin/cards/{card_id}/link', ...options });
+
+/**
+ * Attach Card Link
+ */
+export const attachCardLinkApiV1AdminCardsCardIdLinkAttachPost = <ThrowOnError extends boolean = false>(options: Options<AttachCardLinkApiV1AdminCardsCardIdLinkAttachPostData, ThrowOnError>): RequestResult<AttachCardLinkApiV1AdminCardsCardIdLinkAttachPostResponses, AttachCardLinkApiV1AdminCardsCardIdLinkAttachPostErrors, ThrowOnError> => (options.client ?? client).post<AttachCardLinkApiV1AdminCardsCardIdLinkAttachPostResponses, AttachCardLinkApiV1AdminCardsCardIdLinkAttachPostErrors, ThrowOnError>({
+    url: '/api/v1/admin/cards/{card_id}/link/attach',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Detach Card Link
+ */
+export const detachCardLinkApiV1AdminCardsCardIdLinkDetachPost = <ThrowOnError extends boolean = false>(options: Options<DetachCardLinkApiV1AdminCardsCardIdLinkDetachPostData, ThrowOnError>): RequestResult<DetachCardLinkApiV1AdminCardsCardIdLinkDetachPostResponses, DetachCardLinkApiV1AdminCardsCardIdLinkDetachPostErrors, ThrowOnError> => (options.client ?? client).post<DetachCardLinkApiV1AdminCardsCardIdLinkDetachPostResponses, DetachCardLinkApiV1AdminCardsCardIdLinkDetachPostErrors, ThrowOnError>({
+    url: '/api/v1/admin/cards/{card_id}/link/detach',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Activate Card Link
+ */
+export const activateCardLinkApiV1AdminCardsCardIdLinkActivatePost = <ThrowOnError extends boolean = false>(options: Options<ActivateCardLinkApiV1AdminCardsCardIdLinkActivatePostData, ThrowOnError>): RequestResult<ActivateCardLinkApiV1AdminCardsCardIdLinkActivatePostResponses, ActivateCardLinkApiV1AdminCardsCardIdLinkActivatePostErrors, ThrowOnError> => (options.client ?? client).post<ActivateCardLinkApiV1AdminCardsCardIdLinkActivatePostResponses, ActivateCardLinkApiV1AdminCardsCardIdLinkActivatePostErrors, ThrowOnError>({ url: '/api/v1/admin/cards/{card_id}/link/activate', ...options });
+
+/**
+ * Disable Card Link
+ */
+export const disableCardLinkApiV1AdminCardsCardIdLinkDisablePost = <ThrowOnError extends boolean = false>(options: Options<DisableCardLinkApiV1AdminCardsCardIdLinkDisablePostData, ThrowOnError>): RequestResult<DisableCardLinkApiV1AdminCardsCardIdLinkDisablePostResponses, DisableCardLinkApiV1AdminCardsCardIdLinkDisablePostErrors, ThrowOnError> => (options.client ?? client).post<DisableCardLinkApiV1AdminCardsCardIdLinkDisablePostResponses, DisableCardLinkApiV1AdminCardsCardIdLinkDisablePostErrors, ThrowOnError>({ url: '/api/v1/admin/cards/{card_id}/link/disable', ...options });
+
+/**
+ * Revoke Card Link
+ */
+export const revokeCardLinkApiV1AdminCardsCardIdLinkRevokePost = <ThrowOnError extends boolean = false>(options: Options<RevokeCardLinkApiV1AdminCardsCardIdLinkRevokePostData, ThrowOnError>): RequestResult<RevokeCardLinkApiV1AdminCardsCardIdLinkRevokePostResponses, RevokeCardLinkApiV1AdminCardsCardIdLinkRevokePostErrors, ThrowOnError> => (options.client ?? client).post<RevokeCardLinkApiV1AdminCardsCardIdLinkRevokePostResponses, RevokeCardLinkApiV1AdminCardsCardIdLinkRevokePostErrors, ThrowOnError>({
+    url: '/api/v1/admin/cards/{card_id}/link/revoke',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Lookup Public Profile
@@ -191,15 +298,11 @@ export const metaApiV1MetaGet = <ThrowOnError extends boolean = false>(options?:
 export const lookupPublicProfileApiV1PublicTokenGet = <ThrowOnError extends boolean = false>(options: Options<LookupPublicProfileApiV1PublicTokenGetData, ThrowOnError>): RequestResult<LookupPublicProfileApiV1PublicTokenGetResponses, LookupPublicProfileApiV1PublicTokenGetErrors, ThrowOnError> => (options.client ?? client).get<LookupPublicProfileApiV1PublicTokenGetResponses, LookupPublicProfileApiV1PublicTokenGetErrors, ThrowOnError>({ url: '/api/v1/public/{token}', ...options });
 
 /**
- * Health
- *
- * Return process liveness without contacting MongoDB.
+ * Lookup Emergency Profile
  */
-export const healthHealthGet = <ThrowOnError extends boolean = false>(options?: Options<HealthHealthGetData, ThrowOnError>): RequestResult<HealthHealthGetResponses, unknown, ThrowOnError> => (options?.client ?? client).get<HealthHealthGetResponses, unknown, ThrowOnError>({ url: '/health', ...options });
+export const lookupEmergencyProfileApiV1EmergencyTokenGet = <ThrowOnError extends boolean = false>(options: Options<LookupEmergencyProfileApiV1EmergencyTokenGetData, ThrowOnError>): RequestResult<LookupEmergencyProfileApiV1EmergencyTokenGetResponses, LookupEmergencyProfileApiV1EmergencyTokenGetErrors, ThrowOnError> => (options.client ?? client).get<LookupEmergencyProfileApiV1EmergencyTokenGetResponses, LookupEmergencyProfileApiV1EmergencyTokenGetErrors, ThrowOnError>({ url: '/api/v1/emergency/{token}', ...options });
 
 /**
- * Ready
- *
- * Return readiness only when the managed database answers a ping.
+ * Meta
  */
-export const readyReadyGet = <ThrowOnError extends boolean = false>(options?: Options<ReadyReadyGetData, ThrowOnError>): RequestResult<ReadyReadyGetResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ReadyReadyGetResponses, unknown, ThrowOnError>({ url: '/ready', ...options });
+export const metaApiV1MetaGet = <ThrowOnError extends boolean = false>(options?: Options<MetaApiV1MetaGetData, ThrowOnError>): RequestResult<MetaApiV1MetaGetResponses, unknown, ThrowOnError> => (options?.client ?? client).get<MetaApiV1MetaGetResponses, unknown, ThrowOnError>({ url: '/api/v1/meta', ...options });

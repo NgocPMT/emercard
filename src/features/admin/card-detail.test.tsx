@@ -54,6 +54,8 @@ describe("AdminCardDetailPanel", () => {
     expect(screen.getByRole("heading", { name: /Thẻ EMC-0000-0000-0000-0/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Phân công" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cấp liên kết" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Kích hoạt liên kết" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Vô hiệu hóa liên kết" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Thay thế" })).toBeInTheDocument();
   });
 });
