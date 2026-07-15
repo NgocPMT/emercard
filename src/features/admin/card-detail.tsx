@@ -23,6 +23,7 @@ import {
   getAdminCard,
   issueCard,
   listAdminUserLinks,
+  listAdminUsers,
   lookupAdminUserByEmail,
   reportAdminCardLost,
   replaceCard,
@@ -89,6 +90,13 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
       isApiError(error)
         ? error.retryable && failureCount < 1
         : failureCount < 1,
+  });
+  const usersQuery = useQuery({
+    queryKey: cardKeys.adminUsers(),
+    queryFn: ({ signal }) => listAdminUsers("", signal),
+    staleTime: 30_000,
+    retry: (failureCount, error) =>
+      isApiError(error) ? error.retryable && failureCount < 1 : failureCount < 1,
   });
   const linksQuery = useQuery({
     queryKey: selectedUser
@@ -172,6 +180,7 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
   useEffect(() => {
     const errors = [
       query.error,
+      usersQuery.error,
       linksQuery.error,
       lookupMutation.error,
       attachMutation.error,
@@ -197,6 +206,7 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
     issueMutation.error,
     linksQuery.error,
     lostMutation.error,
+    usersQuery.error,
     lookupMutation.error,
     query.error,
     replaceMutation.error,
@@ -238,12 +248,17 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
   }
 
   const card = query.data;
+  const currentUsers = usersQuery.data?.items ?? [];
+  const filteredUsers = currentUsers.filter((user) =>
+    user.email.includes(userEmail.trim().toLowerCase()),
+  );
   const links = (linksQuery.data?.items ?? []).filter(
     (link) => link.purpose === "card" && link.status === "pending",
   );
   const activeLink = card.link?.status === "active";
   const canBind = !card.issued_at && Boolean(selectedLinkId);
   const errors = [
+    usersQuery.error,
     linksQuery.error,
     lookupMutation.error,
     attachMutation.error,
@@ -340,6 +355,36 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
             </Button>
           </div>
         </div>
+        {usersQuery.error ? null : usersQuery.isFetching ? (
+          <p className="text-sm text-muted-foreground">
+            Đang tải danh sách người dùng...
+          </p>
+        ) : filteredUsers.length > 0 ? (
+          <div className="max-h-64 space-y-2 overflow-y-auto rounded-[var(--radius-panel)] border border-border p-2">
+            {filteredUsers.map((user) => (
+              <button
+                key={user.id}
+                type="button"
+                className="w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-muted"
+                onClick={() => {
+                  setUserEmail(user.email);
+                  setSelectedUser(user);
+                  setSelectedLinkId("");
+                  setMessage(
+                    `Đã chọn hồ sơ ${user.email}. Chỉ các liên kết thẻ đang chờ mới có thể gắn.`,
+                  );
+                }}
+              >
+                <span className="font-medium text-foreground">{user.email}</span>
+                <span className="ml-2 text-muted-foreground">Người dùng</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Không có người dùng phù hợp. Bạn vẫn có thể tìm chính xác bằng email.
+          </p>
+        )}
         {selectedUser ? (
           <div className="rounded-[var(--radius-panel)] border border-border bg-muted/20 p-4 text-sm">
             <p className="font-semibold text-foreground">

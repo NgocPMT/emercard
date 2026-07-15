@@ -5,6 +5,7 @@ import {
   getAdminCard,
   getMyCards,
   listAdminUserLinks,
+  listAdminUsers,
   lookupAdminUserByEmail,
   reportMyCardLost,
   revokeMyCard,
@@ -66,6 +67,26 @@ describe("cards api helpers", () => {
         method: "POST",
         body: { purpose: "card", label: "Thẻ chính" },
       }),
+    );
+  });
+
+  it("parses the current admin user list", async () => {
+    requestJsonMock.mockResolvedValue({
+      items: [
+        {
+          id: "user-1",
+          email: "nurse@example.com",
+          role: "user",
+          created_at: "2026-01-01T00:00:00Z",
+          updated_at: "2026-01-01T00:00:00Z",
+        },
+      ],
+    });
+    await expect(listAdminUsers()).resolves.toMatchObject({
+      items: [{ email: "nurse@example.com" }],
+    });
+    expect(requestJsonMock).toHaveBeenCalledWith(
+      expect.objectContaining({ path: "/admin/users?limit=100" }),
     );
   });
 

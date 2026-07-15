@@ -17,6 +17,7 @@ import {
   cardKeys,
   createAdminUserLink,
   listAdminUserLinks,
+  listAdminUsers,
   lookupAdminUserByEmail,
   type PublicLinkSummary,
   type SafeUser,
@@ -92,6 +93,14 @@ export function AdminLinkManagerPanel() {
     },
   });
 
+  const usersQuery = useQuery({
+    queryKey: cardKeys.adminUsers(),
+    queryFn: ({ signal }) => listAdminUsers("", signal),
+    staleTime: 30_000,
+    retry: (failureCount, error) =>
+      isApiError(error) ? error.retryable && failureCount < 1 : failureCount < 1,
+  });
+
   const createMutation = useMutation({
     mutationFn: ({
       userId,
@@ -126,7 +135,10 @@ export function AdminLinkManagerPanel() {
 
   useEffect(() => {
     const error =
-      lookupMutation.error ?? createMutation.error ?? linksQuery.error;
+      usersQuery.error ??
+      lookupMutation.error ??
+      createMutation.error ??
+      linksQuery.error;
     if (!isApiError(error) || error.status !== 401) return;
     clearSessionCache();
     assignLocation("/login?returnTo=/admin/links");
@@ -135,7 +147,15 @@ export function AdminLinkManagerPanel() {
     createMutation.error,
     linksQuery.error,
     lookupMutation.error,
+    usersQuery.error,
   ]);
+
+  const currentUsers = usersQuery.data?.items ?? [];
+  const filteredUsers = useMemo(() => {
+    const value = email.trim().toLowerCase();
+    if (!value) return currentUsers;
+    return currentUsers.filter((user) => user.email.includes(value));
+  }, [currentUsers, email]);
 
   const userLinks = useMemo(
     () => linksQuery.data?.items ?? [],
@@ -243,6 +263,37 @@ export function AdminLinkManagerPanel() {
             </Button>
           </div>
         </div>
+        {usersQuery.error ? null : usersQuery.isFetching ? (
+          <p className="text-sm text-muted-foreground">
+            Đang tải danh sách người dùng...
+          </p>
+        ) : filteredUsers.length > 0 ? (
+          <div className="max-h-64 space-y-2 overflow-y-auto rounded-[var(--radius-panel)] border border-border p-2">
+            {filteredUsers.map((user) => (
+              <button
+                key={user.id}
+                type="button"
+                className="w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-muted"
+                onClick={() => {
+                  setEmail(user.email);
+                  setSelectedUser(user);
+                  setLastUrl(null);
+                  setMessage(`Đã chọn hồ sơ ${user.email}.`);
+                  void queryClient.invalidateQueries({
+                    queryKey: cardKeys.adminUserLinks(user.id),
+                  });
+                }}
+              >
+                <span className="font-medium text-foreground">{user.email}</span>
+                <span className="ml-2 text-muted-foreground">Người dùng</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Không có người dùng phù hợp. Bạn vẫn có thể tìm chính xác bằng email.
+          </p>
+        )}
       </Panel>
 
       <Panel className="space-y-4">

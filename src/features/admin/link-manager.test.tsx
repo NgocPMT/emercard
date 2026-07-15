@@ -25,25 +25,45 @@ vi.mock("../session", () => ({
 }));
 
 beforeEach(() => {
-  useQueryMock.mockImplementation((config: { enabled?: boolean }) =>
-    config.enabled
-      ? {
+  useQueryMock.mockImplementation(
+    (config: { enabled?: boolean; queryKey?: readonly unknown[] }) => {
+      if (config.queryKey?.[2] === "list") {
+        return {
           isPending: false,
+          isFetching: false,
           error: undefined,
           data: {
             items: [
               {
-                id: "link-1",
-                purpose: "standalone",
-                label: "Liên kết dự phòng",
-                status: "active",
+                id: "user-1",
+                email: "nurse@example.com",
+                role: "user",
                 created_at: "2026-01-01T00:00:00Z",
                 updated_at: "2026-01-01T00:00:00Z",
               },
             ],
           },
-        }
-      : { isPending: false, error: undefined, data: undefined },
+        };
+      }
+      return config.enabled
+        ? {
+            isPending: false,
+            error: undefined,
+            data: {
+              items: [
+                {
+                  id: "link-1",
+                  purpose: "standalone",
+                  label: "Liên kết dự phòng",
+                  status: "active",
+                  created_at: "2026-01-01T00:00:00Z",
+                  updated_at: "2026-01-01T00:00:00Z",
+                },
+              ],
+            },
+          }
+        : { isPending: false, error: undefined, data: undefined };
+    },
   );
   useMutationMock.mockImplementation(
     (config: { onSuccess?: (...args: any[]) => void }) => ({
@@ -89,6 +109,18 @@ describe("AdminLinkManagerPanel", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("lists current users and selects one below the lookup input", async () => {
+    const user = userEvent.setup();
+
+    render(<AdminLinkManagerPanel />);
+
+    await user.click(
+      screen.getByRole("button", { name: /nurse@example\.com/ }),
+    );
+
+    expect(screen.getByText("Đã chọn hồ sơ nurse@example.com.")).toBeInTheDocument();
+  });
+
   it("looks up a profile and shows safe link controls", async () => {
     const user = userEvent.setup();
 
@@ -103,7 +135,7 @@ describe("AdminLinkManagerPanel", () => {
     expect(
       screen.getByText("Đã chọn hồ sơ nurse@example.com."),
     ).toBeInTheDocument();
-    expect(screen.getByText("nurse@example.com")).toBeInTheDocument();
+    expect(screen.getAllByText("nurse@example.com").length).toBeGreaterThan(0);
     expect(
       screen.getByRole("heading", { name: "Tạo liên kết thẻ chờ gắn" }),
     ).toBeInTheDocument();

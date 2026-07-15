@@ -79,6 +79,9 @@ const safeUserSchema = z
     updated_at: z.string(),
   })
   .passthrough();
+const safeUserListResponseSchema = z.object({
+  items: z.array(safeUserSchema),
+});
 
 const adminCardSchema = z
   .object({
@@ -127,12 +130,15 @@ export type UserCardsResponse = z.infer<typeof userCardsResponseSchema>;
 export type AdminCardsResponse = z.infer<typeof adminCardsResponseSchema>;
 export type PublicLinkListResponse = z.infer<typeof linkListResponseSchema>;
 export type SafeUser = z.infer<typeof safeUserSchema>;
+export type SafeUserListResponse = z.infer<typeof safeUserListResponseSchema>;
 
 export const cardKeys = {
   myCards: ["cards", "my"] as const,
   myCard: (cardId: string) => ["cards", "my", cardId] as const,
   adminCards: ["cards", "admin"] as const,
   adminCard: (cardId: string) => ["cards", "admin", cardId] as const,
+  adminUsers: (search = "") =>
+    ["users", "admin", "list", search.trim().toLowerCase()] as const,
   adminUserLookup: (email: string) =>
     ["users", "admin", "lookup", email.trim().toLowerCase()] as const,
   adminUserLinks: (userId: string) => ["links", "admin", userId] as const,
@@ -185,6 +191,20 @@ export async function createBlankCard(
       path: "/admin/cards",
       method: "POST",
       headers: { "Idempotency-Key": crypto.randomUUID() },
+      signal,
+    }),
+  );
+}
+
+export async function listAdminUsers(
+  search = "",
+  signal?: AbortSignal,
+): Promise<SafeUserListResponse> {
+  const params = new URLSearchParams({ limit: "100" });
+  if (search.trim()) params.set("search", search.trim());
+  return safeUserListResponseSchema.parse(
+    await requestJson<unknown>({
+      path: `/admin/users?${params.toString()}`,
       signal,
     }),
   );

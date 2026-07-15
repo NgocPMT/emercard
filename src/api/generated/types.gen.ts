@@ -534,6 +534,16 @@ export type PublicProfileResponse = {
 };
 
 /**
+ * SafeUserListOutput
+ */
+export type SafeUserListOutput = {
+    /**
+     * Items
+     */
+    items: Array<SafeUserOutput>;
+};
+
+/**
  * SafeUserOutput
  */
 export type SafeUserOutput = {
@@ -1151,6 +1161,40 @@ export type ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponses = {
 };
 
 export type ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponse = ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponses[keyof ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponses];
+
+export type ListUsersApiV1AdminUsersGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Search
+         */
+        search?: string | null;
+    };
+    url: '/api/v1/admin/users';
+};
+
+export type ListUsersApiV1AdminUsersGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListUsersApiV1AdminUsersGetError = ListUsersApiV1AdminUsersGetErrors[keyof ListUsersApiV1AdminUsersGetErrors];
+
+export type ListUsersApiV1AdminUsersGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: SafeUserListOutput;
+};
+
+export type ListUsersApiV1AdminUsersGetResponse = ListUsersApiV1AdminUsersGetResponses[keyof ListUsersApiV1AdminUsersGetResponses];
 
 export type LookupUserApiV1AdminUsersLookupGetData = {
     body?: never;
