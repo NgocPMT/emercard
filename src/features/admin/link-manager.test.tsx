@@ -67,6 +67,20 @@ afterEach(() => {
 });
 
 describe("AdminLinkManagerPanel", () => {
+  it("shows the lookup form while the disabled links query is pending", () => {
+    useQueryMock.mockImplementation(() => ({
+      isPending: true,
+      isFetching: false,
+      error: undefined,
+      data: undefined,
+    }));
+
+    render(<AdminLinkManagerPanel />);
+
+    expect(screen.getByRole("heading", { name: "Tìm hồ sơ công khai" })).toBeInTheDocument();
+    expect(screen.queryByText("Đang tải liên kết hồ sơ")).not.toBeInTheDocument();
+  });
+
   it("looks up a profile and shows safe link controls", async () => {
     const user = userEvent.setup();
 

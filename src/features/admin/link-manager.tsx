@@ -114,7 +114,7 @@ export function AdminLinkManagerPanel() {
     setMessage(copied ? "Đã sao chép liên kết." : "Không thể sao chép liên kết.");
   };
 
-  if (lookupMutation.isPending || linksQuery.isPending) {
+  if (lookupMutation.isPending || linksQuery.isFetching) {
     return <PageLoadingState title="Đang tải liên kết hồ sơ" description="Kiểm tra danh sách liên kết và hồ sơ công khai." />;
   }
 
