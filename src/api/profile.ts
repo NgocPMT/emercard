@@ -9,6 +9,7 @@ const emergencyContactSchema = z.object({
   name: z.string(),
   relationship: z.string(),
   phone: z.string(),
+  email: z.string().email().nullable().optional(),
 });
 
 const authenticatedProfileSchema = z.object({
@@ -20,6 +21,7 @@ const authenticatedProfileSchema = z.object({
   important_conditions: z.array(z.string()),
   critical_medications: z.array(z.string()),
   emergency_note: z.string().nullable(),
+  location_alerts_enabled: z.boolean().default(false),
   emergency_contacts: z.array(emergencyContactSchema),
   created_at: z.string(),
   updated_at: z.string(),
@@ -47,12 +49,14 @@ const profileUpsertInputSchema = z.object({
   important_conditions: z.array(z.string()).default([]),
   critical_medications: z.array(z.string()).default([]),
   emergency_note: z.string().nullable().optional(),
+  location_alerts_enabled: z.boolean().default(false),
   emergency_contacts: z
     .array(
       z.object({
         name: z.string(),
         relationship: z.string(),
         phone: z.string(),
+        email: z.string().email().nullable().optional(),
       }),
     )
     .default([]),

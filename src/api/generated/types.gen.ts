@@ -87,9 +87,13 @@ export type AuthenticatedProfileOutput = {
      */
     emergency_note: string | null;
     /**
+     * Location Alerts Enabled
+     */
+    location_alerts_enabled?: boolean;
+    /**
      * Emergency Contacts
      */
-    emergency_contacts: Array<EmergencyContactPublic>;
+    emergency_contacts: Array<EmergencyContactAuthenticated>;
     /**
      * Created At
      */
@@ -219,6 +223,30 @@ export type CurrentUserOutput = {
 };
 
 /**
+ * EmergencyContactAuthenticated
+ *
+ * Owner-only contact projection, including the private email address.
+ */
+export type EmergencyContactAuthenticated = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Relationship
+     */
+    relationship: string;
+    /**
+     * Phone
+     */
+    phone: string;
+    /**
+     * Email
+     */
+    email?: string | null;
+};
+
+/**
  * EmergencyContactInput
  *
  * Client input; contact IDs are intentionally not client-controlled.
@@ -236,6 +264,10 @@ export type EmergencyContactInput = {
      * Phone
      */
     phone: string;
+    /**
+     * Email
+     */
+    email?: string | null;
 };
 
 /**
@@ -329,6 +361,42 @@ export type LinkProvisioningOutput = {
 };
 
 /**
+ * LocationAlertRequest
+ *
+ * Only accept location data produced by the consenting browser.
+ */
+export type LocationAlertRequest = {
+    /**
+     * Latitude
+     */
+    latitude: number;
+    /**
+     * Longitude
+     */
+    longitude: number;
+    /**
+     * Accuracy Meters
+     */
+    accuracy_meters: number;
+    /**
+     * Occurred At
+     */
+    occurred_at: string;
+};
+
+/**
+ * LocationAlertResponse
+ *
+ * Neutral response that does not disclose recipients or provider state.
+ */
+export type LocationAlertResponse = {
+    /**
+     * Status
+     */
+    status: 'sent' | 'unavailable' | 'cooldown';
+};
+
+/**
  * ProfileReadiness
  *
  * Derived profile completion state for authenticated UI flows.
@@ -388,6 +456,10 @@ export type ProfileUpsertInput = {
      * Emergency Note
      */
     emergency_note?: string | null;
+    /**
+     * Location Alerts Enabled
+     */
+    location_alerts_enabled?: boolean;
     /**
      * Emergency Contacts
      */
@@ -1615,6 +1687,36 @@ export type LookupPublicProfileApiV1PublicTokenGetResponses = {
 };
 
 export type LookupPublicProfileApiV1PublicTokenGetResponse = LookupPublicProfileApiV1PublicTokenGetResponses[keyof LookupPublicProfileApiV1PublicTokenGetResponses];
+
+export type SendLocationAlertApiV1PublicTokenLocationAlertPostData = {
+    body: LocationAlertRequest;
+    path: {
+        /**
+         * Token
+         */
+        token: string;
+    };
+    query?: never;
+    url: '/api/v1/public/{token}/location-alert';
+};
+
+export type SendLocationAlertApiV1PublicTokenLocationAlertPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SendLocationAlertApiV1PublicTokenLocationAlertPostError = SendLocationAlertApiV1PublicTokenLocationAlertPostErrors[keyof SendLocationAlertApiV1PublicTokenLocationAlertPostErrors];
+
+export type SendLocationAlertApiV1PublicTokenLocationAlertPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: LocationAlertResponse;
+};
+
+export type SendLocationAlertApiV1PublicTokenLocationAlertPostResponse = SendLocationAlertApiV1PublicTokenLocationAlertPostResponses[keyof SendLocationAlertApiV1PublicTokenLocationAlertPostResponses];
 
 export type LookupEmergencyProfileApiV1EmergencyTokenGetData = {
     body?: never;

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, type FieldPath, type UseFormSetError, type UseFormSetFocus } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Alert, Button, Panel, Select, StatusBadge, Textarea, TextInput } from "../../components/primitives";
+import { Alert, Button, Checkbox, Panel, Select, StatusBadge, Textarea, TextInput } from "../../components/primitives";
 import { EmptyState, PageLoadingState, RetryState, ServiceUnavailableState } from "../../components/feedback";
 import { BrandMark } from "../../components/layout";
 import {
@@ -54,6 +54,7 @@ type ProfileContactRow = {
   name: string;
   relationship: string;
   phone: string;
+  email: string;
 };
 
 export type ProfileFormValues = {
@@ -65,10 +66,12 @@ export type ProfileFormValues = {
   important_conditions: string;
   critical_medications: string;
   emergency_note: string;
+  location_alerts_enabled: boolean;
   emergency_contacts: ProfileContactRow[];
 };
 
-const emptyContact = (): ProfileContactRow => ({ name: "", relationship: "", phone: "" });
+const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+const emptyContact = (): ProfileContactRow => ({ name: "", relationship: "", phone: "", email: "" });
 
 function joinLines(values: string[]) {
   return values.join("\n");
@@ -91,12 +94,14 @@ export function profileViewToFormValues(profile: ProfileView["profile"]): Profil
     important_conditions: joinLines(profile?.important_conditions ?? []),
     critical_medications: joinLines(profile?.critical_medications ?? []),
     emergency_note: profile?.emergency_note ?? "",
+    location_alerts_enabled: profile?.location_alerts_enabled ?? false,
     emergency_contacts:
       profile?.emergency_contacts.length && profile.emergency_contacts.length > 0
         ? profile.emergency_contacts.map((contact) => ({
             name: contact.name,
             relationship: contact.relationship,
             phone: contact.phone,
+            email: contact.email ?? "",
           }))
         : [emptyContact()],
   };
@@ -114,13 +119,15 @@ export function profileFormValuesToPayload(values: ProfileFormValues): ProfileUp
     important_conditions: splitLines(values.important_conditions),
     critical_medications: splitLines(values.critical_medications),
     emergency_note: values.emergency_note.trim() === "" ? null : values.emergency_note.trim(),
+    location_alerts_enabled: values.location_alerts_enabled,
     emergency_contacts: values.emergency_contacts
       .map((contact) => ({
         name: contact.name.trim(),
         relationship: contact.relationship.trim(),
         phone: contact.phone.trim(),
+        email: contact.email.trim() === "" ? null : contact.email.trim().toLowerCase(),
       }))
-      .filter((contact) => contact.name || contact.relationship || contact.phone),
+      .filter((contact) => contact.name || contact.relationship || contact.phone || contact.email),
   };
 }
 
@@ -190,6 +197,7 @@ function PreviewContactList({ contacts }: { contacts: ProfilePreviewContact[] })
           <p className="font-semibold text-foreground">{contact.name}</p>
           <p className="text-sm text-muted-foreground">{contact.relationship}</p>
           <p className="text-sm text-muted-foreground">{contact.phone}</p>
+          {contact.email ? <p className="text-sm text-muted-foreground">Email cảnh báo: {contact.email}</p> : null}
         </li>
       ))}
     </ul>
@@ -234,6 +242,10 @@ function ProfileReadinessPanel({ profileView }: { profileView: ProfileView }) {
             <PreviewRow
               label="Liên hệ khẩn cấp"
               value={<PreviewContactList contacts={profile.emergency_contacts} />}
+            />
+            <PreviewRow
+              label="Cảnh báo vị trí"
+              value={profile.location_alerts_enabled ? "Đang bật" : "Đang tắt"}
             />
           </dl>
         ) : (
@@ -446,7 +458,7 @@ function ProfileEditor({ profileView }: { profileView: ProfileView }) {
                   Xóa
                 </Button>
               </div>
-              <div className="mt-4 grid gap-4 md:grid-cols-3">
+              <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <TextInput
                   label="Tên"
                   placeholder="Sam Example"
@@ -465,10 +477,34 @@ function ProfileEditor({ profileView }: { profileView: ProfileView }) {
                   error={form.formState.errors.emergency_contacts?.[index]?.phone?.message}
                   {...form.register(`emergency_contacts.${index}.phone` as const)}
                 />
+                <TextInput
+                  label="Email nhận cảnh báo"
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  placeholder="lienhe@example.com"
+                  hint="Không bắt buộc. Email này chỉ dùng để gửi cảnh báo vị trí khi chủ thẻ bật tính năng."
+                  error={form.formState.errors.emergency_contacts?.[index]?.email?.message}
+                  {...form.register(`emergency_contacts.${index}.email` as const, {
+                    validate: (value) => !value?.trim() || EMAIL_PATTERN.test(value.trim()) || "Email không hợp lệ",
+                  })}
+                />
               </div>
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="space-y-4">
+        <div>
+          <h3 className="text-lg font-semibold text-foreground">Cảnh báo vị trí</h3>
+          <p className="text-sm text-muted-foreground">Cho phép người quét thẻ gửi vị trí gần đúng đến các liên hệ có email ở trên. Người quét phải tự cấp quyền vị trí trong trình duyệt.</p>
+        </div>
+        <Checkbox
+          label="Bật cảnh báo vị trí cho hồ sơ này"
+          hint="Bạn có thể tắt tính năng này bất cứ lúc nào. Email liên hệ không xuất hiện trên trang công khai."
+          {...form.register("location_alerts_enabled")}
+        />
       </section>
 
       <div className="sticky bottom-3 z-10 -mx-2 flex flex-wrap gap-3 rounded-[var(--radius-panel)] border border-border bg-card/95 p-3 shadow-[var(--shadow-soft)] backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">

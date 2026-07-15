@@ -61,6 +61,217 @@ test("renders the emergency profile and call action", async ({ page }) => {
   await expect(page.getByText(/2026/)).toBeVisible();
 });
 
+test("requests scanner location only after explicit consent and sends a safe alert", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: {
+        getCurrentPosition(success: PositionCallback) {
+          const state = window as Window & { __geoCalls?: number };
+          state.__geoCalls = (state.__geoCalls ?? 0) + 1;
+          success({
+            coords: {
+              latitude: 10.7769,
+              longitude: 106.7009,
+              accuracy: 12,
+              altitude: null,
+              altitudeAccuracy: null,
+              heading: null,
+              speed: null,
+              toJSON: () => ({}),
+            },
+            timestamp: Date.now(),
+            toJSON: () => ({}),
+          });
+        },
+      },
+    });
+  });
+  await serveTokenPage(page);
+  let alertCalls = 0;
+  await page.route("**/api/v1/public/**", async (route) => {
+    if (route.request().method() === "POST") {
+      alertCalls += 1;
+      expect(JSON.parse(route.request().postData() ?? "{}")).toMatchObject({
+        latitude: 10.7769,
+        longitude: 106.7009,
+        accuracy_meters: 12,
+      });
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ status: "sent" }) });
+      return;
+    }
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ profile: baseProfile }) });
+  });
+
+  await page.goto(`/e/${token}`);
+  expect(await page.evaluate(() => (window as Window & { __geoCalls?: number }).__geoCalls ?? 0)).toBe(0);
+  const alertButton = page.getByRole("button", { name: "Gửi cảnh báo vị trí" });
+  await expect(alertButton).toBeVisible();
+  await alertButton.click();
+  await expect(page.getByText("Đã gửi cảnh báo vị trí đến các liên hệ khẩn cấp.")).toBeVisible();
+  expect(alertCalls).toBe(1);
+  expect(await page.evaluate(() => (window as Window & { __geoCalls?: number }).__geoCalls ?? 0)).toBe(1);
+});
+
+test("shows an actionable location permission error", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: {
+        getCurrentPosition(_success: PositionCallback, error: PositionErrorCallback) {
+          error({ code: 1, message: "denied" } as GeolocationPositionError);
+        },
+      },
+    });
+  });
+  await serveTokenPage(page);
+  let postCount = 0;
+  await page.route("**/api/v1/public/**", async (route) => {
+    if (route.request().method() === "POST") {
+      postCount += 1;
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ status: "cooldown" }) });
+      return;
+    }
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ profile: baseProfile }) });
+  });
+
+  await page.goto(`/e/${token}`);
+  await page.getByRole("button", { name: "Gửi cảnh báo vị trí" }).click();
+  await expect(page.getByText(/đã từ chối quyền vị trí/i)).toBeVisible();
+  expect(postCount).toBe(0);
+});
+
+test("renders the backend cooldown state", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: {
+        getCurrentPosition(success: PositionCallback) {
+          success({
+            coords: { latitude: 10, longitude: 20, accuracy: 10, altitude: null, altitudeAccuracy: null, heading: null, speed: null, toJSON: () => ({}) },
+            timestamp: Date.now(),
+            toJSON: () => ({}),
+          });
+        },
+      },
+    });
+  });
+  await serveTokenPage(page);
+  await page.route("**/api/v1/public/**", async (route) => {
+    if (route.request().method() === "POST") {
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ status: "cooldown" }) });
+      return;
+    }
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ profile: baseProfile }) });
+  });
+
+  await page.goto(`/e/${token}`);
+  await page.getByRole("button", { name: "Gửi cảnh báo vị trí" }).click();
+  await expect(page.getByText(/vừa được xử lý/i)).toBeVisible();
+});
+
+test("prevents duplicate clicks while locating and shows unavailable safely", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: {
+        getCurrentPosition(success: PositionCallback) {
+          const state = window as Window & { __geoCalls?: number; __resolveLocation?: PositionCallback };
+          state.__geoCalls = (state.__geoCalls ?? 0) + 1;
+          state.__resolveLocation = success;
+        },
+      },
+    });
+  });
+  await serveTokenPage(page);
+  let postCount = 0;
+  await page.route("**/api/v1/public/**", async (route) => {
+    if (route.request().method() === "POST") {
+      postCount += 1;
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ status: "unavailable" }) });
+      return;
+    }
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ profile: baseProfile }) });
+  });
+
+  await page.goto(`/e/${token}`);
+  const alertButton = page.locator("#location-alert-button");
+  await alertButton.click();
+  await expect(alertButton).toBeDisabled();
+  await alertButton.click({ force: true });
+  expect(await page.evaluate(() => (window as Window & { __geoCalls?: number }).__geoCalls ?? 0)).toBe(1);
+  await page.evaluate(() => {
+    const state = window as Window & { __resolveLocation?: PositionCallback };
+    state.__resolveLocation?.({
+      coords: { latitude: 10, longitude: 20, accuracy: 10, altitude: null, altitudeAccuracy: null, heading: null, speed: null, toJSON: () => ({}) },
+      timestamp: Date.now(),
+      toJSON: () => ({}),
+    });
+  });
+  await expect(page.getByText(/Hiện chưa thể gửi cảnh báo vị trí/i)).toBeVisible();
+  expect(postCount).toBe(1);
+});
+
+test("shows unsupported-browser location guidance", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "geolocation", { configurable: true, value: undefined });
+  });
+  await serveTokenPage(page);
+  await mockProfile(page, 200, { profile: baseProfile });
+
+  await page.goto(`/e/${token}`);
+  await page.getByRole("button", { name: "Gửi cảnh báo vị trí" }).click();
+  await expect(page.getByText(/không hỗ trợ chia sẻ vị trí/i)).toBeVisible();
+});
+
+test("shows timeout and retryable service guidance", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: {
+        getCurrentPosition(_success: PositionCallback, error: PositionErrorCallback) {
+          error({ code: 3, message: "timeout" } as GeolocationPositionError);
+        },
+      },
+    });
+  });
+  await serveTokenPage(page);
+  await mockProfile(page, 200, { profile: baseProfile });
+
+  await page.goto(`/e/${token}`);
+  await page.getByRole("button", { name: "Gửi cảnh báo vị trí" }).click();
+  await expect(page.getByText(/Không nhận được vị trí kịp thời/i)).toBeVisible();
+});
+
+test("shows retryable service guidance after the alert API fails", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: {
+        getCurrentPosition(success: PositionCallback) {
+          success({
+            coords: { latitude: 10, longitude: 20, accuracy: 10, altitude: null, altitudeAccuracy: null, heading: null, speed: null, toJSON: () => ({}) },
+            timestamp: Date.now(),
+            toJSON: () => ({}),
+          });
+        },
+      },
+    });
+  });
+  await serveTokenPage(page);
+  await page.route("**/api/v1/public/**", async (route) => {
+    if (route.request().method() === "POST") {
+      await route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: { code: "location_alert.service_unavailable", message: "safe" } }) });
+      return;
+    }
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ profile: baseProfile }) });
+  });
+
+  await page.goto(`/e/${token}`);
+  await page.getByRole("button", { name: "Gửi cảnh báo vị trí" }).click();
+  await expect(page.getByText(/Máy chủ tạm thời không thể gửi cảnh báo/i)).toBeVisible();
+});
+
 test("renders the not found state", async ({ page }) => {
   await serveTokenPage(page);
   await mockProfile(page, 404, { error: { code: "public_profile.not_found", message: "safe" } });

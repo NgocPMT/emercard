@@ -22,7 +22,7 @@ export const publicEmergencyContactSchema = z
     relationship: z.string(),
     phone: z.string(),
   })
-  .passthrough();
+  .strict();
 
 export const publicEmergencyProfileSchema = z
   .object({
@@ -37,9 +37,9 @@ export const publicEmergencyProfileSchema = z
     emergency_contacts: z.array(publicEmergencyContactSchema),
     profile_updated_at: z.string(),
   })
-  .passthrough();
+  .strict();
 
-export const publicEmergencyResponseSchema = z.object({ profile: publicEmergencyProfileSchema });
+export const publicEmergencyResponseSchema = z.object({ profile: publicEmergencyProfileSchema }).strict();
 
 export type PublicEmergencyContact = z.infer<typeof publicEmergencyContactSchema>;
 export type PublicEmergencyProfile = z.infer<typeof publicEmergencyProfileSchema>;

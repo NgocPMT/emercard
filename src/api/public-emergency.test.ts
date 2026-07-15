@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import { extractEmergencyToken, getPublicEmergencyProfile } from "./public-emergency";
+import {
+  extractEmergencyToken,
+  getPublicEmergencyProfile,
+  sendPublicEmergencyLocationAlert,
+} from "./public-emergency";
 
 const okProfile = {
   profile: {
@@ -37,6 +41,79 @@ describe("public emergency helper", () => {
     vi.stubGlobal("fetch", fetchMock);
     await expect(getPublicEmergencyProfile("token-123")).resolves.toEqual({ kind: "available", profile: okProfile.profile });
     expect(fetchMock).toHaveBeenCalledOnce();
+  });
+
+  it("fails closed if a public response contains a private contact email", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        jsonResponse({
+          profile: {
+            ...okProfile.profile,
+            emergency_contacts: [{ ...okProfile.profile.emergency_contacts[0], email: "private@example.com" }],
+          },
+        }),
+      ),
+    );
+
+    await expect(getPublicEmergencyProfile("token-123")).resolves.toMatchObject({ kind: "service_unavailable" });
+  });
+
+  it("sends only the validated scanner payload with privacy-safe options", async () => {
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      expect(init?.method).toBe("POST");
+      expect(init?.credentials).toBe("omit");
+      expect(init?.cache).toBe("no-store");
+      expect(init?.referrerPolicy).toBe("no-referrer");
+      expect(JSON.parse(String(init?.body))).toEqual({
+        latitude: 10.7769,
+        longitude: 106.7009,
+        accuracy_meters: 12,
+        occurred_at: "2026-01-01T00:00:00.000Z",
+      });
+      return jsonResponse({ status: "sent" });
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(
+      sendPublicEmergencyLocationAlert("token-123", {
+        latitude: 10.7769,
+        longitude: 106.7009,
+        accuracy_meters: 12,
+        occurred_at: "2026-01-01T00:00:00.000Z",
+      }),
+    ).resolves.toEqual({ kind: "sent" });
+  });
+
+  it.each([
+    [200, { status: "unavailable" }, { kind: "unavailable" }],
+    [200, { status: "cooldown" }, { kind: "cooldown" }],
+    [429, { error: { code: "rate_limited", message: "safe" } }, { kind: "rate_limited" }],
+    [503, { error: { code: "location_alert.service_unavailable", message: "safe" } }, { kind: "service_unavailable", retryable: true }],
+  ])("maps location-alert response %s to a safe state", async (status, body, expected) => {
+    vi.stubGlobal("fetch", vi.fn(async () => jsonResponse(body, status)));
+    await expect(
+      sendPublicEmergencyLocationAlert("token-123", {
+        latitude: 10,
+        longitude: 20,
+        accuracy_meters: 10,
+        occurred_at: "2026-01-01T00:00:00.000Z",
+      }),
+    ).resolves.toMatchObject(expected as object);
+  });
+
+  it("rejects invalid coordinates before making a request", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(
+      sendPublicEmergencyLocationAlert("token-123", {
+        latitude: 91,
+        longitude: 20,
+        accuracy_meters: 10,
+        occurred_at: "2026-01-01T00:00:00.000Z",
+      }),
+    ).rejects.toThrow();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it.each([

@@ -137,6 +137,26 @@
           Liên hệ khẩn cấp
         </h3><ul id="contacts" class="mt-3 space-y-3"></ul>
       </section>
+      <section
+        id="location-alert-section"
+        class="mt-8 hidden rounded-[1rem] border border-primary/20 bg-primary/5 p-5"
+        aria-labelledby="location-alert-title"
+      >
+        <h3 id="location-alert-title" class="text-lg font-semibold text-foreground">
+          Gửi cảnh báo vị trí
+        </h3>
+        <p class="mt-2 text-sm leading-6 text-muted-foreground">
+          Khi bạn nhấn nút, vị trí gần đúng của bạn sẽ được gửi qua email cho các liên hệ khẩn cấp của chủ thẻ. Chỉ sử dụng khi cần thiết; đây không thay thế dịch vụ cấp cứu.
+        </p>
+        <button
+          id="location-alert-button"
+          type="button"
+          class="mt-4 inline-flex min-h-12 items-center justify-center rounded-[var(--radius-control)] bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary-strong focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          Gửi cảnh báo vị trí
+        </button>
+        <p id="location-alert-status" class="mt-3 text-sm text-muted-foreground" role="status" aria-live="polite"></p>
+      </section>
       <section class="mt-8 rounded-[1rem] border border-border bg-muted/30 p-4">
         <p class="text-sm font-semibold text-foreground">Cập nhật gần nhất</p><p
           id="updated-at"
@@ -152,6 +172,7 @@
   import {
     extractEmergencyToken,
     getPublicEmergencyProfile,
+    sendPublicEmergencyLocationAlert,
   } from "../../api/public-emergency";
   import { bloodTypeLabel, genderLabel } from "../../lib/profile-labels";
 
@@ -165,6 +186,10 @@
   const serviceUnavailable = document.querySelector("#service-unavailable");
   const retryButton = document.querySelector("#retry");
   const profileElement = document.querySelector("#profile");
+  const locationAlertSection = document.querySelector("#location-alert-section");
+  const locationAlertButton = document.querySelector("#location-alert-button");
+  const locationAlertStatus = document.querySelector("#location-alert-status");
+  let locationAlertBusy = false;
 
   const hide = (element) => element?.classList.add("hidden");
   const show = (element) => element?.classList.remove("hidden");
@@ -179,6 +204,7 @@
       notReady,
       serviceUnavailable,
       profileElement,
+      locationAlertSection,
     ])
       hide(element);
   };
@@ -236,6 +262,83 @@
     if (container.childElementCount) show(section);
     else hide(section);
   };
+  const locationAlertMessages = {
+    idle: "Vị trí chỉ được yêu cầu sau khi bạn nhấn nút.",
+    locating: "Đang xin quyền truy cập vị trí của bạn…",
+    sending: "Đang gửi cảnh báo vị trí…",
+    sent: "Đã gửi cảnh báo vị trí đến các liên hệ khẩn cấp.",
+    unavailable: "Hiện chưa thể gửi cảnh báo vị trí. Vui lòng thử lại khi cần.",
+    cooldown: "Cảnh báo vị trí vừa được xử lý. Vui lòng chờ trước khi gửi lại.",
+    rate_limited: "Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.",
+    permission_denied: "Bạn đã từ chối quyền vị trí. Hãy bật quyền vị trí trong trình duyệt nếu muốn thử lại.",
+    unsupported: "Trình duyệt này không hỗ trợ chia sẻ vị trí.",
+    timeout: "Không nhận được vị trí kịp thời. Hãy thử lại ở nơi có tín hiệu tốt hơn.",
+    unavailable_position: "Không thể xác định vị trí hiện tại. Hãy thử lại sau.",
+    invalid_request: "Vị trí nhận được không hợp lệ. Vui lòng thử lại.",
+    service_unavailable: "Máy chủ tạm thời không thể gửi cảnh báo. Vui lòng thử lại sau.",
+    link_unavailable: "Liên kết hồ sơ không còn sẵn sàng để gửi cảnh báo.",
+  };
+  const setLocationAlertState = (state) => {
+    if (!locationAlertStatus) return;
+    locationAlertStatus.textContent = locationAlertMessages[state] ?? locationAlertMessages.service_unavailable;
+    locationAlertStatus.className = `mt-3 text-sm ${state === "sent" ? "text-success" : state === "service_unavailable" || state === "permission_denied" ? "text-destructive" : "text-muted-foreground"}`;
+  };
+  const setLocationAlertBusy = (busy, label) => {
+    locationAlertBusy = busy;
+    if (!locationAlertButton) return;
+    locationAlertButton.disabled = busy;
+    locationAlertButton.textContent = label;
+  };
+  const readScannerPosition = () =>
+    new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 10_000,
+      });
+    });
+  const handleLocationAlert = async () => {
+    if (locationAlertBusy) return;
+    const token = extractEmergencyToken(window.location.pathname);
+    if (!token) {
+      setLocationAlertState("link_unavailable");
+      return;
+    }
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setLocationAlertState("unsupported");
+      return;
+    }
+    setLocationAlertBusy(true, "Đang xác định vị trí…");
+    setLocationAlertState("locating");
+    try {
+      const position = await readScannerPosition();
+      const { latitude, longitude, accuracy } = position.coords;
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || !Number.isFinite(accuracy) || accuracy <= 0 || latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+        setLocationAlertState("invalid_request");
+        return;
+      }
+      setLocationAlertBusy(true, "Đang gửi cảnh báo…");
+      setLocationAlertState("sending");
+      const result = await sendPublicEmergencyLocationAlert(token, {
+        latitude,
+        longitude,
+        accuracy_meters: accuracy,
+        occurred_at: new Date().toISOString(),
+      });
+      setLocationAlertState(result.kind);
+    } catch (error) {
+      if (error && typeof error === "object" && "code" in error) {
+        const code = error.code;
+        setLocationAlertState(code === 1 ? "permission_denied" : code === 2 ? "unavailable_position" : code === 3 ? "timeout" : "service_unavailable");
+      } else {
+        setLocationAlertState("invalid_request");
+      }
+    } finally {
+      setLocationAlertBusy(false, "Gửi cảnh báo vị trí");
+    }
+  };
+  locationAlertButton?.addEventListener("click", () => void handleLocationAlert());
+
   const renderProfile = (profile) => {
     hideAll();
     setText(
@@ -265,6 +368,9 @@
     setListText("medications-row", "medications", profile.critical_medications);
     setSectionText("note-row", "note", profile.emergency_note);
     renderContacts(profile.emergency_contacts);
+    setLocationAlertState("idle");
+    setLocationAlertBusy(false, "Gửi cảnh báo vị trí");
+    show(locationAlertSection);
     setText(
       "#updated-at",
       new Date(profile.profile_updated_at).toLocaleString("vi-VN"),

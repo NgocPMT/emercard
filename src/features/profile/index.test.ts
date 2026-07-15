@@ -13,7 +13,8 @@ describe("profile form helpers", () => {
       important_conditions: ["Asthma"],
       critical_medications: [],
       emergency_note: "Use the right arm",
-      emergency_contacts: [{ name: "Sam Example", relationship: "Friend", phone: "0901234567" }],
+      location_alerts_enabled: true,
+      emergency_contacts: [{ name: "Sam Example", relationship: "Friend", phone: "0901234567", email: "sam@example.com" }],
       created_at: "2026-01-01T00:00:00.000Z",
       updated_at: "2026-01-01T00:00:00.000Z",
     };
@@ -27,7 +28,8 @@ describe("profile form helpers", () => {
       important_conditions: "Asthma",
       critical_medications: "",
       emergency_note: "Use the right arm",
-      emergency_contacts: [{ name: "Sam Example", relationship: "Friend", phone: "0901234567" }],
+      location_alerts_enabled: true,
+      emergency_contacts: [{ name: "Sam Example", relationship: "Friend", phone: "0901234567", email: "sam@example.com" }],
     });
   });
 
@@ -41,9 +43,10 @@ describe("profile form helpers", () => {
       important_conditions: "Asthma",
       critical_medications: "",
       emergency_note: "  Use the right arm  ",
+      location_alerts_enabled: true,
       emergency_contacts: [
-        { name: " Sam Example ", relationship: " Friend ", phone: " 0901234567 " },
-        { name: "", relationship: "", phone: "" },
+        { name: " Sam Example ", relationship: " Friend ", phone: " 0901234567 ", email: " SAM@EXAMPLE.COM " },
+        { name: "", relationship: "", phone: "", email: "" },
       ],
     };
 
@@ -56,7 +59,8 @@ describe("profile form helpers", () => {
       important_conditions: ["Asthma"],
       critical_medications: [],
       emergency_note: "Use the right arm",
-      emergency_contacts: [{ name: "Sam Example", relationship: "Friend", phone: "0901234567" }],
+      location_alerts_enabled: true,
+      emergency_contacts: [{ name: "Sam Example", relationship: "Friend", phone: "0901234567", email: "sam@example.com" }],
     });
   });
 });
