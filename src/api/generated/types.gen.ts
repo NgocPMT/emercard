@@ -55,16 +55,6 @@ export type AdminCardOutput = {
 };
 
 /**
- * AssignCardInput
- */
-export type AssignCardInput = {
-    /**
-     * User Id
-     */
-    user_id: string;
-};
-
-/**
  * AuthenticatedProfileOutput
  *
  * Sanitized current-user profile response without ownership or readiness metadata.
@@ -541,20 +531,6 @@ export type PublicProfileOutput = {
  */
 export type PublicProfileResponse = {
     profile: PublicProfileOutput;
-};
-
-/**
- * ReassignCardInput
- */
-export type ReassignCardInput = {
-    /**
-     * New Owner Id
-     */
-    new_owner_id: string;
-    /**
-     * Reason
-     */
-    reason: 'assignment_error' | 'recipient_changed' | 'internal_correction';
 };
 
 /**
@@ -1146,66 +1122,6 @@ export type CreateBlankCardApiV1AdminCardsPostResponses = {
 
 export type CreateBlankCardApiV1AdminCardsPostResponse = CreateBlankCardApiV1AdminCardsPostResponses[keyof CreateBlankCardApiV1AdminCardsPostResponses];
 
-export type ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostData = {
-    body?: never;
-    path: {
-        /**
-         * Card Id
-         */
-        card_id: string;
-    };
-    query?: never;
-    url: '/api/v1/admin/cards/{card_id}/provision-link';
-};
-
-export type ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostError = ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostErrors[keyof ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostErrors];
-
-export type ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: CardProvisioningOutput;
-};
-
-export type ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostResponse = ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostResponses[keyof ProvisionLinkApiV1AdminCardsCardIdProvisionLinkPostResponses];
-
-export type ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostData = {
-    body?: never;
-    path: {
-        /**
-         * Card Id
-         */
-        card_id: string;
-    };
-    query?: never;
-    url: '/api/v1/admin/cards/{card_id}/reprovision-link';
-};
-
-export type ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostError = ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostErrors[keyof ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostErrors];
-
-export type ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: CardProvisioningOutput;
-};
-
-export type ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostResponse = ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostResponses[keyof ReprovisionLinkApiV1AdminCardsCardIdReprovisionLinkPostResponses];
-
 export type ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostData = {
     body: ConfirmEncodingInput;
     path: {
@@ -1265,96 +1181,6 @@ export type LookupUserApiV1AdminUsersLookupGetResponses = {
 };
 
 export type LookupUserApiV1AdminUsersLookupGetResponse = LookupUserApiV1AdminUsersLookupGetResponses[keyof LookupUserApiV1AdminUsersLookupGetResponses];
-
-export type AssignCardApiV1AdminCardsCardIdAssignPostData = {
-    body: AssignCardInput;
-    path: {
-        /**
-         * Card Id
-         */
-        card_id: string;
-    };
-    query?: never;
-    url: '/api/v1/admin/cards/{card_id}/assign';
-};
-
-export type AssignCardApiV1AdminCardsCardIdAssignPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type AssignCardApiV1AdminCardsCardIdAssignPostError = AssignCardApiV1AdminCardsCardIdAssignPostErrors[keyof AssignCardApiV1AdminCardsCardIdAssignPostErrors];
-
-export type AssignCardApiV1AdminCardsCardIdAssignPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: AdminCardOutput;
-};
-
-export type AssignCardApiV1AdminCardsCardIdAssignPostResponse = AssignCardApiV1AdminCardsCardIdAssignPostResponses[keyof AssignCardApiV1AdminCardsCardIdAssignPostResponses];
-
-export type ReassignCardApiV1AdminCardsCardIdReassignPostData = {
-    body: ReassignCardInput;
-    path: {
-        /**
-         * Card Id
-         */
-        card_id: string;
-    };
-    query?: never;
-    url: '/api/v1/admin/cards/{card_id}/reassign';
-};
-
-export type ReassignCardApiV1AdminCardsCardIdReassignPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReassignCardApiV1AdminCardsCardIdReassignPostError = ReassignCardApiV1AdminCardsCardIdReassignPostErrors[keyof ReassignCardApiV1AdminCardsCardIdReassignPostErrors];
-
-export type ReassignCardApiV1AdminCardsCardIdReassignPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: AdminCardOutput;
-};
-
-export type ReassignCardApiV1AdminCardsCardIdReassignPostResponse = ReassignCardApiV1AdminCardsCardIdReassignPostResponses[keyof ReassignCardApiV1AdminCardsCardIdReassignPostResponses];
-
-export type UnassignCardApiV1AdminCardsCardIdUnassignPostData = {
-    body?: never;
-    path: {
-        /**
-         * Card Id
-         */
-        card_id: string;
-    };
-    query?: never;
-    url: '/api/v1/admin/cards/{card_id}/unassign';
-};
-
-export type UnassignCardApiV1AdminCardsCardIdUnassignPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UnassignCardApiV1AdminCardsCardIdUnassignPostError = UnassignCardApiV1AdminCardsCardIdUnassignPostErrors[keyof UnassignCardApiV1AdminCardsCardIdUnassignPostErrors];
-
-export type UnassignCardApiV1AdminCardsCardIdUnassignPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: AdminCardOutput;
-};
-
-export type UnassignCardApiV1AdminCardsCardIdUnassignPostResponse = UnassignCardApiV1AdminCardsCardIdUnassignPostResponses[keyof UnassignCardApiV1AdminCardsCardIdUnassignPostResponses];
 
 export type IssueCardApiV1AdminCardsCardIdIssuePostData = {
     body?: never;
@@ -1625,36 +1451,6 @@ export type AttachCardLinkApiV1AdminCardsCardIdLinkAttachPostResponses = {
 };
 
 export type AttachCardLinkApiV1AdminCardsCardIdLinkAttachPostResponse = AttachCardLinkApiV1AdminCardsCardIdLinkAttachPostResponses[keyof AttachCardLinkApiV1AdminCardsCardIdLinkAttachPostResponses];
-
-export type DetachCardLinkApiV1AdminCardsCardIdLinkDetachPostData = {
-    body: LinkDetachInput;
-    path: {
-        /**
-         * Card Id
-         */
-        card_id: string;
-    };
-    query?: never;
-    url: '/api/v1/admin/cards/{card_id}/link/detach';
-};
-
-export type DetachCardLinkApiV1AdminCardsCardIdLinkDetachPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type DetachCardLinkApiV1AdminCardsCardIdLinkDetachPostError = DetachCardLinkApiV1AdminCardsCardIdLinkDetachPostErrors[keyof DetachCardLinkApiV1AdminCardsCardIdLinkDetachPostErrors];
-
-export type DetachCardLinkApiV1AdminCardsCardIdLinkDetachPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: AdminCardOutput;
-};
-
-export type DetachCardLinkApiV1AdminCardsCardIdLinkDetachPostResponse = DetachCardLinkApiV1AdminCardsCardIdLinkDetachPostResponses[keyof DetachCardLinkApiV1AdminCardsCardIdLinkDetachPostResponses];
 
 export type ActivateCardLinkApiV1AdminCardsCardIdLinkActivatePostData = {
     body?: never;
