@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AdminApplicationRoot } from ".";
 
@@ -15,6 +15,12 @@ vi.mock("@tanstack/react-query", async () => {
   };
 });
 
+vi.mock("./card-detail", () => ({
+  AdminCardDetailPanel: ({ cardId }: { cardId: string }) => (
+    <div>Card detail {cardId}</div>
+  ),
+}));
+
 vi.mock("../session", () => ({
   PageApplicationRoot: ({ brand, title, description, children }: { brand: React.ReactNode; title?: React.ReactNode; description?: React.ReactNode; children: React.ReactNode }) => (
     <div>
@@ -29,6 +35,7 @@ vi.mock("../session", () => ({
 
 afterEach(() => {
   useQueryMock.mockReset();
+  window.history.replaceState({}, "", "/");
 });
 
 describe("AdminApplicationRoot", () => {
@@ -41,6 +48,16 @@ describe("AdminApplicationRoot", () => {
     expect(screen.getAllByRole("heading", { name: "Kho thẻ" })).toHaveLength(1);
     expect(screen.getByText("Đang tải kho thẻ")).toBeInTheDocument();
     expect(screen.queryByText("Chưa có hành động quản trị ở màn hình này")).not.toBeInTheDocument();
+  });
+
+  it("reads cardId from the browser URL for static detail pages", async () => {
+    window.history.pushState({}, "", "/admin/cards/detail?cardId=card-1");
+
+    render(<AdminApplicationRoot section="detail" />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Card detail card-1")).toBeInTheDocument();
+    });
   });
 
   it("renders the link lookup section", () => {

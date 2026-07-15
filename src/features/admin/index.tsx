@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Panel, StatusBadge } from "../../components/primitives";
 import {
@@ -312,6 +312,14 @@ export function AdminApplicationRoot({
   section: AdminAppSection;
   cardId?: string | null;
 }) {
+  const [locationCardId, setLocationCardId] = useState<string | null>(cardId ?? null);
+
+  useEffect(() => {
+    if (cardId || section !== "detail") return;
+    setLocationCardId(new URLSearchParams(window.location.search).get("cardId"));
+  }, [cardId, section]);
+
+  const resolvedCardId = cardId ?? locationCardId;
   const copy = sectionCopy[section];
   const currentPath =
     section === "overview"
@@ -336,8 +344,8 @@ export function AdminApplicationRoot({
       ) : section === "links" ? (
         <AdminLinkManagerPanel />
       ) : section === "detail" ? (
-        cardId ? (
-          <AdminCardDetailPanel cardId={cardId} />
+        resolvedCardId ? (
+          <AdminCardDetailPanel cardId={resolvedCardId} />
         ) : (
           <EmptyState
             title="Thiếu cardId"
