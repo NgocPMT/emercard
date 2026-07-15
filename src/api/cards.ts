@@ -1,9 +1,23 @@
 import { z } from "zod";
 import { requestJson } from "./http-client";
 
-const cardStatusSchema = z.enum(["unassigned", "assigned", "active", "disabled", "lost", "replaced", "void"]);
+const cardStatusSchema = z.enum([
+  "unassigned",
+  "assigned",
+  "active",
+  "disabled",
+  "lost",
+  "replaced",
+  "void",
+]);
 const publicLinkPurposeSchema = z.enum(["card", "standalone"]);
-const publicLinkStatusSchema = z.enum(["pending", "active", "disabled", "revoked", "expired"]);
+const publicLinkStatusSchema = z.enum([
+  "pending",
+  "active",
+  "disabled",
+  "revoked",
+  "expired",
+]);
 
 const userCardSchema = z
   .object({
@@ -18,6 +32,7 @@ const userCardSchema = z
     updated_at: z.string(),
     can_activate: z.boolean(),
     can_disable: z.boolean(),
+    can_revoke: z.boolean(),
     can_report_lost: z.boolean(),
     blocking_reason: z.string().nullable().optional(),
     link_status: publicLinkStatusSchema.nullable().optional(),
@@ -73,10 +88,7 @@ const adminCardSchema = z
     is_current: z.boolean(),
     encoding_state: z.enum(["not_provisioned", "link_generated", "verified"]),
     owner: z
-      .object({
-        id: z.string(),
-        email: z.string(),
-      })
+      .object({ id: z.string(), email: z.string() })
       .nullable()
       .optional(),
     link: publicLinkSummarySchema.nullable().optional(),
@@ -90,29 +102,27 @@ const adminCardSchema = z
   })
   .passthrough();
 
-const adminCardsResponseSchema = z.object({ items: z.array(adminCardSchema), next_cursor: z.string().nullable().optional() });
-
+const adminCardsResponseSchema = z.object({
+  items: z.array(adminCardSchema),
+  next_cursor: z.string().nullable().optional(),
+});
 const linkProvisioningResponseSchema = z.object({
   link: publicLinkSummarySchema,
   public_token: z.string(),
   public_url: z.string(),
 });
-
-const linkListResponseSchema = z.object({ items: z.array(publicLinkSummarySchema) });
-
-const provisioningResponseSchema = z.object({
-  card: adminCardSchema,
-  provisioning: z.object({ public_token: z.string(), public_url: z.string() }),
+const linkListResponseSchema = z.object({
+  items: z.array(publicLinkSummarySchema),
 });
-
 const adminCardResponseSchema = adminCardSchema;
 
 export type UserCard = z.infer<typeof userCardSchema>;
 export type AdminCard = z.infer<typeof adminCardSchema>;
 export type PublicLinkSummary = z.infer<typeof publicLinkSummarySchema>;
 export type CardAssignmentSummary = z.infer<typeof cardAssignmentSummarySchema>;
-export type LinkProvisioningResponse = z.infer<typeof linkProvisioningResponseSchema>;
-export type CardProvisioningResponse = z.infer<typeof provisioningResponseSchema>;
+export type LinkProvisioningResponse = z.infer<
+  typeof linkProvisioningResponseSchema
+>;
 export type UserCardsResponse = z.infer<typeof userCardsResponseSchema>;
 export type AdminCardsResponse = z.infer<typeof adminCardsResponseSchema>;
 export type PublicLinkListResponse = z.infer<typeof linkListResponseSchema>;
@@ -121,174 +131,216 @@ export type SafeUser = z.infer<typeof safeUserSchema>;
 export const cardKeys = {
   myCards: ["cards", "my"] as const,
   myCard: (cardId: string) => ["cards", "my", cardId] as const,
-  myLinks: ["links", "my"] as const,
   adminCards: ["cards", "admin"] as const,
   adminCard: (cardId: string) => ["cards", "admin", cardId] as const,
-  adminUserLookup: (email: string) => ["users", "admin", "lookup", email.trim().toLowerCase()] as const,
+  adminUserLookup: (email: string) =>
+    ["users", "admin", "lookup", email.trim().toLowerCase()] as const,
   adminUserLinks: (userId: string) => ["links", "admin", userId] as const,
 };
 
-export async function getMyCards(signal?: AbortSignal): Promise<UserCardsResponse> {
-  const response = await requestJson<unknown>({ path: "/me/cards", signal });
-  return userCardsResponseSchema.parse(response);
+export async function getMyCards(
+  signal?: AbortSignal,
+): Promise<UserCardsResponse> {
+  return userCardsResponseSchema.parse(
+    await requestJson<unknown>({ path: "/me/cards", signal }),
+  );
 }
 
-export async function activateMyCard(cardId: string, signal?: AbortSignal): Promise<UserCard> {
-  const response = await requestJson<unknown>({ path: `/me/cards/${encodeURIComponent(cardId)}/activate`, method: "POST", signal });
-  return userCardSchema.parse(response);
+async function userCardMutation(
+  cardId: string,
+  action: "activate" | "disable" | "revoke" | "lost",
+  signal?: AbortSignal,
+): Promise<UserCard> {
+  return userCardSchema.parse(
+    await requestJson<unknown>({
+      path: `/me/cards/${encodeURIComponent(cardId)}/${action}`,
+      method: "POST",
+      signal,
+    }),
+  );
 }
 
-export async function disableMyCard(cardId: string, signal?: AbortSignal): Promise<UserCard> {
-  const response = await requestJson<unknown>({ path: `/me/cards/${encodeURIComponent(cardId)}/disable`, method: "POST", signal });
-  return userCardSchema.parse(response);
+export const activateMyCard = (cardId: string, signal?: AbortSignal) =>
+  userCardMutation(cardId, "activate", signal);
+export const disableMyCard = (cardId: string, signal?: AbortSignal) =>
+  userCardMutation(cardId, "disable", signal);
+export const revokeMyCard = (cardId: string, signal?: AbortSignal) =>
+  userCardMutation(cardId, "revoke", signal);
+export const reportMyCardLost = (cardId: string, signal?: AbortSignal) =>
+  userCardMutation(cardId, "lost", signal);
+
+export async function getAdminCards(
+  signal?: AbortSignal,
+): Promise<AdminCardsResponse> {
+  return adminCardsResponseSchema.parse(
+    await requestJson<unknown>({ path: "/admin/cards", signal }),
+  );
 }
 
-export async function reportMyCardLost(cardId: string, signal?: AbortSignal): Promise<UserCard> {
-  const response = await requestJson<unknown>({ path: `/me/cards/${encodeURIComponent(cardId)}/lost`, method: "POST", signal });
-  return userCardSchema.parse(response);
+export async function createBlankCard(
+  signal?: AbortSignal,
+): Promise<AdminCard> {
+  return adminCardResponseSchema.parse(
+    await requestJson<unknown>({
+      path: "/admin/cards",
+      method: "POST",
+      headers: { "Idempotency-Key": crypto.randomUUID() },
+      signal,
+    }),
+  );
 }
 
-export async function getAdminCards(signal?: AbortSignal): Promise<AdminCardsResponse> {
-  const response = await requestJson<unknown>({ path: "/admin/cards", signal });
-  return adminCardsResponseSchema.parse(response);
+export async function lookupAdminUserByEmail(
+  email: string,
+  signal?: AbortSignal,
+): Promise<SafeUser> {
+  return safeUserSchema.parse(
+    await requestJson<unknown>({
+      path: `/admin/users/lookup?email=${encodeURIComponent(email.trim())}`,
+      signal,
+    }),
+  );
 }
 
-export async function createBlankCard(signal?: AbortSignal): Promise<AdminCard> {
-  const response = await requestJson<unknown>({ path: "/admin/cards", method: "POST", headers: { "Idempotency-Key": crypto.randomUUID() }, signal });
-  return adminCardResponseSchema.parse(response);
-}
-
-export async function provisionCardLink(cardId: string, signal?: AbortSignal): Promise<CardProvisioningResponse> {
-  const response = await requestJson<unknown>({ path: `/admin/cards/${encodeURIComponent(cardId)}/provision-link`, method: "POST", signal });
-  return provisioningResponseSchema.parse(response);
-}
-
-export async function lookupAdminUserByEmail(email: string, signal?: AbortSignal): Promise<SafeUser> {
-  const response = await requestJson<unknown>({
-    path: `/admin/users/lookup?email=${encodeURIComponent(email.trim())}`,
-    signal,
-  });
-  return safeUserSchema.parse(response);
-}
-
-export async function listAdminUserLinks(userId: string, signal?: AbortSignal): Promise<PublicLinkListResponse> {
-  const response = await requestJson<unknown>({ path: `/admin/users/${encodeURIComponent(userId)}/links`, signal });
-  return linkListResponseSchema.parse(response);
+export async function listAdminUserLinks(
+  userId: string,
+  signal?: AbortSignal,
+): Promise<PublicLinkListResponse> {
+  return linkListResponseSchema.parse(
+    await requestJson<unknown>({
+      path: `/admin/users/${encodeURIComponent(userId)}/links`,
+      signal,
+    }),
+  );
 }
 
 export async function createAdminUserLink(
   userId: string,
-  payload: { purpose: "card" | "standalone"; label?: string | null },
+  payload: { label?: string | null },
   signal?: AbortSignal,
 ): Promise<LinkProvisioningResponse> {
+  return linkProvisioningResponseSchema.parse(
+    await requestJson<unknown>({
+      path: `/admin/users/${encodeURIComponent(userId)}/links`,
+      method: "POST",
+      body: { purpose: "card", label: payload.label ?? null },
+      signal,
+    }),
+  );
+}
+
+export async function getAdminCard(
+  cardId: string,
+  signal?: AbortSignal,
+): Promise<AdminCard> {
+  return adminCardResponseSchema.parse(
+    await requestJson<unknown>({
+      path: `/admin/cards/${encodeURIComponent(cardId)}`,
+      signal,
+    }),
+  );
+}
+
+export async function attachAdminCardLink(
+  cardId: string,
+  publicAccessLinkId: string,
+  signal?: AbortSignal,
+): Promise<AdminCard> {
+  return adminCardResponseSchema.parse(
+    await requestJson<unknown>({
+      path: `/admin/cards/${encodeURIComponent(cardId)}/link/attach`,
+      method: "POST",
+      body: { public_access_link_id: publicAccessLinkId },
+      signal,
+    }),
+  );
+}
+
+export async function confirmCardEncoding(
+  cardId: string,
+  publicUrl: string,
+  signal?: AbortSignal,
+): Promise<AdminCard> {
+  return adminCardResponseSchema.parse(
+    await requestJson<unknown>({
+      path: `/admin/cards/${encodeURIComponent(cardId)}/confirm-encoding`,
+      method: "POST",
+      body: { public_url: publicUrl },
+      signal,
+    }),
+  );
+}
+
+async function adminCardMutation(
+  cardId: string,
+  action:
+    "activate" | "disable" | "revoke" | "issue" | "void" | "lost" | "replace",
+  signal?: AbortSignal,
+) {
   const response = await requestJson<unknown>({
-    path: `/admin/users/${encodeURIComponent(userId)}/links`,
+    path: `/admin/cards/${encodeURIComponent(cardId)}/${action}`,
     method: "POST",
-    body: payload,
     signal,
   });
-  return linkProvisioningResponseSchema.parse(response);
+  return action === "replace"
+    ? z
+        .object({
+          card: adminCardSchema,
+          provisioning: z.object({
+            public_token: z.string(),
+            public_url: z.string(),
+          }),
+        })
+        .parse(response).card
+    : adminCardResponseSchema.parse(response);
 }
 
-export async function getAdminCard(cardId: string, signal?: AbortSignal): Promise<AdminCard> {
-  const response = await requestJson<unknown>({ path: `/admin/cards/${encodeURIComponent(cardId)}`, signal });
-  return adminCardResponseSchema.parse(response);
+export const issueCard = (cardId: string, signal?: AbortSignal) =>
+  adminCardMutation(cardId, "issue", signal);
+export const voidCard = (cardId: string, signal?: AbortSignal) =>
+  adminCardMutation(cardId, "void", signal);
+export const reportAdminCardLost = (cardId: string, signal?: AbortSignal) =>
+  adminCardMutation(cardId, "lost", signal);
+export const replaceCard = (cardId: string, signal?: AbortSignal) =>
+  adminCardMutation(cardId, "replace", signal);
+
+export async function activateAdminCardLink(
+  cardId: string,
+  signal?: AbortSignal,
+): Promise<AdminCard> {
+  return adminCardResponseSchema.parse(
+    await requestJson<unknown>({
+      path: `/admin/cards/${encodeURIComponent(cardId)}/link/activate`,
+      method: "POST",
+      signal,
+    }),
+  );
 }
 
-export async function getAdminCardLink(cardId: string, signal?: AbortSignal): Promise<AdminCard> {
-  const response = await requestJson<unknown>({ path: `/admin/cards/${encodeURIComponent(cardId)}/link`, signal });
-  return adminCardResponseSchema.parse(response);
+export async function disableAdminCardLink(
+  cardId: string,
+  signal?: AbortSignal,
+): Promise<AdminCard> {
+  return adminCardResponseSchema.parse(
+    await requestJson<unknown>({
+      path: `/admin/cards/${encodeURIComponent(cardId)}/link/disable`,
+      method: "POST",
+      signal,
+    }),
+  );
 }
 
-export async function attachAdminCardLink(cardId: string, publicAccessLinkId: string, signal?: AbortSignal): Promise<AdminCard> {
-  const response = await requestJson<unknown>({
-    path: `/admin/cards/${encodeURIComponent(cardId)}/link/attach`,
-    method: "POST",
-    body: { public_access_link_id: publicAccessLinkId },
-    signal,
-  });
-  return adminCardResponseSchema.parse(response);
-}
-
-export async function detachAdminCardLink(cardId: string, reason?: string | null, signal?: AbortSignal): Promise<AdminCard> {
-  const response = await requestJson<unknown>({
-    path: `/admin/cards/${encodeURIComponent(cardId)}/link/detach`,
-    method: "POST",
-    body: { reason: reason ?? null },
-    signal,
-  });
-  return adminCardResponseSchema.parse(response);
-}
-
-export async function activateAdminCardLink(cardId: string, signal?: AbortSignal): Promise<AdminCard> {
-  const response = await requestJson<unknown>({
-    path: `/admin/cards/${encodeURIComponent(cardId)}/link/activate`,
-    method: "POST",
-    signal,
-  });
-  return adminCardResponseSchema.parse(response);
-}
-
-export async function disableAdminCardLink(cardId: string, signal?: AbortSignal): Promise<AdminCard> {
-  const response = await requestJson<unknown>({
-    path: `/admin/cards/${encodeURIComponent(cardId)}/link/disable`,
-    method: "POST",
-    signal,
-  });
-  return adminCardResponseSchema.parse(response);
-}
-
-export async function revokeAdminCardLink(cardId: string, reason?: string | null, signal?: AbortSignal): Promise<AdminCard> {
-  const response = await requestJson<unknown>({
-    path: `/admin/cards/${encodeURIComponent(cardId)}/link/revoke`,
-    method: "POST",
-    body: { reason: reason ?? null },
-    signal,
-  });
-  return adminCardResponseSchema.parse(response);
-}
-
-export async function reprovisionCardLink(cardId: string, signal?: AbortSignal): Promise<CardProvisioningResponse> {
-  const response = await requestJson<unknown>({ path: `/admin/cards/${encodeURIComponent(cardId)}/reprovision-link`, method: "POST", signal });
-  return provisioningResponseSchema.parse(response);
-}
-
-export async function confirmCardEncoding(cardId: string, publicUrl: string, signal?: AbortSignal): Promise<AdminCard> {
-  const response = await requestJson<unknown>({ path: `/admin/cards/${encodeURIComponent(cardId)}/confirm-encoding`, method: "POST", body: { public_url: publicUrl }, signal });
-  return adminCardResponseSchema.parse(response);
-}
-
-export async function assignCard(cardId: string, userId: string, signal?: AbortSignal): Promise<AdminCard> {
-  const response = await requestJson<unknown>({ path: `/admin/cards/${encodeURIComponent(cardId)}/assign`, method: "POST", body: { user_id: userId }, signal });
-  return adminCardResponseSchema.parse(response);
-}
-
-export async function reassignCard(cardId: string, newOwnerId: string, reason: "assignment_error" | "recipient_changed" | "internal_correction", signal?: AbortSignal): Promise<AdminCard> {
-  const response = await requestJson<unknown>({ path: `/admin/cards/${encodeURIComponent(cardId)}/reassign`, method: "POST", body: { new_owner_id: newOwnerId, reason }, signal });
-  return adminCardResponseSchema.parse(response);
-}
-
-export async function unassignCard(cardId: string, signal?: AbortSignal): Promise<AdminCard> {
-  const response = await requestJson<unknown>({ path: `/admin/cards/${encodeURIComponent(cardId)}/unassign`, method: "POST", signal });
-  return adminCardResponseSchema.parse(response);
-}
-
-export async function issueCard(cardId: string, signal?: AbortSignal): Promise<AdminCard> {
-  const response = await requestJson<unknown>({ path: `/admin/cards/${encodeURIComponent(cardId)}/issue`, method: "POST", signal });
-  return adminCardResponseSchema.parse(response);
-}
-
-export async function voidCard(cardId: string, signal?: AbortSignal): Promise<AdminCard> {
-  const response = await requestJson<unknown>({ path: `/admin/cards/${encodeURIComponent(cardId)}/void`, method: "POST", signal });
-  return adminCardResponseSchema.parse(response);
-}
-
-export async function reportAdminCardLost(cardId: string, signal?: AbortSignal): Promise<AdminCard> {
-  const response = await requestJson<unknown>({ path: `/admin/cards/${encodeURIComponent(cardId)}/lost`, method: "POST", signal });
-  return adminCardResponseSchema.parse(response);
-}
-
-export async function replaceCard(cardId: string, signal?: AbortSignal): Promise<CardProvisioningResponse> {
-  const response = await requestJson<unknown>({ path: `/admin/cards/${encodeURIComponent(cardId)}/replace`, method: "POST", signal });
-  return provisioningResponseSchema.parse(response);
+export async function revokeAdminCardLink(
+  cardId: string,
+  reason?: string | null,
+  signal?: AbortSignal,
+): Promise<AdminCard> {
+  return adminCardResponseSchema.parse(
+    await requestJson<unknown>({
+      path: `/admin/cards/${encodeURIComponent(cardId)}/link/revoke`,
+      method: "POST",
+      body: { reason: reason ?? null },
+      signal,
+    }),
+  );
 }

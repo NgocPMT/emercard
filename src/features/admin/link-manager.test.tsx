@@ -9,7 +9,9 @@ const useMutationMock = vi.fn();
 const invalidateQueriesMock = vi.fn();
 
 vi.mock("@tanstack/react-query", async () => {
-  const actual = await vi.importActual<typeof import("@tanstack/react-query")>("@tanstack/react-query");
+  const actual = await vi.importActual<typeof import("@tanstack/react-query")>(
+    "@tanstack/react-query",
+  );
   return {
     ...actual,
     useQuery: (...args: unknown[]) => useQueryMock(...args),
@@ -43,21 +45,23 @@ beforeEach(() => {
         }
       : { isPending: false, error: undefined, data: undefined },
   );
-  useMutationMock.mockImplementation((config: { onSuccess?: (...args: any[]) => void }) => ({
-    isPending: false,
-    error: undefined,
-    mutate: (...args: any[]) =>
-      config.onSuccess?.(
-        {
-          id: "user-1",
-          email: "nurse@example.com",
-          role: "user",
-          created_at: "2026-01-01T00:00:00Z",
-          updated_at: "2026-01-01T00:00:00Z",
-        },
-        args[0],
-      ),
-  }));
+  useMutationMock.mockImplementation(
+    (config: { onSuccess?: (...args: any[]) => void }) => ({
+      isPending: false,
+      error: undefined,
+      mutate: (...args: any[]) =>
+        config.onSuccess?.(
+          {
+            id: "user-1",
+            email: "nurse@example.com",
+            role: "user",
+            created_at: "2026-01-01T00:00:00Z",
+            updated_at: "2026-01-01T00:00:00Z",
+          },
+          args[0],
+        ),
+    }),
+  );
 });
 
 afterEach(() => {
@@ -77,8 +81,12 @@ describe("AdminLinkManagerPanel", () => {
 
     render(<AdminLinkManagerPanel />);
 
-    expect(screen.getByRole("heading", { name: "Tìm hồ sơ công khai" })).toBeInTheDocument();
-    expect(screen.queryByText("Đang tải liên kết hồ sơ")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Tìm hồ sơ công khai" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("Đang tải liên kết hồ sơ"),
+    ).not.toBeInTheDocument();
   });
 
   it("looks up a profile and shows safe link controls", async () => {
@@ -86,13 +94,22 @@ describe("AdminLinkManagerPanel", () => {
 
     render(<AdminLinkManagerPanel />);
 
-    expect(screen.getByRole("heading", { name: "Tìm hồ sơ công khai" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Tìm hồ sơ công khai" }),
+    ).toBeInTheDocument();
     await user.type(screen.getByLabelText("Email hồ sơ"), "nurse@example.com");
     await user.click(screen.getByRole("button", { name: "Tìm hồ sơ" }));
 
-    expect(screen.getByText("Hồ sơ đã chọn")).toBeInTheDocument();
+    expect(
+      screen.getByText("Đã chọn hồ sơ nurse@example.com."),
+    ).toBeInTheDocument();
     expect(screen.getByText("nurse@example.com")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Tạo liên kết công khai" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Tạo liên kết thẻ chờ gắn" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Liên kết dự phòng")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /kích hoạt/i }),
+    ).not.toBeInTheDocument();
   });
 });

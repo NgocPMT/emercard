@@ -1,7 +1,12 @@
 import React, { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Panel, StatusBadge } from "../../components/primitives";
-import { EmptyState, PageLoadingState, RetryState, ServiceUnavailableState } from "../../components/feedback";
+import {
+  EmptyState,
+  PageLoadingState,
+  RetryState,
+  ServiceUnavailableState,
+} from "../../components/feedback";
 import { BrandMark } from "../../components/layout";
 import {
   activateMyCard,
@@ -9,9 +14,15 @@ import {
   disableMyCard,
   getMyCards,
   reportMyCardLost,
+  revokeMyCard,
   type UserCard,
 } from "../../api/cards";
-import { getCurrentProfile, profileKeys, profileMissingFieldLabel, profileReadinessLabel } from "../../api/profile";
+import {
+  getCurrentProfile,
+  profileKeys,
+  profileMissingFieldLabel,
+  profileReadinessLabel,
+} from "../../api/profile";
 import { isApiError } from "../../api/http-client";
 import { assignLocation } from "../../lib/navigation";
 import { bloodTypeLabel, genderLabel } from "../../lib/profile-labels";
@@ -27,14 +38,19 @@ const navigation = [
 
 const appBrand = <BrandMark />;
 
-const sectionCopy: Record<UserAppSection, { title: string; description: string }> = {
+const sectionCopy: Record<
+  UserAppSection,
+  { title: string; description: string }
+> = {
   overview: {
     title: "Tổng quan tài khoản",
-    description: "Màn hình nền tảng cho các thông tin tóm tắt và điều hướng nhanh.",
+    description:
+      "Màn hình nền tảng cho các thông tin tóm tắt và điều hướng nhanh.",
   },
   profile: {
     title: "Hồ sơ y tế",
-    description: "Khung giao diện cho quản lý hồ sơ y tế sẽ được nối ở các giai đoạn sau.",
+    description:
+      "Khung giao diện cho quản lý hồ sơ y tế sẽ được nối ở các giai đoạn sau.",
   },
   cards: {
     title: "Thẻ của tôi",
@@ -76,6 +92,21 @@ function cardStatusVariant(card: UserCard) {
   }
 }
 
+function cardBlockingReasonLabel(card: UserCard) {
+  const labels: Record<string, string> = {
+    card_terminal: "Thẻ đã ở trạng thái kết thúc.",
+    card_encoding_not_verified: "Thẻ chưa được xác minh mã hóa.",
+    link_not_assigned: "Thẻ chưa có liên kết hồ sơ.",
+    link_revoked: "Liên kết đã bị thu hồi và không thể kích hoạt lại.",
+    link_expired: "Liên kết đã hết hạn.",
+    card_not_current: "Thẻ không còn là thẻ hiện hành.",
+  };
+  return card.blocking_reason
+    ? (labels[card.blocking_reason] ??
+        "Thao tác hiện chưa được máy chủ cho phép.")
+    : null;
+}
+
 function ProfileSummaryCard() {
   const { clearSessionCache } = useSession();
   const query = useQuery({
@@ -90,7 +121,8 @@ function ProfileSummaryCard() {
     },
   });
 
-  const isSessionExpired = isApiError(query.error) && query.error.status === 401;
+  const isSessionExpired =
+    isApiError(query.error) && query.error.status === 401;
 
   useEffect(() => {
     if (!isSessionExpired) {
@@ -101,17 +133,40 @@ function ProfileSummaryCard() {
   }, [clearSessionCache, isSessionExpired]);
 
   if (query.isPending) {
-    return <PageLoadingState title="Đang tải hồ sơ y tế" description="Kiểm tra trạng thái hồ sơ hiện tại của tài khoản." />;
+    return (
+      <PageLoadingState
+        title="Đang tải hồ sơ y tế"
+        description="Kiểm tra trạng thái hồ sơ hiện tại của tài khoản."
+      />
+    );
   }
 
   if (query.error) {
     if (isSessionExpired) {
-      return <PageLoadingState title="Đang chuyển hướng đến đăng nhập" description="Phiên đã hết hạn, bạn sẽ được đăng nhập lại an toàn." />;
+      return (
+        <PageLoadingState
+          title="Đang chuyển hướng đến đăng nhập"
+          description="Phiên đã hết hạn, bạn sẽ được đăng nhập lại an toàn."
+        />
+      );
     }
-    if (isApiError(query.error) && (query.error.status === 503 || query.error.retryable)) {
-      return <ServiceUnavailableState title="Không thể tải hồ sơ" description="Máy chủ tạm thời không phản hồi. Vui lòng thử lại sau." />;
+    if (
+      isApiError(query.error) &&
+      (query.error.status === 503 || query.error.retryable)
+    ) {
+      return (
+        <ServiceUnavailableState
+          title="Không thể tải hồ sơ"
+          description="Máy chủ tạm thời không phản hồi. Vui lòng thử lại sau."
+        />
+      );
     }
-    return <RetryState title="Không thể tải hồ sơ" description="Đã xảy ra lỗi khi đọc hồ sơ y tế." />;
+    return (
+      <RetryState
+        title="Không thể tải hồ sơ"
+        description="Đã xảy ra lỗi khi đọc hồ sơ y tế."
+      />
+    );
   }
 
   const profile = query.data.profile;
@@ -121,17 +176,31 @@ function ProfileSummaryCard() {
     <Panel className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold text-foreground">Trạng thái hồ sơ</h2>
-          <p className="text-sm text-muted-foreground">{profileReadinessLabel(readiness.status)}</p>
+          <h2 className="text-xl font-semibold text-foreground">
+            Trạng thái hồ sơ
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {profileReadinessLabel(readiness.status)}
+          </p>
         </div>
-        <StatusBadge variant={readiness.status === "ready" ? "success" : readiness.status === "not_started" ? "warning" : "primary"}>
+        <StatusBadge
+          variant={
+            readiness.status === "ready"
+              ? "success"
+              : readiness.status === "not_started"
+                ? "warning"
+                : "primary"
+          }
+        >
           {readiness.status}
         </StatusBadge>
       </div>
 
       {profile ? (
         <div className="space-y-3 text-sm text-muted-foreground">
-          <p className="text-foreground">{profile.display_name ?? "Chưa đặt tên hiển thị"}</p>
+          <p className="text-foreground">
+            {profile.display_name ?? "Chưa đặt tên hiển thị"}
+          </p>
           <p>Năm sinh: {profile.birth_year ?? "chưa cung cấp"}</p>
           <p>Giới tính: {genderLabel(profile.gender)}</p>
           <p>Nhóm máu: {bloodTypeLabel(profile.blood_type)}</p>
@@ -142,7 +211,10 @@ function ProfileSummaryCard() {
           title="Chưa có hồ sơ"
           description="Hồ sơ y tế sẽ xuất hiện sau lần lưu đầu tiên."
           action={
-            <a href="/app/profile" className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
+            <a
+              href="/app/profile"
+              className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+            >
               Tạo hồ sơ
             </a>
           }
@@ -196,6 +268,12 @@ function MyCardsPanel() {
       void queryClient.invalidateQueries({ queryKey: cardKeys.myCards });
     },
   });
+  const revokeMutation = useMutation({
+    mutationFn: (cardId: string) => revokeMyCard(cardId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: cardKeys.myCards });
+    },
+  });
 
   useEffect(() => {
     if (isApiError(query.error) && query.error.status === 401) {
@@ -205,23 +283,51 @@ function MyCardsPanel() {
   }, [clearSessionCache, query.error]);
 
   if (query.isPending) {
-    return <PageLoadingState title="Đang tải thẻ" description="Kiểm tra danh sách thẻ đã cấp cho tài khoản." />;
+    return (
+      <PageLoadingState
+        title="Đang tải thẻ"
+        description="Kiểm tra danh sách thẻ đã cấp cho tài khoản."
+      />
+    );
   }
 
   if (query.error) {
     if (isApiError(query.error) && query.error.status === 401) {
-      return <PageLoadingState title="Đang chuyển hướng đến đăng nhập" description="Phiên đã hết hạn, bạn sẽ được đăng nhập lại an toàn." />;
+      return (
+        <PageLoadingState
+          title="Đang chuyển hướng đến đăng nhập"
+          description="Phiên đã hết hạn, bạn sẽ được đăng nhập lại an toàn."
+        />
+      );
     }
-    if (isApiError(query.error) && (query.error.status === 503 || query.error.retryable)) {
-      return <ServiceUnavailableState title="Không thể tải thẻ" description="Máy chủ tạm thời không phản hồi. Vui lòng thử lại sau." />;
+    if (
+      isApiError(query.error) &&
+      (query.error.status === 503 || query.error.retryable)
+    ) {
+      return (
+        <ServiceUnavailableState
+          title="Không thể tải thẻ"
+          description="Máy chủ tạm thời không phản hồi. Vui lòng thử lại sau."
+        />
+      );
     }
-    return <RetryState title="Không thể tải thẻ" description="Đã xảy ra lỗi khi đọc danh sách thẻ." />;
+    return (
+      <RetryState
+        title="Không thể tải thẻ"
+        description="Đã xảy ra lỗi khi đọc danh sách thẻ."
+      />
+    );
   }
 
   const cards = query.data.cards;
 
   if (cards.length === 0) {
-    return <EmptyState title="Chưa có thẻ" description="Thẻ của bạn sẽ xuất hiện ở đây sau khi được cấp và phát hành." />;
+    return (
+      <EmptyState
+        title="Chưa có thẻ"
+        description="Thẻ của bạn sẽ xuất hiện ở đây sau khi được cấp và phát hành."
+      />
+    );
   }
 
   return (
@@ -230,16 +336,25 @@ function MyCardsPanel() {
         <Panel key={card.id} className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-foreground">Thẻ {card.serial}</h2>
-              <p className="text-sm text-muted-foreground">{cardStatusLabel(card)}</p>
+              <h2 className="text-lg font-semibold text-foreground">
+                Thẻ {card.serial}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {cardStatusLabel(card)}
+              </p>
             </div>
-            <StatusBadge variant={cardStatusVariant(card)}>{card.status}</StatusBadge>
+            <StatusBadge variant={cardStatusVariant(card)}>
+              {card.status}
+            </StatusBadge>
           </div>
           <div className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
             <p>Đang hiện diện: {card.is_current ? "Có" : "Không"}</p>
-            <p>Đã cấp: {new Date(card.issued_at).toLocaleDateString("vi-VN")}</p>
+            <p>
+              Đã cấp: {new Date(card.issued_at).toLocaleDateString("vi-VN")}
+            </p>
             <p>Cho phép kích hoạt: {card.can_activate ? "Có" : "Không"}</p>
             <p>Cho phép vô hiệu hóa: {card.can_disable ? "Có" : "Không"}</p>
+            <p>Cho phép thu hồi: {card.can_revoke ? "Có" : "Không"}</p>
             <p>Liên kết: {card.link_status ?? "chưa có"}</p>
             <p>Loại liên kết: {card.link_purpose ?? "chưa có"}</p>
             <p>Nhãn liên kết: {card.link_label ?? "không có"}</p>
@@ -251,7 +366,12 @@ function MyCardsPanel() {
               disabled={!card.can_activate || activateMutation.isPending}
               busy={activateMutation.isPending}
               onClick={() => {
-                if (!window.confirm("Bạn có chắc muốn kích hoạt public URL của thẻ này không?")) return;
+                if (
+                  !window.confirm(
+                    "Bạn có chắc muốn kích hoạt public URL của thẻ này không?",
+                  )
+                )
+                  return;
                 activateMutation.mutate(card.id);
               }}
             >
@@ -277,17 +397,39 @@ function MyCardsPanel() {
             <Button
               type="button"
               variant="ghost"
+              disabled={!card.can_revoke || revokeMutation.isPending}
+              busy={revokeMutation.isPending}
+              onClick={() => {
+                if (
+                  !window.confirm(
+                    "Thu hồi liên kết là thao tác kết thúc và không thể kích hoạt lại?",
+                  )
+                )
+                  return;
+                revokeMutation.mutate(card.id);
+              }}
+            >
+              Thu hồi liên kết
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
               disabled={!card.can_report_lost || lostMutation.isPending}
               busy={lostMutation.isPending}
               onClick={() => {
-                if (!window.confirm("Bạn có chắc muốn báo mất thẻ này không?")) return;
+                if (!window.confirm("Bạn có chắc muốn báo mất thẻ này không?"))
+                  return;
                 lostMutation.mutate(card.id);
               }}
             >
               Báo mất
             </Button>
           </div>
-          {card.blocking_reason ? <p className="text-xs text-muted-foreground">Lý do chặn: {card.blocking_reason}</p> : null}
+          {cardBlockingReasonLabel(card) ? (
+            <p className="text-xs text-muted-foreground">
+              Hướng dẫn: {cardBlockingReasonLabel(card)}
+            </p>
+          ) : null}
         </Panel>
       ))}
     </div>
@@ -303,7 +445,11 @@ export function UserApplicationRoot({ section }: { section: UserAppSection }) {
       brand={appBrand}
       title={copy.title}
       description={copy.description}
-      navigation={navigation.map((item) => ({ ...item, current: item.href === (section === "overview" ? "/app" : `/app/${section}`) }))}
+      navigation={navigation.map((item) => ({
+        ...item,
+        current:
+          item.href === (section === "overview" ? "/app" : `/app/${section}`),
+      }))}
       userLabel={<StatusBadge variant="primary">Người dùng</StatusBadge>}
     >
       {section === "overview" ? (

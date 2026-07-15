@@ -1,40 +1,73 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Alert, Button, Panel, Select, StatusBadge, TextInput } from "../../components/primitives";
-import { EmptyState, PageLoadingState, RetryState, ServiceUnavailableState } from "../../components/feedback";
 import {
-  assignCard,
+  Alert,
+  Button,
+  Panel,
+  Select,
+  StatusBadge,
+  TextInput,
+} from "../../components/primitives";
+import {
+  EmptyState,
+  PageLoadingState,
+  RetryState,
+  ServiceUnavailableState,
+} from "../../components/feedback";
+import {
   activateAdminCardLink,
   attachAdminCardLink,
   cardKeys,
   confirmCardEncoding,
-  detachAdminCardLink,
   disableAdminCardLink,
   getAdminCard,
   issueCard,
+  listAdminUserLinks,
   lookupAdminUserByEmail,
-  provisionCardLink,
-  reassignCard,
   reportAdminCardLost,
   replaceCard,
   revokeAdminCardLink,
-  reprovisionCardLink,
   type AdminCard,
+  type PublicLinkSummary,
   type SafeUser,
   voidCard,
 } from "../../api/cards";
 import { isApiError } from "../../api/http-client";
-import { copyText } from "../../lib/clipboard";
 import { assignLocation } from "../../lib/navigation";
 import { useSession } from "../session";
 
 function historyEntries(card: AdminCard) {
-  const unknown = card as AdminCard & {
+  const value = card as AdminCard & {
     assignment_history?: Array<Record<string, unknown>>;
     custody_history?: Array<Record<string, unknown>>;
     history?: Array<Record<string, unknown>>;
   };
-  return unknown.assignment_history ?? unknown.custody_history ?? unknown.history ?? [];
+  return (
+    value.assignment_history ?? value.custody_history ?? value.history ?? []
+  );
+}
+
+function apiMessage(error: unknown) {
+  if (!isApiError(error)) return null;
+  const messages: Record<string, string> = {
+    "card.profile_not_ready":
+      "Hồ sơ chưa đủ thông tin bắt buộc. Hãy yêu cầu người dùng hoàn thiện hồ sơ trước khi gắn liên kết.",
+    "card.assignment_target_invalid":
+      "Chỉ liên kết thẻ đang chờ của hồ sơ sẵn sàng mới được gắn vào thẻ chưa phát hành.",
+    "card.already_issued":
+      "Thẻ đã phát hành; không thể gắn lại hoặc thay đổi liên kết.",
+    "card.encoding_mismatch":
+      "URL đọc lại không khớp với liên kết đang gắn trên thẻ.",
+    "card.encoding_not_verified":
+      "Cần xác minh mã hóa trước khi phát hành hoặc kích hoạt.",
+    "card.reassignment_not_allowed":
+      "Thẻ đã qua mốc không cho phép thay đổi liên kết.",
+  };
+  return (
+    messages[error.code] ??
+    error.message ??
+    "Thao tác không được máy chủ chấp nhận."
+  );
 }
 
 export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
@@ -42,372 +75,499 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
   const queryClient = useQueryClient();
   const [encodingUrl, setEncodingUrl] = useState("");
   const [userEmail, setUserEmail] = useState("");
-  const [assignedUser, setAssignedUser] = useState<SafeUser | null>(null);
-  const [linkId, setLinkId] = useState("");
-  const [detachReason, setDetachReason] = useState("");
+  const [selectedUser, setSelectedUser] = useState<SafeUser | null>(null);
+  const [selectedLinkId, setSelectedLinkId] = useState("");
+  const [reason, setReason] = useState("");
   const [message, setMessage] = useState<string | null>(null);
-  const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
 
   const query = useQuery({
     queryKey: cardKeys.adminCard(cardId),
     queryFn: ({ signal }) => getAdminCard(cardId, signal),
     enabled: Boolean(cardId),
     staleTime: 10_000,
-    retry: (failureCount, error) => {
-      if (isApiError(error)) {
-        return error.retryable && failureCount < 1;
-      }
-      return failureCount < 1;
-    },
+    retry: (failureCount, error) =>
+      isApiError(error)
+        ? error.retryable && failureCount < 1
+        : failureCount < 1,
   });
-
+  const linksQuery = useQuery({
+    queryKey: selectedUser
+      ? cardKeys.adminUserLinks(selectedUser.id)
+      : ["links", "admin", "empty"],
+    queryFn: ({ signal }) => listAdminUserLinks(selectedUser?.id ?? "", signal),
+    enabled: Boolean(selectedUser),
+    staleTime: 5_000,
+  });
   const lookupMutation = useMutation({
-    mutationFn: (nextEmail: string) => lookupAdminUserByEmail(nextEmail),
+    mutationFn: (email: string) => lookupAdminUserByEmail(email),
     onSuccess: (user) => {
-      setAssignedUser(user);
-      setMessage(`Đã chọn ${user.email}.`);
+      setSelectedUser(user);
+      setSelectedLinkId("");
+      setMessage(
+        `Đã chọn hồ sơ ${user.email}. Chỉ các liên kết thẻ đang chờ mới có thể gắn.`,
+      );
     },
   });
-  const provisionMutation = useMutation({
-    mutationFn: () => provisionCardLink(cardId),
-    onSuccess: (result) => {
-      setCopiedUrl(result.provisioning.public_url);
-      setEncodingUrl(result.provisioning.public_url);
-      setMessage("Đã cấp liên kết cho thẻ.");
-      void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(cardId) });
+  const refresh = () => {
+    void queryClient.invalidateQueries({
+      queryKey: cardKeys.adminCard(cardId),
+    });
+    void queryClient.invalidateQueries({ queryKey: cardKeys.adminCards });
+    if (selectedUser)
+      void queryClient.invalidateQueries({
+        queryKey: cardKeys.adminUserLinks(selectedUser.id),
+      });
+  };
+  const mutation = (action: () => Promise<unknown>, success: string) => ({
+    mutationFn: action,
+    onSuccess: () => {
+      setMessage(success);
+      refresh();
     },
   });
-  const reprovisionMutation = useMutation({
-    mutationFn: () => reprovisionCardLink(cardId),
-    onSuccess: (result) => {
-      setCopiedUrl(result.provisioning.public_url);
-      setEncodingUrl(result.provisioning.public_url);
-      setMessage("Đã cấp lại liên kết cho thẻ.");
-      void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(cardId) });
-    },
-  });
+  const attachMutation = useMutation(
+    mutation(
+      () => attachAdminCardLink(cardId, selectedLinkId),
+      "Đã gắn liên kết hồ sơ vào thẻ.",
+    ),
+  );
   const confirmMutation = useMutation({
-    mutationFn: (publicUrl: string) => confirmCardEncoding(cardId, publicUrl),
+    mutationFn: () => confirmCardEncoding(cardId, encodingUrl),
     onSuccess: () => {
-      setMessage("Đã xác nhận mã hóa.");
-      void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(cardId) });
+      setMessage("Đã xác minh mã hóa vật lý.");
+      refresh();
     },
   });
-  const assignMutation = useMutation({
-    mutationFn: (userId: string) => assignCard(cardId, userId),
-    onSuccess: () => {
-      setMessage("Đã phân công thẻ.");
-      void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(cardId) });
-    },
-  });
-  const reassignMutation = useMutation({
-    mutationFn: (userId: string) => reassignCard(cardId, userId, "internal_correction"),
-    onSuccess: () => {
-      setMessage("Đã đổi chủ thẻ.");
-      void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(cardId) });
-    },
-  });
-  const issueMutation = useMutation({
-    mutationFn: () => issueCard(cardId),
-    onSuccess: () => {
-      setMessage("Đã phát hành thẻ.");
-      void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(cardId) });
-    },
-  });
-  const lostMutation = useMutation({
-    mutationFn: () => reportAdminCardLost(cardId),
-    onSuccess: () => {
-      setMessage("Đã báo mất thẻ.");
-      void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(cardId) });
-    },
-  });
-  const replaceMutation = useMutation({
-    mutationFn: () => replaceCard(cardId),
-    onSuccess: (result) => {
-      setCopiedUrl(result.provisioning.public_url);
-      setMessage("Đã tạo thẻ thay thế.");
-      void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(result.card.id) });
-    },
-  });
-  const voidMutation = useMutation({
-    mutationFn: () => voidCard(cardId),
-    onSuccess: () => {
-      setMessage("Đã hủy thẻ.");
-      void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(cardId) });
-    },
-  });
-  const attachMutation = useMutation({
-    mutationFn: (publicAccessLinkId: string) => attachAdminCardLink(cardId, publicAccessLinkId),
-    onSuccess: () => {
-      setMessage("Đã gắn liên kết vào thẻ.");
-      void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(cardId) });
-    },
-  });
-  const activateLinkMutation = useMutation({
-    mutationFn: () => activateAdminCardLink(cardId),
-    onSuccess: () => {
-      setMessage("Đã kích hoạt liên kết của thẻ.");
-      void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(cardId) });
-    },
-  });
-  const disableLinkMutation = useMutation({
-    mutationFn: () => disableAdminCardLink(cardId),
-    onSuccess: () => {
-      setMessage("Đã vô hiệu hóa liên kết của thẻ.");
-      void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(cardId) });
-    },
-  });
-  const detachMutation = useMutation({
-    mutationFn: (reason: string | null) => detachAdminCardLink(cardId, reason),
-    onSuccess: () => {
-      setMessage("Đã gỡ liên kết khỏi thẻ.");
-      void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(cardId) });
-    },
-  });
-  const revokeMutation = useMutation({
-    mutationFn: (reason: string | null) => revokeAdminCardLink(cardId, reason),
-    onSuccess: () => {
-      setMessage("Đã thu hồi liên kết của thẻ.");
-      void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(cardId) });
-    },
-  });
+  const issueMutation = useMutation(
+    mutation(() => issueCard(cardId), "Đã phát hành thẻ."),
+  );
+  const activateMutation = useMutation(
+    mutation(
+      () => activateAdminCardLink(cardId),
+      "Đã kích hoạt liên kết của thẻ.",
+    ),
+  );
+  const disableMutation = useMutation(
+    mutation(
+      () => disableAdminCardLink(cardId),
+      "Đã vô hiệu hóa liên kết của thẻ.",
+    ),
+  );
+  const revokeMutation = useMutation(
+    mutation(
+      () => revokeAdminCardLink(cardId, reason.trim() || null),
+      "Đã thu hồi liên kết của thẻ.",
+    ),
+  );
+  const lostMutation = useMutation(
+    mutation(() => reportAdminCardLost(cardId), "Đã ghi nhận thẻ bị mất."),
+  );
+  const replaceMutation = useMutation(
+    mutation(() => replaceCard(cardId), "Đã tạo quy trình thay thế thẻ."),
+  );
+  const voidMutation = useMutation(
+    mutation(() => voidCard(cardId), "Đã hủy thẻ."),
+  );
 
   useEffect(() => {
-    const error =
-      query.error ??
-      lookupMutation.error ??
-      provisionMutation.error ??
-      reprovisionMutation.error ??
-      confirmMutation.error ??
-      assignMutation.error ??
-      reassignMutation.error ??
-      issueMutation.error ??
-      lostMutation.error ??
-      replaceMutation.error ??
-      voidMutation.error ??
-      attachMutation.error ??
-      activateLinkMutation.error ??
-      disableLinkMutation.error ??
-      detachMutation.error ??
-      revokeMutation.error;
-    if (!isApiError(error) || error.status !== 401) {
-      return;
+    const errors = [
+      query.error,
+      linksQuery.error,
+      lookupMutation.error,
+      attachMutation.error,
+      confirmMutation.error,
+      issueMutation.error,
+      activateMutation.error,
+      disableMutation.error,
+      revokeMutation.error,
+      lostMutation.error,
+      replaceMutation.error,
+      voidMutation.error,
+    ];
+    if (errors.some((error) => isApiError(error) && error.status === 401)) {
+      clearSessionCache();
+      assignLocation("/login?returnTo=/admin/cards");
     }
-    clearSessionCache();
-    assignLocation("/login?returnTo=/admin/cards");
   }, [
-    assignMutation.error,
+    activateMutation.error,
     attachMutation.error,
-    activateLinkMutation.error,
     clearSessionCache,
     confirmMutation.error,
-    detachMutation.error,
-    disableLinkMutation.error,
+    disableMutation.error,
     issueMutation.error,
+    linksQuery.error,
     lostMutation.error,
     lookupMutation.error,
-    provisionMutation.error,
     query.error,
-    reassignMutation.error,
     replaceMutation.error,
-    reprovisionMutation.error,
     revokeMutation.error,
     voidMutation.error,
   ]);
 
-  if (query.isPending) {
-    return <PageLoadingState title="Đang tải chi tiết thẻ" description="Kiểm tra trạng thái, liên kết và phân công của thẻ." />;
-  }
-
+  if (query.isPending)
+    return (
+      <PageLoadingState
+        title="Đang tải chi tiết thẻ"
+        description="Kiểm tra trạng thái liên kết và phát hành của thẻ."
+      />
+    );
   if (query.error) {
-    if (isApiError(query.error) && query.error.status === 401) {
-      return <PageLoadingState title="Đang chuyển hướng đến đăng nhập" description="Phiên đã hết hạn, bạn sẽ được đăng nhập lại an toàn." />;
-    }
-    if (isApiError(query.error) && (query.error.status === 503 || query.error.retryable)) {
-      return <ServiceUnavailableState title="Không thể tải chi tiết thẻ" description="Máy chủ tạm thời không phản hồi. Vui lòng thử lại sau." />;
-    }
-    return <RetryState title="Không thể tải chi tiết thẻ" description="Đã xảy ra lỗi khi đọc chi tiết thẻ." />;
+    if (isApiError(query.error) && query.error.status === 401)
+      return (
+        <PageLoadingState
+          title="Đang chuyển hướng đến đăng nhập"
+          description="Phiên đã hết hạn."
+        />
+      );
+    if (
+      isApiError(query.error) &&
+      (query.error.status === 503 || query.error.retryable)
+    )
+      return (
+        <ServiceUnavailableState
+          title="Không thể tải chi tiết thẻ"
+          description="Máy chủ tạm thời không phản hồi."
+        />
+      );
+    return (
+      <RetryState
+        title="Không thể tải chi tiết thẻ"
+        description="Đã xảy ra lỗi khi đọc chi tiết thẻ."
+      />
+    );
   }
 
   const card = query.data;
+  const links = (linksQuery.data?.items ?? []).filter(
+    (link) => link.purpose === "card" && link.status === "pending",
+  );
+  const activeLink = card.link?.status === "active";
+  const canBind = !card.issued_at && Boolean(selectedLinkId);
+  const errors = [
+    linksQuery.error,
+    lookupMutation.error,
+    attachMutation.error,
+    confirmMutation.error,
+    issueMutation.error,
+    activateMutation.error,
+    disableMutation.error,
+    revokeMutation.error,
+    lostMutation.error,
+    replaceMutation.error,
+    voidMutation.error,
+  ];
+  const errorMessage = errors.map(apiMessage).find(Boolean) ?? null;
   const entries = historyEntries(card);
-
-  const copyCurrentUrl = async () => {
-    if (!copiedUrl) return;
-    const ok = await copyText(copiedUrl);
-    setMessage(ok ? "Đã sao chép URL." : "Không thể sao chép URL.");
-  };
-
-  const handleLookup = () => {
-    const value = userEmail.trim();
-    if (!value) {
-      setMessage("Hãy nhập email để tìm hồ sơ.");
-      return;
-    }
-    lookupMutation.mutate(value);
-  };
 
   return (
     <div className="space-y-6">
       <Panel className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-xl font-semibold text-foreground">Thẻ {card.serial}</h2>
-            <p className="text-sm text-muted-foreground">Khung chi tiết và thao tác cấp phát an toàn.</p>
+            <h2 className="text-xl font-semibold text-foreground">
+              Thẻ {card.serial}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Liên kết hồ sơ là nguồn truy cập công khai duy nhất của thẻ.
+            </p>
           </div>
-          <StatusBadge variant={card.status === "active" ? "success" : card.status === "disabled" ? "warning" : card.status === "lost" || card.status === "replaced" || card.status === "void" ? "danger" : "primary"}>
+          <StatusBadge
+            variant={
+              card.status === "active"
+                ? "success"
+                : card.status === "disabled"
+                  ? "warning"
+                  : card.status === "lost" ||
+                      card.status === "replaced" ||
+                      card.status === "void"
+                    ? "danger"
+                    : "primary"
+            }
+          >
             {card.status}
           </StatusBadge>
         </div>
-
         {message ? <Alert variant="info">{message}</Alert> : null}
-
-        <div className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-          <p>Đang hiện diện: {card.is_current ? "Có" : "Không"}</p>
-          <p>Chủ sở hữu: {card.owner?.email ?? "chưa có"}</p>
-          <p>Cấp phát lúc: {card.issued_at ? new Date(card.issued_at).toLocaleString("vi-VN") : "chưa"}</p>
-          <p>Xác minh mã: {card.encoding_verified_at ? new Date(card.encoding_verified_at).toLocaleString("vi-VN") : "chưa"}</p>
-          <p>Liên kết: {card.link?.status ?? "chưa có"}</p>
-          <p>Phân công: {card.assignment?.status ?? "chưa có"}</p>
-        </div>
-
-        <div className="grid gap-3 md:grid-cols-[1fr_auto]">
-          <TextInput label="URL xác minh" value={encodingUrl} onChange={(event) => setEncodingUrl(event.target.value)} placeholder="https://app.example/e/..." />
-          <div className="flex items-end">
-            <Button type="button" variant="secondary" busy={confirmMutation.isPending} onClick={() => {
-              if (!window.confirm("Bạn có chắc muốn xác nhận mã hóa thẻ này không?")) return;
-              confirmMutation.mutate(encodingUrl);
-            }}>
-              Xác nhận mã
-            </Button>
-          </div>
-        </div>
-
-        {copiedUrl ? (
-          <Alert variant="success" title="Liên kết cấp phát">
-            <div className="break-all text-sm">{copiedUrl}</div>
-            <div className="mt-3 flex flex-wrap gap-3">
-              <Button type="button" variant="secondary" onClick={() => void copyCurrentUrl()}>
-                Sao chép
-              </Button>
-            </div>
+        {errorMessage ? (
+          <Alert variant="danger" title="Không thể thực hiện thao tác">
+            {errorMessage}
           </Alert>
         ) : null}
+        <div className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+          <p>Trạng thái mã: {card.encoding_state}</p>
+          <p>Liên kết: {card.link?.status ?? "chưa gắn"}</p>
+          <p>Gắn liên kết: {card.assignment?.status ?? "chưa có"}</p>
+          <p>
+            Phát hành:{" "}
+            {card.issued_at
+              ? new Date(card.issued_at).toLocaleString("vi-VN")
+              : "chưa"}
+          </p>
+          <p>
+            Xác minh mã:{" "}
+            {card.encoding_verified_at
+              ? new Date(card.encoding_verified_at).toLocaleString("vi-VN")
+              : "chưa"}
+          </p>
+          <p>Người nhận giao hàng: {card.owner?.email ?? "chưa có"}</p>
+        </div>
       </Panel>
 
       <Panel className="space-y-4">
-        <h3 className="text-lg font-semibold text-foreground">Tra cứu và phân công hồ sơ</h3>
+        <div>
+          <h3 className="text-lg font-semibold text-foreground">
+            Gắn hoặc đổi liên kết trước phát hành
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Không gỡ liên kết độc lập. Đổi thẻ trước phát hành sẽ tự động thu
+            hồi liên kết cũ.
+          </p>
+        </div>
         <div className="grid gap-3 md:grid-cols-[1fr_auto]">
-          <TextInput label="Email hồ sơ" value={userEmail} onChange={(event) => setUserEmail(event.target.value)} placeholder="ten@domain.com" />
+          <TextInput
+            label="Email hồ sơ"
+            value={userEmail}
+            onChange={(event) => setUserEmail(event.target.value)}
+            placeholder="ten@domain.com"
+          />
           <div className="flex items-end">
-            <Button type="button" busy={lookupMutation.isPending} onClick={handleLookup}>
+            <Button
+              type="button"
+              busy={lookupMutation.isPending}
+              onClick={() => lookupMutation.mutate(userEmail.trim())}
+            >
               Tìm hồ sơ
             </Button>
           </div>
         </div>
-        {assignedUser ? (
-          <div className="rounded-[var(--radius-panel)] border border-border bg-muted/20 p-4 text-sm text-muted-foreground">
-            <p className="font-semibold text-foreground">Hồ sơ đã chọn</p>
-            <p>{assignedUser.email}</p>
-            <p>ID: {assignedUser.id}</p>
+        {selectedUser ? (
+          <div className="rounded-[var(--radius-panel)] border border-border bg-muted/20 p-4 text-sm">
+            <p className="font-semibold text-foreground">
+              {selectedUser.email}
+            </p>
+            <p className="text-muted-foreground">
+              Chỉ chọn liên kết thẻ đang chờ, không dùng token để nhận diện.
+            </p>
           </div>
         ) : null}
-        <div className="flex flex-wrap gap-3">
-          <Button type="button" busy={assignMutation.isPending} disabled={!assignedUser} onClick={() => {
-            if (!assignedUser) return;
-            if (!window.confirm("Bạn có chắc muốn phân công thẻ này cho hồ sơ đã chọn không?")) return;
-            assignMutation.mutate(assignedUser.id);
-          }}>
-            Phân công
-          </Button>
-          <Button type="button" variant="secondary" busy={reassignMutation.isPending} disabled={!assignedUser} onClick={() => {
-            if (!assignedUser) return;
-            if (!window.confirm("Bạn có chắc muốn đổi chủ thẻ này không?")) return;
-            reassignMutation.mutate(assignedUser.id);
-          }}>
-            Đổi chủ
-          </Button>
-          <Button type="button" variant="secondary" busy={issueMutation.isPending} onClick={() => {
-            if (!window.confirm("Bạn có chắc muốn phát hành thẻ này không?")) return;
-            issueMutation.mutate();
-          }}>
-            Phát hành
-          </Button>
-        </div>
+        {selectedUser && linksQuery.isFetching ? (
+          <p className="text-sm text-muted-foreground">
+            Đang tải liên kết chờ...
+          </p>
+        ) : null}
+        {selectedUser && !linksQuery.isFetching ? (
+          links.length > 0 ? (
+            <div className="grid gap-3 md:grid-cols-[1fr_auto]">
+              <Select
+                label="Liên kết thẻ chờ"
+                value={selectedLinkId}
+                onChange={(event) => setSelectedLinkId(event.target.value)}
+              >
+                <option value="">Chọn liên kết</option>
+                {links.map((link: PublicLinkSummary) => (
+                  <option key={link.id} value={link.id}>
+                    {link.label ?? link.id}
+                  </option>
+                ))}
+              </Select>
+              <div className="flex items-end">
+                <Button
+                  type="button"
+                  busy={attachMutation.isPending}
+                  disabled={!canBind}
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        card.link
+                          ? "Đổi liên kết này trước phát hành? Liên kết cũ sẽ bị thu hồi."
+                          : "Gắn liên kết này vào thẻ?",
+                      )
+                    )
+                      attachMutation.mutate();
+                  }}
+                >
+                  {card.link ? "Đổi liên kết" : "Gắn liên kết"}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <EmptyState
+              title="Không có liên kết chờ"
+              description="Tạo liên kết thẻ chờ ở màn hình Liên kết hồ sơ. Hồ sơ phải sẵn sàng trước khi máy chủ cho phép gắn."
+            />
+          )
+        ) : null}
       </Panel>
 
       <Panel className="space-y-4">
-        <h3 className="text-lg font-semibold text-foreground">Liên kết và vòng đời</h3>
+        <div>
+          <h3 className="text-lg font-semibold text-foreground">
+            Xác minh, phát hành và vòng đời liên kết
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Mã hóa phải khớp với URL của liên kết đang gắn. Sau phát hành không
+            thể đổi hoặc gỡ liên kết.
+          </p>
+        </div>
+        <div className="grid gap-3 md:grid-cols-[1fr_auto]">
+          <TextInput
+            label="URL đọc lại để xác minh"
+            value={encodingUrl}
+            onChange={(event) => setEncodingUrl(event.target.value)}
+            placeholder="https://app.example/e/..."
+          />
+          <div className="flex items-end">
+            <Button
+              type="button"
+              variant="secondary"
+              busy={confirmMutation.isPending}
+              disabled={!encodingUrl.trim() || !card.link}
+              onClick={() => confirmMutation.mutate()}
+            >
+              Xác nhận mã
+            </Button>
+          </div>
+        </div>
         <div className="flex flex-wrap gap-3">
-          <Button type="button" variant="secondary" busy={provisionMutation.isPending} onClick={() => provisionMutation.mutate()}>
-            Cấp liên kết
+          <Button
+            type="button"
+            busy={issueMutation.isPending}
+            disabled={
+              !card.link ||
+              card.encoding_state !== "verified" ||
+              Boolean(card.issued_at)
+            }
+            onClick={() => {
+              if (
+                window.confirm(
+                  "Phát hành thẻ sau khi đã gắn và xác minh liên kết?",
+                )
+              )
+                issueMutation.mutate();
+            }}
+          >
+            Phát hành thẻ
           </Button>
-          <Button type="button" variant="secondary" busy={reprovisionMutation.isPending} onClick={() => reprovisionMutation.mutate()}>
-            Cấp lại liên kết
-          </Button>
-          <Button type="button" variant="ghost" busy={attachMutation.isPending} disabled={!linkId} onClick={() => attachMutation.mutate(linkId)}>
-            Gắn liên kết
-          </Button>
-          <Button type="button" variant="ghost" busy={activateLinkMutation.isPending} disabled={!card.link} onClick={() => activateLinkMutation.mutate()}>
+          <Button
+            type="button"
+            variant="secondary"
+            busy={activateMutation.isPending}
+            disabled={!card.issued_at || !card.link || activeLink}
+            onClick={() => activateMutation.mutate()}
+          >
             Kích hoạt liên kết
           </Button>
-          <Button type="button" variant="ghost" busy={disableLinkMutation.isPending} disabled={!card.link} onClick={() => disableLinkMutation.mutate()}>
+          <Button
+            type="button"
+            variant="secondary"
+            busy={disableMutation.isPending}
+            disabled={!card.issued_at || !activeLink}
+            onClick={() => disableMutation.mutate()}
+          >
             Vô hiệu hóa liên kết
           </Button>
-          <Button type="button" variant="ghost" busy={detachMutation.isPending} onClick={() => {
-            if (!window.confirm("Bạn có chắc muốn gỡ liên kết khỏi thẻ này không?")) return;
-            detachMutation.mutate(detachReason.trim() || null);
-          }}>
-            Gỡ liên kết
-          </Button>
-          <Button type="button" variant="ghost" busy={revokeMutation.isPending} onClick={() => {
-            if (!window.confirm("Bạn có chắc muốn thu hồi liên kết của thẻ này không?")) return;
-            revokeMutation.mutate(detachReason.trim() || null);
-          }}>
-            Thu hồi
+          <Button
+            type="button"
+            variant="ghost"
+            busy={revokeMutation.isPending}
+            disabled={!card.link || card.link.status === "revoked"}
+            onClick={() => {
+              if (
+                window.confirm(
+                  "Thu hồi là thao tác kết thúc và không thể kích hoạt lại?",
+                )
+              )
+                revokeMutation.mutate();
+            }}
+          >
+            Thu hồi liên kết
           </Button>
         </div>
-        <div className="grid gap-3 md:grid-cols-2">
-          <TextInput label="Link ID để gắn" value={linkId} onChange={(event) => setLinkId(event.target.value)} placeholder="public-access-link-id" />
-          <TextInput label="Lý do gỡ / thu hồi" value={detachReason} onChange={(event) => setDetachReason(event.target.value)} placeholder="Sai phân công" />
-        </div>
+        {!card.link ? (
+          <p className="text-xs text-muted-foreground">
+            Cần tạo và gắn liên kết thẻ chờ trước khi xác minh hoặc phát hành.
+          </p>
+        ) : null}
       </Panel>
 
       <Panel className="space-y-4">
-        <h3 className="text-lg font-semibold text-foreground">Ghi chú lịch sử</h3>
+        <h3 className="text-lg font-semibold text-foreground">
+          Ghi chú lịch sử
+        </h3>
         {entries.length > 0 ? (
           <div className="space-y-2 text-sm text-muted-foreground">
             {entries.map((entry, index) => (
-              <div key={index} className="rounded-[var(--radius-panel)] border border-border bg-card p-3">
-                <p className="font-semibold text-foreground">{String(entry.event_type ?? entry.action ?? entry.status ?? `Mục ${index + 1}`)}</p>
-                <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-xs">{JSON.stringify(entry, null, 2)}</pre>
+              <div
+                key={index}
+                className="rounded-[var(--radius-panel)] border border-border bg-card p-3"
+              >
+                <p className="font-semibold text-foreground">
+                  {String(
+                    entry.event_type ??
+                      entry.action ??
+                      entry.status ??
+                      `Mục ${index + 1}`,
+                  )}
+                </p>
+                <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-xs">
+                  {JSON.stringify(entry, null, 2)}
+                </pre>
               </div>
             ))}
           </div>
         ) : (
-          <EmptyState title="Chưa có lịch sử" description="Card trả về không chứa dòng lịch sử nào ở thời điểm này." />
+          <EmptyState
+            title="Chưa có lịch sử"
+            description="Chưa có dòng lịch sử được trả về."
+          />
         )}
       </Panel>
 
       <Panel className="space-y-4">
-        <h3 className="text-lg font-semibold text-foreground">Thao tác rủi ro</h3>
+        <h3 className="text-lg font-semibold text-foreground">
+          Thao tác thẻ vật lý
+        </h3>
         <div className="flex flex-wrap gap-3">
-          <Button type="button" variant="ghost" busy={lostMutation.isPending} onClick={() => {
-            if (!window.confirm("Bạn có chắc muốn báo mất thẻ này không?")) return;
-            lostMutation.mutate();
-          }}>
+          <Button
+            type="button"
+            variant="ghost"
+            busy={lostMutation.isPending}
+            onClick={() => {
+              if (
+                window.confirm(
+                  "Báo mất thẻ này? Liên kết hiện tại sẽ bị thu hồi theo chính sách.",
+                )
+              )
+                lostMutation.mutate();
+            }}
+          >
             Báo mất
           </Button>
-          <Button type="button" variant="danger" busy={replaceMutation.isPending} onClick={() => {
-            if (!window.confirm("Bạn có chắc muốn thay thế thẻ này không?")) return;
-            replaceMutation.mutate();
-          }}>
+          <Button
+            type="button"
+            variant="danger"
+            busy={replaceMutation.isPending}
+            onClick={() => {
+              if (window.confirm("Tạo quy trình thay thế thẻ này?"))
+                replaceMutation.mutate();
+            }}
+          >
             Thay thế
           </Button>
-          <Button type="button" variant="danger" busy={voidMutation.isPending} onClick={() => {
-            if (!window.confirm("Bạn có chắc muốn hủy thẻ này không?")) return;
-            voidMutation.mutate();
-          }}>
+          <Button
+            type="button"
+            variant="danger"
+            busy={voidMutation.isPending}
+            disabled={Boolean(card.issued_at)}
+            onClick={() => {
+              if (
+                window.confirm(
+                  "Hủy thẻ chưa phát hành? Liên kết sẽ bị thu hồi.",
+                )
+              )
+                voidMutation.mutate();
+            }}
+          >
             Hủy
           </Button>
         </div>

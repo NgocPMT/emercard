@@ -1,7 +1,18 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Alert, Button, Panel, Select, StatusBadge, TextInput } from "../../components/primitives";
-import { EmptyState, PageLoadingState, RetryState, ServiceUnavailableState } from "../../components/feedback";
+import {
+  Alert,
+  Button,
+  Panel,
+  StatusBadge,
+  TextInput,
+} from "../../components/primitives";
+import {
+  EmptyState,
+  PageLoadingState,
+  RetryState,
+  ServiceUnavailableState,
+} from "../../components/feedback";
 import {
   cardKeys,
   createAdminUserLink,
@@ -15,23 +26,45 @@ import { copyText } from "../../lib/clipboard";
 import { assignLocation } from "../../lib/navigation";
 import { useSession } from "../session";
 
-const purposeLabels: Record<"card" | "standalone", string> = {
-  card: "Liên kết thẻ",
-  standalone: "Liên kết standalone",
+const linkStatusLabels: Record<PublicLinkSummary["status"], string> = {
+  pending: "Chờ gắn thẻ",
+  active: "Đang hoạt động",
+  disabled: "Đã vô hiệu hóa",
+  revoked: "Đã thu hồi",
+  expired: "Đã hết hạn",
 };
 
 function LinkSummaryRow({ link }: { link: PublicLinkSummary }) {
+  const variant =
+    link.status === "active"
+      ? "success"
+      : link.status === "disabled"
+        ? "warning"
+        : link.status === "revoked" || link.status === "expired"
+          ? "danger"
+          : "neutral";
   return (
     <div className="rounded-[var(--radius-panel)] border border-border bg-card p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="font-semibold text-foreground">{link.label ?? purposeLabels[link.purpose]}</p>
-          <p className="text-sm text-muted-foreground">{purposeLabels[link.purpose]}</p>
+          <p className="font-semibold text-foreground">
+            {link.label ?? "Liên kết thẻ"}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Liên kết thuộc hồ sơ, không chứa token
+          </p>
         </div>
-        <StatusBadge variant={link.status === "active" ? "success" : link.status === "disabled" ? "warning" : "neutral"}>{link.status}</StatusBadge>
+        <StatusBadge variant={variant}>
+          {linkStatusLabels[link.status]}
+        </StatusBadge>
       </div>
       <div className="mt-3 text-sm text-muted-foreground">
         <p>ID: {link.id}</p>
+        <p>
+          {link.status === "pending"
+            ? "Chưa công khai: cần gắn vào thẻ, xác minh mã và phát hành."
+            : "Trạng thái công khai do máy chủ quyết định."}
+        </p>
         <p>Cập nhật: {new Date(link.updated_at).toLocaleString("vi-VN")}</p>
       </div>
     </div>
@@ -43,7 +76,6 @@ export function AdminLinkManagerPanel() {
   const queryClient = useQueryClient();
   const [email, setEmail] = useState("");
   const [selectedUser, setSelectedUser] = useState<SafeUser | null>(null);
-  const [purpose, setPurpose] = useState<"card" | "standalone">("card");
   const [label, setLabel] = useState("");
   const [lastUrl, setLastUrl] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -52,45 +84,63 @@ export function AdminLinkManagerPanel() {
     mutationFn: (nextEmail: string) => lookupAdminUserByEmail(nextEmail),
     onSuccess: (user) => {
       setSelectedUser(user);
+      setLastUrl(null);
       setMessage(`Đã chọn hồ sơ ${user.email}.`);
-      void queryClient.invalidateQueries({ queryKey: cardKeys.adminUserLinks(user.id) });
+      void queryClient.invalidateQueries({
+        queryKey: cardKeys.adminUserLinks(user.id),
+      });
     },
   });
 
   const createMutation = useMutation({
-    mutationFn: ({ userId, nextPurpose, nextLabel }: { userId: string; nextPurpose: "card" | "standalone"; nextLabel: string }) =>
-      createAdminUserLink(userId, { purpose: nextPurpose, label: nextLabel.trim() || null }),
+    mutationFn: ({
+      userId,
+      nextLabel,
+    }: {
+      userId: string;
+      nextLabel: string;
+    }) => createAdminUserLink(userId, { label: nextLabel.trim() || null }),
     onSuccess: (result, variables) => {
       setLastUrl(result.public_url);
-      setMessage(`Đã tạo ${purposeLabels[variables.nextPurpose]}.`);
-      void queryClient.invalidateQueries({ queryKey: cardKeys.adminUserLinks(variables.userId) });
+      setMessage(
+        "Đã tạo liên kết thẻ ở trạng thái chờ gắn. Hãy giữ URL này để xác minh mã trên thẻ.",
+      );
+      void queryClient.invalidateQueries({
+        queryKey: cardKeys.adminUserLinks(variables.userId),
+      });
     },
   });
 
   const linksQuery = useQuery({
-    queryKey: selectedUser ? cardKeys.adminUserLinks(selectedUser.id) : ["links", "admin", "empty"],
+    queryKey: selectedUser
+      ? cardKeys.adminUserLinks(selectedUser.id)
+      : ["links", "admin", "empty"],
     queryFn: ({ signal }) => listAdminUserLinks(selectedUser?.id ?? "", signal),
     enabled: Boolean(selectedUser),
     staleTime: 10_000,
-    retry: (failureCount, error) => {
-      if (isApiError(error)) {
-        return error.retryable && failureCount < 1;
-      }
-      return failureCount < 1;
-    },
+    retry: (failureCount, error) =>
+      isApiError(error)
+        ? error.retryable && failureCount < 1
+        : failureCount < 1,
   });
 
   useEffect(() => {
-    const error = lookupMutation.error ?? createMutation.error ?? linksQuery.error;
-    if (!isApiError(error) || error.status !== 401) {
-      return;
-    }
+    const error =
+      lookupMutation.error ?? createMutation.error ?? linksQuery.error;
+    if (!isApiError(error) || error.status !== 401) return;
     clearSessionCache();
     assignLocation("/login?returnTo=/admin/links");
-  }, [clearSessionCache, createMutation.error, linksQuery.error, lookupMutation.error]);
+  }, [
+    clearSessionCache,
+    createMutation.error,
+    linksQuery.error,
+    lookupMutation.error,
+  ]);
 
-  const userLinks = useMemo(() => linksQuery.data?.items ?? [], [linksQuery.data]);
-
+  const userLinks = useMemo(
+    () => linksQuery.data?.items ?? [],
+    [linksQuery.data],
+  );
   const handleLookup = () => {
     const value = email.trim();
     if (!value) {
@@ -99,35 +149,61 @@ export function AdminLinkManagerPanel() {
     }
     lookupMutation.mutate(value);
   };
-
   const handleCreate = () => {
     if (!selectedUser) {
       setMessage("Hãy chọn một hồ sơ trước.");
       return;
     }
-    createMutation.mutate({ userId: selectedUser.id, nextPurpose: purpose, nextLabel: label });
+    createMutation.mutate({ userId: selectedUser.id, nextLabel: label });
   };
-
   const handleCopy = async () => {
     if (!lastUrl) return;
-    const copied = await copyText(lastUrl);
-    setMessage(copied ? "Đã sao chép liên kết." : "Không thể sao chép liên kết.");
+    setMessage(
+      (await copyText(lastUrl))
+        ? "Đã sao chép liên kết một lần."
+        : "Không thể sao chép liên kết.",
+    );
   };
 
   if (lookupMutation.isPending || linksQuery.isFetching) {
-    return <PageLoadingState title="Đang tải liên kết hồ sơ" description="Kiểm tra danh sách liên kết và hồ sơ công khai." />;
+    return (
+      <PageLoadingState
+        title="Đang tải liên kết hồ sơ"
+        description="Kiểm tra danh sách liên kết an toàn của hồ sơ."
+      />
+    );
   }
-
-  if (lookupMutation.error && isApiError(lookupMutation.error) && (lookupMutation.error.status === 503 || lookupMutation.error.retryable)) {
-    return <ServiceUnavailableState title="Không thể tải liên kết hồ sơ" description="Máy chủ tạm thời không phản hồi. Vui lòng thử lại sau." />;
+  if (
+    lookupMutation.error &&
+    isApiError(lookupMutation.error) &&
+    (lookupMutation.error.status === 503 || lookupMutation.error.retryable)
+  ) {
+    return (
+      <ServiceUnavailableState
+        title="Không thể tải liên kết hồ sơ"
+        description="Máy chủ tạm thời không phản hồi. Vui lòng thử lại sau."
+      />
+    );
   }
-
-  if (linksQuery.error && isApiError(linksQuery.error) && (linksQuery.error.status === 503 || linksQuery.error.retryable)) {
-    return <ServiceUnavailableState title="Không thể tải liên kết hồ sơ" description="Máy chủ tạm thời không phản hồi. Vui lòng thử lại sau." />;
+  if (
+    linksQuery.error &&
+    isApiError(linksQuery.error) &&
+    (linksQuery.error.status === 503 || linksQuery.error.retryable)
+  ) {
+    return (
+      <ServiceUnavailableState
+        title="Không thể tải liên kết hồ sơ"
+        description="Máy chủ tạm thời không phản hồi. Vui lòng thử lại sau."
+      />
+    );
   }
-
   if (lookupMutation.error && !isApiError(lookupMutation.error)) {
-    return <RetryState title="Không thể tìm hồ sơ" description="Đã xảy ra lỗi khi tra cứu hồ sơ." />;
+    return (
+      <RetryState
+        title="Không thể tìm hồ sơ"
+        description="Đã xảy ra lỗi khi tra cứu hồ sơ."
+      />
+    );
   }
 
   return (
@@ -135,70 +211,92 @@ export function AdminLinkManagerPanel() {
       <Panel className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-xl font-semibold text-foreground">Tìm hồ sơ công khai</h2>
-            <p className="text-sm text-muted-foreground">Chỉ làm việc với email và liên kết an toàn, không hiển thị hồ sơ y tế.</p>
+            <h2 className="text-xl font-semibold text-foreground">
+              Tìm hồ sơ công khai
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Chỉ dùng email để tìm hồ sơ; không hiển thị dữ liệu y tế.
+            </p>
           </div>
-          {selectedUser ? <StatusBadge variant="success">{selectedUser.email}</StatusBadge> : <StatusBadge variant="neutral">Chưa chọn hồ sơ</StatusBadge>}
+          {selectedUser ? (
+            <StatusBadge variant="success">{selectedUser.email}</StatusBadge>
+          ) : (
+            <StatusBadge variant="neutral">Chưa chọn hồ sơ</StatusBadge>
+          )}
         </div>
-
         {message ? <Alert variant="info">{message}</Alert> : null}
-
         <div className="grid gap-3 md:grid-cols-[1fr_auto]">
-          <TextInput label="Email hồ sơ" type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="ten@domain.com" />
+          <TextInput
+            label="Email hồ sơ"
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="ten@domain.com"
+          />
           <div className="flex items-end">
-            <Button type="button" busy={lookupMutation.isPending} onClick={handleLookup}>
+            <Button
+              type="button"
+              busy={lookupMutation.isPending}
+              onClick={handleLookup}
+            >
               Tìm hồ sơ
             </Button>
           </div>
         </div>
-
-        {selectedUser ? (
-          <div className="rounded-[var(--radius-panel)] border border-border bg-muted/20 p-4 text-sm text-muted-foreground">
-            <p className="font-semibold text-foreground">Hồ sơ đã chọn</p>
-            <p>ID: {selectedUser.id}</p>
-            <p>Email: {selectedUser.email}</p>
-            <p>Vai trò: {selectedUser.role}</p>
-          </div>
-        ) : null}
       </Panel>
 
       <Panel className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-xl font-semibold text-foreground">Tạo liên kết công khai</h2>
-            <p className="text-sm text-muted-foreground">Tạo liên kết card hoặc standalone cho hồ sơ đã chọn.</p>
-          </div>
-          <StatusBadge variant={purpose === "card" ? "primary" : "neutral"}>{purposeLabels[purpose]}</StatusBadge>
+        <div>
+          <h2 className="text-xl font-semibold text-foreground">
+            Tạo liên kết thẻ chờ gắn
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Liên kết luôn bắt đầu ở trạng thái chờ; không có nút kích hoạt khi
+            chưa gắn vào thẻ.
+          </p>
         </div>
-
-        <div className="grid gap-3 md:grid-cols-[1fr_1fr]">
-          <Select label="Loại liên kết" value={purpose} onChange={(event) => setPurpose(event.target.value as "card" | "standalone") }>
-            <option value="card">Liên kết thẻ</option>
-            <option value="standalone">Liên kết standalone</option>
-          </Select>
-          <TextInput label="Nhãn" value={label} onChange={(event) => setLabel(event.target.value)} placeholder="Liên kết dự phòng" />
-        </div>
-
+        <TextInput
+          label="Nhãn tùy chọn"
+          value={label}
+          onChange={(event) => setLabel(event.target.value)}
+          placeholder="Thẻ chính"
+        />
         <div className="flex flex-wrap gap-3">
-          <Button type="button" disabled={!selectedUser || createMutation.isPending} busy={createMutation.isPending} onClick={handleCreate}>
-            Tạo liên kết
+          <Button
+            type="button"
+            disabled={!selectedUser || createMutation.isPending}
+            busy={createMutation.isPending}
+            onClick={handleCreate}
+          >
+            Tạo liên kết chờ
           </Button>
-          <Button type="button" variant="secondary" disabled={!lastUrl} onClick={() => void handleCopy()}>
-            Sao chép URL
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={!lastUrl}
+            onClick={() => void handleCopy()}
+          >
+            Sao chép URL một lần
           </Button>
         </div>
-
         {lastUrl ? (
-          <Alert variant="success" title="URL cấp phát">
+          <Alert variant="success" title="URL dùng để mã hóa thẻ">
             <div className="break-all text-sm">{lastUrl}</div>
+            <p className="mt-2 text-xs">
+              Không lưu URL này vào danh sách hoặc bộ nhớ trình duyệt.
+            </p>
           </Alert>
         ) : null}
       </Panel>
 
       <Panel className="space-y-4">
         <div>
-          <h2 className="text-xl font-semibold text-foreground">Liên kết của hồ sơ</h2>
-          <p className="text-sm text-muted-foreground">Danh sách an toàn chỉ hiển thị ID, nhãn, trạng thái và thời điểm cập nhật.</p>
+          <h2 className="text-xl font-semibold text-foreground">
+            Liên kết của hồ sơ
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Chỉ hiển thị ID, nhãn, trạng thái liên kết và hướng dẫn an toàn.
+          </p>
         </div>
         {selectedUser ? (
           userLinks.length > 0 ? (
@@ -208,10 +306,16 @@ export function AdminLinkManagerPanel() {
               ))}
             </div>
           ) : (
-            <EmptyState title="Chưa có liên kết" description="Hồ sơ này chưa có liên kết công khai nào." />
+            <EmptyState
+              title="Chưa có liên kết"
+              description="Tạo một liên kết thẻ chờ để bắt đầu quy trình."
+            />
           )
         ) : (
-          <EmptyState title="Chưa chọn hồ sơ" description="Nhập email để xem và tạo liên kết công khai an toàn." />
+          <EmptyState
+            title="Chưa chọn hồ sơ"
+            description="Nhập email để xem và tạo liên kết thẻ an toàn."
+          />
         )}
       </Panel>
     </div>

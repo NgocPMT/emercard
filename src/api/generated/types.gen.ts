@@ -641,6 +641,10 @@ export type UserCardOutput = {
      */
     can_disable: boolean;
     /**
+     * Can Revoke
+     */
+    can_revoke: boolean;
+    /**
      * Can Report Lost
      */
     can_report_lost: boolean;
@@ -992,6 +996,36 @@ export type DisableMyCardApiV1MeCardsCardIdDisablePostResponses = {
 };
 
 export type DisableMyCardApiV1MeCardsCardIdDisablePostResponse = DisableMyCardApiV1MeCardsCardIdDisablePostResponses[keyof DisableMyCardApiV1MeCardsCardIdDisablePostResponses];
+
+export type RevokeMyCardLinkApiV1MeCardsCardIdRevokePostData = {
+    body?: never;
+    path: {
+        /**
+         * Card Id
+         */
+        card_id: string;
+    };
+    query?: never;
+    url: '/api/v1/me/cards/{card_id}/revoke';
+};
+
+export type RevokeMyCardLinkApiV1MeCardsCardIdRevokePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RevokeMyCardLinkApiV1MeCardsCardIdRevokePostError = RevokeMyCardLinkApiV1MeCardsCardIdRevokePostErrors[keyof RevokeMyCardLinkApiV1MeCardsCardIdRevokePostErrors];
+
+export type RevokeMyCardLinkApiV1MeCardsCardIdRevokePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserCardOutput;
+};
+
+export type RevokeMyCardLinkApiV1MeCardsCardIdRevokePostResponse = RevokeMyCardLinkApiV1MeCardsCardIdRevokePostResponses[keyof RevokeMyCardLinkApiV1MeCardsCardIdRevokePostResponses];
 
 export type ReportMyCardLostApiV1MeCardsCardIdLostPostData = {
     body?: never;
