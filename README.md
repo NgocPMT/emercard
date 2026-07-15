@@ -51,7 +51,7 @@ The emergency page remains a static Astro page. The hosting platform must apply 
 /e/* -> /e/index.html (200)
 ```
 
-`public/_redirects` contains this rule for static hosts that support the `_redirects` format. Configure an equivalent rewrite if the selected platform uses another format.
+`public/_redirects` contains this rule for static hosts that support the `_redirects` format. The build also emits `404.html` with the emergency page so GitHub Pages serves `/e/{token}` without falling back to the landing page. Configure an equivalent rewrite if the selected platform uses another format.
 
 The static page reads the path token only in memory and calls the same-origin API:
 
@@ -110,7 +110,7 @@ npm run api:check
 npm run build
 ```
 
-The build must produce `dist/e/index.html`, `_redirects`, and `_headers`.
+The build must produce `dist/e/index.html`, `404.html`, `_redirects`, and `_headers`.
 
 ## Deployment note
 
