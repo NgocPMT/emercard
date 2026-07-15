@@ -5,13 +5,13 @@ export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 export type ButtonSize = "sm" | "md" | "lg";
 
 const buttonBase =
-  "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition focus-visible:outline-none focus-visible:ring-4 disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex items-center justify-center gap-2 rounded-full font-semibold tracking-[-0.01em] transition focus-visible:outline-none focus-visible:ring-4 disabled:cursor-not-allowed disabled:opacity-60";
 
 const buttonVariants: Record<ButtonVariant, string> = {
-  primary: "bg-primary text-primary-foreground shadow-sm hover:opacity-95",
-  secondary: "border border-border bg-card text-foreground hover:bg-muted",
+  primary: "bg-primary text-primary-foreground shadow-[0_10px_24px_rgb(40_127_155_/_0.18)] hover:bg-primary-strong",
+  secondary: "border border-border bg-card text-foreground shadow-sm hover:border-primary/40 hover:bg-muted",
   ghost: "bg-transparent text-foreground hover:bg-muted",
-  danger: "bg-destructive text-destructive-foreground shadow-sm hover:opacity-95",
+  danger: "bg-destructive text-destructive-foreground shadow-[0_10px_24px_rgb(180_35_24_/_0.16)] hover:opacity-90",
 };
 
 const buttonSizes: Record<ButtonSize, string> = {
@@ -153,7 +153,7 @@ export function FormField({ label, htmlFor, hint, error, required, className, ch
 
 function inputBase(className?: string) {
   return cn(
-    "min-h-11 w-full rounded-[var(--radius-control)] border border-border bg-card px-4 py-2.5 text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/15 disabled:cursor-not-allowed disabled:bg-muted",
+    "min-h-11 w-full rounded-[var(--radius-control)] border border-border bg-white/80 px-4 py-2.5 text-foreground shadow-[0_2px_0_rgb(19_43_53_/_0.02)] outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/15 disabled:cursor-not-allowed disabled:bg-muted",
     className,
   );
 }
@@ -283,7 +283,7 @@ export type AlertProps = HTMLAttributes<HTMLDivElement> & {
 
 export function Alert({ variant = "info", title, className, children, ...props }: AlertProps) {
   return (
-    <div className={cn("rounded-[var(--radius-panel)] border p-4 shadow-sm", alertVariants[variant], className)} role={variant === "danger" ? "alert" : "status"} {...props}>
+    <div className={cn("rounded-[var(--radius-panel)] border p-4 shadow-[0_8px_24px_rgb(19_43_53_/_0.05)]", alertVariants[variant], className)} role={variant === "danger" ? "alert" : "status"} {...props}>
       {title ? <p className="font-semibold">{title}</p> : null}
       {children ? <div className={cn(title ? "mt-2" : "")}>{children}</div> : null}
     </div>
@@ -305,7 +305,7 @@ export function StatusBadge({ variant = "neutral", className, ...props }: HTMLAt
 }
 
 export function Panel({ className, ...props }: HTMLAttributes<HTMLElement>) {
-  return <section className={cn("rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-sm", className)} {...props} />;
+  return <section className={cn("rounded-[var(--radius-panel)] border border-border/90 bg-card p-5 shadow-[var(--shadow-soft)]", className)} {...props} />;
 }
 
 export function Spinner({ className, ...props }: HTMLAttributes<HTMLSpanElement>) {

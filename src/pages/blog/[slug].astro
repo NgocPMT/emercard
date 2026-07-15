@@ -25,7 +25,7 @@ const published = post
 <Base title={post?.title ?? "Blog"}>
   {
     post ? (
-      <article class="mx-auto max-w-4xl px-6 py-20">
+      <article class="mx-auto max-w-4xl px-6 py-16 lg:px-8 lg:py-24">
         <Breadcrumbs
           items={[
             { label: "Inicio", href: "/" },
@@ -38,13 +38,13 @@ const published = post
           <img src={post.coverUrl} alt={post.coverAlt} class="mb-8 h-[28rem] w-full rounded-3xl object-cover shadow-lg" loading="eager" />
         ) : null}
 
-        <div class="mb-4 flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">
+        <div class="mb-4 flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
           <span>{published}</span>
-          <span class="h-1 w-1 rounded-full bg-emerald-400"></span>
+          <span class="h-1 w-1 rounded-full bg-sky-400"></span>
           <span>{post.author}</span>
         </div>
 
-        <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
+        <h1 class="text-4xl font-black tracking-[-0.04em] text-slate-950 md:text-5xl">
           {post.title}
         </h1>
 
@@ -54,15 +54,15 @@ const published = post
 
         <a
           href="/blog"
-          class="mt-8 inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+          class="mt-8 inline-flex items-center gap-2 rounded-full bg-sky-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-sky-700"
         >
-          Back to blog
+          Quay lại bài viết
         </a>
 
         {
           relatedPosts.length > 0 && (
             <section class="mt-16">
-              <h2 class="mb-6 text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">Related articles</h2>
+              <h2 class="mb-6 text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">Bài viết liên quan</h2>
 
               <div class="grid gap-6 md:grid-cols-2">
                 {relatedPosts.map((relatedPost) => <BlogCard post={relatedPost} />)}
@@ -79,7 +79,7 @@ const published = post
             { label: "Blog", href: "/blog" },
           ]}
         />
-        <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">Bài viết không tồn tại</h1>
+        <h1 class="text-4xl font-black tracking-[-0.04em] text-slate-950 md:text-5xl">Bài viết không tồn tại</h1>
         <p class="mt-4 text-slate-600">Vui lòng quay lại danh sách blog.</p>
       </article>
     )

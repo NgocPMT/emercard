@@ -18,7 +18,7 @@ const currentPosts = posts.slice(start, start + postsPerPage);
 ---
 
 <Base title="Blog">
-  <section class="mx-auto max-w-7xl px-6 py-20">
+  <section class="mx-auto max-w-7xl px-6 py-16 lg:px-8 lg:py-24">
     <div class="mx-auto max-w-3xl text-center">
       <Breadcrumbs
         items={[
@@ -27,12 +27,12 @@ const currentPosts = posts.slice(start, start + postsPerPage);
         ]}
       />
 
-      <p class="mb-4 text-sm font-semibold uppercase tracking-[0.35em] text-emerald-600">Blog</p>
-      <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">Health insights, prevention, and care updates.</h1>
-      <p class="mt-4 text-base leading-7 text-slate-600 md:text-lg">Explore practical articles about coverage, prevention, and everyday wellbeing.</p>
+      <p class="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-sky-700">Blog</p>
+      <h1 class="text-4xl font-black tracking-[-0.04em] text-slate-950 md:text-5xl">Kiến thức giúp bạn chủ động chăm sóc sức khỏe.</h1>
+      <p class="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-600 md:text-lg">Những bài viết ngắn gọn về phòng ngừa, chăm sóc và các thói quen tốt mỗi ngày.</p>
     </div>
 
-    <div class="mt-12 grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+    <div class="mt-14 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
       {currentPosts.map((post) => <BlogCard post={post} />)}
     </div>
 

@@ -1,24 +1,27 @@
 :root {
   color-scheme: light;
-  --color-page-bg: #f8fafc;
+  --color-page-bg: #f3f8fb;
   --color-surface: #ffffff;
-  --color-surface-muted: #f1f5f9;
-  --color-text: #0f172a;
-  --color-text-muted: #475569;
-  --color-border: #cbd5e1;
-  --color-primary: #0f766e;
-  --color-primary-strong: #115e59;
-  --color-danger: #b91c1c;
-  --color-danger-soft: #fef2f2;
-  --color-warning: #b45309;
-  --color-warning-soft: #fffbeb;
-  --color-success: #047857;
-  --color-success-soft: #ecfdf5;
-  --color-focus: #14b8a6;
-  --shadow-soft: 0 10px 30px rgb(15 23 42 / 0.08);
+  --color-surface-muted: #eaf4f8;
+  --color-text: #132b35;
+  --color-text-muted: #526a74;
+  --color-border: #d3e4ea;
+  --color-primary: #287f9b;
+  --color-primary-strong: #1d657d;
+  --color-danger: #b42318;
+  --color-danger-soft: #fff1ef;
+  --color-warning: #a15c08;
+  --color-warning-soft: #fff7e6;
+  --color-success: #087a55;
+  --color-success-soft: #e8f7ef;
+  --color-focus: #57b5d0;
+  --shadow-soft: 0 16px 40px rgb(19 43 53 / 0.08);
+  --shadow-lifted: 0 24px 64px rgb(19 43 53 / 0.12);
   --radius-panel: 1.25rem;
-  --radius-control: 0.875rem;
+  --radius-control: 0.75rem;
   --space-touch: 2.75rem;
+  --font-source-sans-3: "Source Sans 3", "Avenir Next", ui-sans-serif, system-ui, sans-serif;
+  --font-inconsolata: "Inconsolata", ui-monospace, SFMono-Regular, monospace;
 }
 
 @theme inline {

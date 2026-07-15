@@ -18,11 +18,11 @@ const { items = [] }: Props = Astro.props;
         <li class="flex items-center gap-2">
           {index > 0 && <span aria-hidden="true">/</span>}
           {index < items.length - 1 && item.href ? (
-            <a href={item.href} class="font-medium transition hover:text-emerald-700">
+            <a href={item.href} class="font-medium transition hover:text-sky-700">
               {item.label}
             </a>
           ) : (
-            <span class="font-semibold text-emerald-700">{item.label}</span>
+            <span class="font-semibold text-sky-700">{item.label}</span>
           )}
         </li>
       ))

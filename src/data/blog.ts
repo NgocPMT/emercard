@@ -17,7 +17,7 @@ const contentRoot = join(process.cwd(), "src/content/blog");
 const coverModules = import.meta.glob("../content/blog/*/cover.jpg", {
   eager: true,
   import: "default",
-}) as Record<string, string>;
+}) as Record<string, string | { src: string }>;
 
 function parseFrontmatter(source: string) {
   const match = source.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
@@ -73,7 +73,8 @@ export function getBlogPosts(): BlogPost[] {
       const source = readFileSync(filePath, "utf8");
       const { frontmatter, body } = parseFrontmatter(source);
       const slug = file.replace(/\.md$/, "");
-      const coverUrl = coverModules[`../content/blog/${slug}/cover.jpg`] ?? "";
+      const coverModule = coverModules[`../content/blog/${slug}/cover.jpg`];
+      const coverUrl = typeof coverModule === "string" ? coverModule : coverModule?.src ?? "";
       const paragraphs = splitParagraphs(body);
 
       return {

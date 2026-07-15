@@ -8,7 +8,7 @@ import { login, registerAccount } from "../../api/auth";
 import { ApiError } from "../../api/errors";
 import { isApiError } from "../../api/http-client";
 import { Alert, Button, LinkButton, Panel, TextInput } from "../../components/primitives";
-import { PageTitle } from "../../components/layout";
+import { BrandMark, PageTitle } from "../../components/layout";
 import { createPageQueryClient } from "../../api/query-client";
 import { sessionKeys } from "../../api/session";
 import { PageErrorBoundary, PublicAuthGate, SessionProvider, validateReturnTo } from "../session";
@@ -114,13 +114,17 @@ function AuthLayout({
   const flash = useMemo(() => resolveFlashNotice(notice, initialEmail), [initialEmail, notice]);
 
   return (
-    <section className="mx-auto grid w-full max-w-6xl gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-      <div className="space-y-6">
-        <PageTitle
-          eyebrow={mode === "login" ? "Đăng nhập" : "Đăng ký"}
-          title={mode === "login" ? `Truy cập tài khoản ${brand}` : `Tạo tài khoản ${brand}`}
-          description={mode === "login" ? "Đăng nhập bằng email và mật khẩu để tiếp tục." : "Tạo tài khoản mới bằng email và mật khẩu."}
-        />
+    <section className="mx-auto grid w-full max-w-6xl gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-stretch">
+      <div className="brand-surface flex min-h-[28rem] flex-col justify-between rounded-[2rem] border border-primary/15 p-7 shadow-[var(--shadow-lifted)] sm:p-10">
+        <div className="space-y-10">
+          <BrandMark />
+          <PageTitle
+            eyebrow={mode === "login" ? "Tài khoản an toàn" : "Bắt đầu với EmerCard"}
+            title={mode === "login" ? "Thông tin quan trọng, luôn sẵn sàng." : "Tạo nơi tin cậy cho hồ sơ y tế."}
+            description={mode === "login" ? "Đăng nhập để quản lý hồ sơ và liên kết khẩn cấp của bạn." : "Tạo tài khoản để lưu hồ sơ, thêm người liên hệ và sử dụng EmerCard."}
+          />
+        </div>
+        <p className="max-w-sm text-sm leading-6 text-muted-foreground">EmerCard giúp thông tin y tế quan trọng đi cùng bạn, nhưng chỉ hiển thị khi được cấp quyền.</p>
         {flash ? (
           <Alert variant={flash.variant} title={flash.title}>
             {flash.message}
@@ -128,7 +132,7 @@ function AuthLayout({
         ) : null}
       </div>
 
-      <Panel className="space-y-5">
+      <Panel className="flex items-center p-6 sm:p-10">
         {mode === "login" ? <LoginForm initialEmail={initialEmail} returnTo={returnTo} /> : <RegisterForm initialEmail={initialEmail} />}
       </Panel>
     </section>

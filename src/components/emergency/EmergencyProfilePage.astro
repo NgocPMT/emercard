@@ -1,11 +1,14 @@
 <main
-  class="mx-auto flex min-h-screen max-w-2xl items-center px-4 py-8 sm:px-6"
+  class="mx-auto flex min-h-screen max-w-3xl items-center px-4 py-8 sm:px-6 lg:py-12"
 >
   <section
-    class="w-full rounded-[1.5rem] border border-border bg-card p-6 shadow-sm sm:p-8"
+    class="w-full rounded-[2rem] border border-primary/15 bg-card p-6 shadow-[var(--shadow-lifted)] sm:p-10"
   >
-    <p class="text-sm font-semibold tracking-wide text-primary">EMERCARD</p>
-    <h1 class="mt-2 text-2xl font-bold text-foreground">
+    <div class="mb-8 flex items-center gap-3">
+      <img src="/logo.png" alt="EmerCard" class="h-10 w-10 rounded-2xl border border-primary/20 bg-white object-contain" />
+      <p class="text-sm font-extrabold tracking-[0.16em] text-primary">EMERCARD</p>
+    </div>
+    <h1 class="text-3xl font-black tracking-[-0.035em] text-foreground sm:text-4xl">
       Thông tin y tế khẩn cấp
     </h1>
 
@@ -67,7 +70,7 @@
         >Thử lại</button>
     </div>
 
-    <article id="profile" class="mt-8 hidden" aria-live="polite">
+    <article id="profile" class="mt-10 hidden" aria-live="polite">
       <header class="space-y-2">
         <h2 id="display-name" class="text-2xl font-bold text-foreground"></h2><p
           id="identity-meta"

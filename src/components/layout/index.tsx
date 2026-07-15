@@ -8,7 +8,7 @@ export function BrandMark({ label = "EmerCard" }: { label?: string }) {
       <img
         src="/logo.png"
         alt={label}
-        className="h-10 w-10 rounded-2xl border border-slate-200 bg-white object-contain shadow-sm"
+        className="h-10 w-10 rounded-2xl border border-primary/20 bg-white object-contain shadow-sm"
       />
       <span className="text-lg font-extrabold tracking-tight text-foreground">
         {label}
@@ -44,13 +44,13 @@ export function PageTitle({
   eyebrow?: ReactNode;
 }) {
   return (
-    <header className="space-y-3">
+    <header className="space-y-3 border-l-4 border-primary/60 pl-5">
       {eyebrow ? (
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
           {eyebrow}
         </p>
       ) : null}
-      <h1 className="text-3xl font-black tracking-tight text-foreground md:text-4xl">
+      <h1 className="max-w-3xl text-3xl font-black tracking-[-0.035em] text-foreground md:text-4xl">
         {title}
       </h1>
       {description ? (
@@ -231,8 +231,9 @@ export function ApplicationShell({
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <div className="pointer-events-none fixed inset-x-0 top-0 -z-0 h-72 bg-[radial-gradient(circle_at_50%_0%,rgb(87_181_208_/_0.08),transparent_62%)]" aria-hidden="true" />
       <SkipLink />
-      <header className="sticky top-0 z-30 border-b border-border/70 bg-background/90 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-border/70 bg-white/85 shadow-[0_8px_24px_rgb(19_43_53_/_0.04)] backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-4 px-4 py-4 sm:px-6 lg:px-8">
           <a
             href="/"
@@ -255,11 +256,11 @@ export function ApplicationShell({
       <main
         id="main-content"
         className={cn(
-          "mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8",
+          "mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8",
           mainClassName,
         )}
       >
-        <div className="space-y-6">
+        <div className="relative space-y-8">
           {title || description ? (
             <PageTitle title={title ?? brand} description={description} />
           ) : null}
