@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Panel, StatusBadge } from "../../components/primitives";
+import { Button, Dialog, Panel, StatusBadge } from "../../components/primitives";
 import {
   EmptyState,
   PageLoadingState,
@@ -27,6 +27,7 @@ import { AdminCardDetailPanel } from "./card-detail";
 export type AdminAppSection = "overview" | "cards" | "links" | "detail";
 
 const navigation = [
+  { href: "/admin", label: "Bảng điều khiển" },
   { href: "/admin/cards", label: "Kho thẻ" },
   { href: "/admin/links", label: "Liên kết hồ sơ" },
 ];
@@ -37,7 +38,7 @@ const sectionCopy: Record<
 > = {
   overview: {
     title: "Bảng điều khiển quản trị",
-    description: "Khung nền tảng cho quản trị viên EmerCard.",
+    description: "Ưu tiên các công việc cần hoàn tất để thẻ có thể được phát hành an toàn.",
   },
   cards: {
     title: "Kho thẻ",
@@ -72,6 +73,30 @@ function cardStatusVariant(card: AdminCard) {
       : ["lost", "replaced", "void"].includes(card.status)
         ? "danger"
         : "primary";
+}
+
+function encodingStatus(card: AdminCard) {
+  return {
+    not_provisioned: { label: "Chưa có liên kết", variant: "neutral" as const },
+    link_generated: { label: "Chờ xác minh mã hóa", variant: "warning" as const },
+    verified: { label: "Mã hóa đã xác minh", variant: "success" as const },
+  }[card.encoding_state];
+}
+
+function linkStatus(card: AdminCard) {
+  const status = card.link?.status;
+  if (status === "active") return { label: "Đang công khai", variant: "success" as const };
+  if (status === "disabled") return { label: "Tạm dừng công khai", variant: "warning" as const };
+  if (status === "revoked" || status === "expired") return { label: status === "revoked" ? "Đã thu hồi" : "Đã hết hạn", variant: "danger" as const };
+  return { label: status === "pending" ? "Chờ gắn và phát hành" : "Chưa gắn liên kết", variant: "neutral" as const };
+}
+
+function nextCardAction(card: AdminCard) {
+  if (!card.link) return "Gắn liên kết hồ sơ";
+  if (card.encoding_state !== "verified") return "Xác minh URL đã mã hóa";
+  if (!card.issued_at) return "Phát hành thẻ vật lý";
+  if (card.link.status !== "active") return "Kích hoạt trang thông tin";
+  return "Không cần thao tác thêm";
 }
 
 function AdminCardsPanel() {
@@ -157,7 +182,7 @@ function AdminCardsPanel() {
             Thao tác nhanh
           </h2>
           <p className="text-sm text-muted-foreground">
-            Tạo thẻ trống, sau đó mở chi tiết để gắn liên kết thẻ chờ.
+            Theo dõi từng bước: gắn liên kết, xác minh URL, phát hành thẻ, rồi mở trang thông tin công khai.
           </p>
         </div>
         <Button
@@ -213,6 +238,14 @@ function AdminCardPanel({
   };
   busy: Record<string, boolean>;
 }) {
+  const [pendingAction, setPendingAction] = useState<{
+    title: string;
+    description: string;
+    confirmLabel: string;
+    variant: "primary" | "danger";
+    run: () => void;
+  } | null>(null);
+
   return (
     <Panel className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -225,25 +258,19 @@ function AdminCardPanel({
           </p>
         </div>
         <StatusBadge variant={cardStatusVariant(card)}>
-          {card.encoding_state}
+          {cardStatusLabel(card)}
         </StatusBadge>
       </div>
-      <div className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-        <p>Đang hiện diện: {card.is_current ? "Có" : "Không"}</p>
-        <p>Người nhận giao hàng: {card.owner?.email ?? "chưa có"}</p>
-        <p>
-          Phát hành:{" "}
-          {card.issued_at
-            ? new Date(card.issued_at).toLocaleString("vi-VN")
-            : "chưa"}
-        </p>
-        <p>Liên kết: {card.link?.status ?? "chưa gắn"}</p>
-        <p>Gắn liên kết: {card.assignment?.status ?? "chưa có"}</p>
-        <p>
-          Xác minh mã:{" "}
-          {card.encoding_verified_at ? "Đã xác minh" : "Chưa xác minh"}
-        </p>
+      <div className="rounded-[var(--radius-control)] border border-primary/20 bg-primary/5 p-4">
+        <p className="text-xs font-semibold text-primary">Việc cần làm tiếp theo</p>
+        <p className="mt-1 font-semibold text-foreground">{nextCardAction(card)}</p>
       </div>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <section className="rounded-[var(--radius-control)] border border-border bg-muted/30 p-3"><p className="text-xs font-semibold text-muted-foreground">Liên kết hồ sơ</p><div className="mt-2"><StatusBadge variant={linkStatus(card).variant}>{linkStatus(card).label}</StatusBadge></div></section>
+        <section className="rounded-[var(--radius-control)] border border-border bg-muted/30 p-3"><p className="text-xs font-semibold text-muted-foreground">Mã hóa thẻ</p><div className="mt-2"><StatusBadge variant={encodingStatus(card).variant}>{encodingStatus(card).label}</StatusBadge></div></section>
+        <section className="rounded-[var(--radius-control)] border border-border bg-muted/30 p-3"><p className="text-xs font-semibold text-muted-foreground">Phát hành vật lý</p><p className="mt-2 text-sm font-semibold text-foreground">{card.issued_at ? "Đã phát hành" : "Chưa phát hành"}</p></section>
+      </div>
+      <p className="text-sm text-muted-foreground">Chủ thẻ: {card.owner?.email ?? "Chưa gắn hồ sơ"}</p>
       <div className="flex flex-wrap gap-3">
         <Button
           type="button"
@@ -272,9 +299,13 @@ function AdminCardPanel({
           type="button"
           variant="ghost"
           busy={busy.lost}
-          onClick={() => {
-            if (window.confirm("Báo mất thẻ này?")) actions.lost();
-          }}
+          onClick={() => setPendingAction({
+            title: "Báo mất thẻ",
+            description: "Thẻ sẽ bị đánh dấu là đã mất. Liên kết hiện tại có thể bị thu hồi theo chính sách.",
+            confirmLabel: "Xác nhận báo mất",
+            variant: "danger",
+            run: actions.lost,
+          })}
         >
           Báo mất
         </Button>
@@ -283,9 +314,13 @@ function AdminCardPanel({
           variant="ghost"
           busy={busy.void}
           disabled={Boolean(card.issued_at)}
-          onClick={() => {
-            if (window.confirm("Hủy thẻ chưa phát hành?")) actions.void();
-          }}
+          onClick={() => setPendingAction({
+            title: "Hủy thẻ chưa phát hành",
+            description: "Thẻ sẽ không thể được cấp hoặc sử dụng. Liên kết đang gắn, nếu có, sẽ bị thu hồi.",
+            confirmLabel: "Hủy thẻ",
+            variant: "danger",
+            run: actions.void,
+          })}
         >
           Hủy
         </Button>
@@ -293,14 +328,26 @@ function AdminCardPanel({
           type="button"
           variant="danger"
           busy={busy.replace}
-          onClick={() => {
-            if (window.confirm("Tạo quy trình thay thế thẻ này?"))
-              actions.replace();
-          }}
+          onClick={() => setPendingAction({
+            title: "Thay thế thẻ",
+            description: "Thao tác này bắt đầu quy trình thay thế và thẻ hiện tại sẽ không còn là thẻ đang sử dụng.",
+            confirmLabel: "Tạo thẻ thay thế",
+            variant: "danger",
+            run: actions.replace,
+          })}
         >
           Thay thế
         </Button>
       </div>
+      <Dialog
+        open={Boolean(pendingAction)}
+        title={pendingAction?.title ?? "Xác nhận thao tác"}
+        description={pendingAction?.description}
+        onClose={() => setPendingAction(null)}
+        actions={<><Button variant="secondary" onClick={() => setPendingAction(null)}>Quay lại</Button><Button variant={pendingAction?.variant ?? "primary"} onClick={() => { pendingAction?.run(); setPendingAction(null); }}>{pendingAction?.confirmLabel ?? "Xác nhận"}</Button></>}
+      >
+        <p className="text-sm leading-6 text-muted-foreground">Kiểm tra kỹ tác động của thao tác trước khi tiếp tục.</p>
+      </Dialog>
     </Panel>
   );
 }
@@ -353,12 +400,18 @@ export function AdminApplicationRoot({
           />
         )
       ) : (
-        <Panel>
-          <EmptyState
-            title="Chưa có hành động quản trị ở màn hình này"
-            description="Chọn kho thẻ hoặc liên kết hồ sơ để bắt đầu."
-          />
-        </Panel>
+        <div className="grid gap-5 lg:grid-cols-2">
+          <Panel className="space-y-3">
+            <h2 className="text-xl font-semibold text-foreground">Bắt đầu một quy trình mới</h2>
+            <p className="text-sm leading-6 text-muted-foreground">Tạo liên kết hồ sơ trước, sau đó gắn liên kết vào thẻ trống trong kho thẻ.</p>
+            <Button type="button" onClick={() => assignLocation("/admin/links")}>Tạo liên kết hồ sơ</Button>
+          </Panel>
+          <Panel className="space-y-3">
+            <h2 className="text-xl font-semibold text-foreground">Tiếp tục công việc đang dở</h2>
+            <p className="text-sm leading-6 text-muted-foreground">Mở kho thẻ để xem trạng thái mã hóa, phát hành và liên kết công khai của từng thẻ.</p>
+            <Button type="button" variant="secondary" onClick={() => assignLocation("/admin/cards")}>Mở kho thẻ</Button>
+          </Panel>
+        </div>
       )}
     </PageApplicationRoot>
   );

@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Panel, StatusBadge } from "../../components/primitives";
+import { Button, Dialog, Panel, StatusBadge } from "../../components/primitives";
 import {
   EmptyState,
   PageLoadingState,
@@ -45,12 +45,12 @@ const sectionCopy: Record<
   overview: {
     title: "Tổng quan tài khoản",
     description:
-      "Màn hình nền tảng cho các thông tin tóm tắt và điều hướng nhanh.",
+      "Xem mức độ sẵn sàng của hồ sơ và việc cần làm tiếp theo để thông tin khẩn cấp có thể được sử dụng.",
   },
   profile: {
     title: "Hồ sơ y tế",
     description:
-      "Khung giao diện cho quản lý hồ sơ y tế sẽ được nối ở các giai đoạn sau.",
+      "Cập nhật thông tin sẽ hiển thị cho người hỗ trợ trong tình huống khẩn cấp.",
   },
   cards: {
     title: "Thẻ của tôi",
@@ -90,6 +90,23 @@ function cardStatusVariant(card: UserCard) {
     default:
       return "primary";
   }
+}
+
+function linkStatusLabel(status: UserCard["link_status"]) {
+  return {
+    active: "Đang công khai",
+    disabled: "Tạm dừng công khai",
+    pending: "Chờ kích hoạt",
+    revoked: "Đã thu hồi",
+    expired: "Đã hết hạn",
+  }[status ?? "pending"];
+}
+
+function linkStatusVariant(status: UserCard["link_status"]) {
+  if (status === "active") return "success";
+  if (status === "disabled" || status === "pending") return "warning";
+  if (status === "revoked" || status === "expired") return "danger";
+  return "neutral";
 }
 
 function cardBlockingReasonLabel(card: UserCard) {
@@ -192,7 +209,7 @@ function ProfileSummaryCard() {
                 : "primary"
           }
         >
-          {readiness.status}
+          {profileReadinessLabel(readiness.status)}
         </StatusBadge>
       </div>
 
@@ -222,14 +239,17 @@ function ProfileSummaryCard() {
       )}
 
       {readiness.missing_fields.length > 0 ? (
-        <div className="rounded-[var(--radius-panel)] border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
-          <p className="font-semibold text-foreground">Cần bổ sung</p>
+        <div className="rounded-[var(--radius-panel)] border border-warning/25 bg-warning-soft p-4 text-sm text-muted-foreground">
+          <p className="font-semibold text-foreground">Việc cần hoàn tất</p>
           <ul className="mt-2 space-y-1">
             {readiness.missing_fields.map((field) => (
               <li key={field}>• {profileMissingFieldLabel(field)}</li>
             ))}
           </ul>
+          <a href="/app/profile" className="mt-4 inline-flex min-h-11 items-center rounded-[var(--radius-control)] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Hoàn thiện hồ sơ</a>
         </div>
+      ) : readiness.status === "ready" ? (
+        <div className="rounded-[var(--radius-panel)] border border-success/25 bg-success-soft p-4 text-sm text-foreground">Hồ sơ đã đủ thông tin cần thiết. Kiểm tra trạng thái thẻ và liên kết công khai trước khi dựa vào hồ sơ trong tình huống khẩn cấp.</div>
       ) : null}
     </Panel>
   );
@@ -237,6 +257,13 @@ function ProfileSummaryCard() {
 
 function MyCardsPanel() {
   const { clearSessionCache } = useSession();
+  const [pendingAction, setPendingAction] = useState<{
+    title: string;
+    description: string;
+    confirmLabel: string;
+    variant: "primary" | "danger";
+    run: () => void;
+  } | null>(null);
   const queryClient = useQueryClient();
   const query = useQuery({
     queryKey: cardKeys.myCards,
@@ -332,6 +359,7 @@ function MyCardsPanel() {
 
   return (
     <div className="space-y-4">
+      <p className="max-w-3xl text-sm leading-6 text-muted-foreground">Trạng thái thẻ vật lý và trạng thái trang thông tin khẩn cấp là hai thông tin riêng. Kiểm tra cả hai trước khi dựa vào thẻ trong tình huống khẩn cấp.</p>
       {cards.map((card) => (
         <Panel key={card.id} className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -344,20 +372,20 @@ function MyCardsPanel() {
               </p>
             </div>
             <StatusBadge variant={cardStatusVariant(card)}>
-              {card.status}
+              {cardStatusLabel(card)}
             </StatusBadge>
           </div>
-          <div className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-            <p>Đang hiện diện: {card.is_current ? "Có" : "Không"}</p>
-            <p>
-              Đã cấp: {new Date(card.issued_at).toLocaleDateString("vi-VN")}
-            </p>
-            <p>Cho phép kích hoạt: {card.can_activate ? "Có" : "Không"}</p>
-            <p>Cho phép vô hiệu hóa: {card.can_disable ? "Có" : "Không"}</p>
-            <p>Cho phép thu hồi: {card.can_revoke ? "Có" : "Không"}</p>
-            <p>Liên kết: {card.link_status ?? "chưa có"}</p>
-            <p>Loại liên kết: {card.link_purpose ?? "chưa có"}</p>
-            <p>Nhãn liên kết: {card.link_label ?? "không có"}</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <section className="rounded-[var(--radius-control)] border border-border bg-muted/30 p-4">
+              <p className="text-xs font-semibold text-muted-foreground">Thẻ vật lý</p>
+              <p className="mt-1 font-semibold text-foreground">{cardStatusLabel(card)}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{card.is_current ? "Đây là thẻ hiện hành." : "Thẻ này không còn là thẻ hiện hành."}</p>
+            </section>
+            <section className="rounded-[var(--radius-control)] border border-border bg-muted/30 p-4">
+              <p className="text-xs font-semibold text-muted-foreground">Trang thông tin khẩn cấp</p>
+              <div className="mt-1"><StatusBadge variant={linkStatusVariant(card.link_status)}>{linkStatusLabel(card.link_status)}</StatusBadge></div>
+              <p className="mt-2 text-sm text-muted-foreground">{card.link_label ? `Liên kết: ${card.link_label}` : "Chưa có nhãn liên kết."}</p>
+            </section>
           </div>
           <div className="flex flex-wrap gap-3">
             <Button
@@ -366,13 +394,7 @@ function MyCardsPanel() {
               disabled={!card.can_activate || activateMutation.isPending}
               busy={activateMutation.isPending}
               onClick={() => {
-                if (
-                  !window.confirm(
-                    "Bạn có chắc muốn kích hoạt public URL của thẻ này không?",
-                  )
-                )
-                  return;
-                activateMutation.mutate(card.id);
+                setPendingAction({ title: "Kích hoạt trang thông tin", description: "Trang thông tin khẩn cấp của thẻ này sẽ có thể truy cập công khai.", confirmLabel: "Kích hoạt liên kết", variant: "primary", run: () => activateMutation.mutate(card.id) });
               }}
             >
               Kích hoạt
@@ -383,13 +405,7 @@ function MyCardsPanel() {
               disabled={!card.can_disable || disableMutation.isPending}
               busy={disableMutation.isPending}
               onClick={() => {
-                if (
-                  !window.confirm(
-                    "Bạn có chắc muốn tạm dừng public URL của thẻ này không? Bạn có thể kích hoạt lại cùng một URL sau đó.",
-                  )
-                )
-                  return;
-                disableMutation.mutate(card.id);
+                setPendingAction({ title: "Tạm dừng trang thông tin", description: "Người quét thẻ sẽ không thể xem hồ sơ này cho đến khi liên kết được kích hoạt lại.", confirmLabel: "Tạm dừng liên kết", variant: "primary", run: () => disableMutation.mutate(card.id) });
               }}
             >
               Vô hiệu hóa
@@ -400,13 +416,7 @@ function MyCardsPanel() {
               disabled={!card.can_revoke || revokeMutation.isPending}
               busy={revokeMutation.isPending}
               onClick={() => {
-                if (
-                  !window.confirm(
-                    "Thu hồi liên kết là thao tác kết thúc và không thể kích hoạt lại?",
-                  )
-                )
-                  return;
-                revokeMutation.mutate(card.id);
+                setPendingAction({ title: "Thu hồi liên kết", description: "Đây là thao tác kết thúc. Trang thông tin hiện tại sẽ không thể được kích hoạt lại.", confirmLabel: "Thu hồi liên kết", variant: "danger", run: () => revokeMutation.mutate(card.id) });
               }}
             >
               Thu hồi liên kết
@@ -417,9 +427,7 @@ function MyCardsPanel() {
               disabled={!card.can_report_lost || lostMutation.isPending}
               busy={lostMutation.isPending}
               onClick={() => {
-                if (!window.confirm("Bạn có chắc muốn báo mất thẻ này không?"))
-                  return;
-                lostMutation.mutate(card.id);
+                setPendingAction({ title: "Báo mất thẻ", description: "Thẻ sẽ được đánh dấu là đã mất và liên kết hiện tại có thể không còn dùng được theo chính sách.", confirmLabel: "Xác nhận báo mất", variant: "danger", run: () => lostMutation.mutate(card.id) });
               }}
             >
               Báo mất
@@ -432,6 +440,15 @@ function MyCardsPanel() {
           ) : null}
         </Panel>
       ))}
+      <Dialog
+        open={Boolean(pendingAction)}
+        title={pendingAction?.title ?? "Xác nhận thao tác"}
+        description={pendingAction?.description}
+        onClose={() => setPendingAction(null)}
+        actions={<><Button variant="secondary" onClick={() => setPendingAction(null)}>Quay lại</Button><Button variant={pendingAction?.variant ?? "primary"} onClick={() => { pendingAction?.run(); setPendingAction(null); }}>{pendingAction?.confirmLabel ?? "Xác nhận"}</Button></>}
+      >
+        <p className="text-sm leading-6 text-muted-foreground">Hãy kiểm tra kỹ tác động của thao tác trước khi tiếp tục.</p>
+      </Dialog>
     </div>
   );
 }

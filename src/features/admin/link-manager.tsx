@@ -35,6 +35,25 @@ const linkStatusLabels: Record<PublicLinkSummary["status"], string> = {
   expired: "Đã hết hạn",
 };
 
+function LinkWorkflow({ selectedUser }: { selectedUser: SafeUser | null }) {
+  const steps = [
+    { label: "Chọn người dùng", state: selectedUser ? "Đã chọn" : "Cần thực hiện" },
+    { label: "Tạo liên kết chờ", state: "Không công khai" },
+    { label: "Gắn vào thẻ", state: "Thực hiện trong kho thẻ" },
+  ];
+  return (
+    <ol className="grid gap-3 sm:grid-cols-3" aria-label="Quy trình tạo liên kết thẻ">
+      {steps.map((step, index) => (
+        <li key={step.label} className={`rounded-[var(--radius-control)] border p-3 ${index === 0 && selectedUser ? "border-success/30 bg-success-soft" : "border-border bg-muted/30"}`}>
+          <p className="text-xs font-semibold text-muted-foreground">Bước {index + 1}</p>
+          <p className="mt-1 text-sm font-semibold text-foreground">{step.label}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{step.state}</p>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 function LinkSummaryRow({ link }: { link: PublicLinkSummary }) {
   const variant =
     link.status === "active"
@@ -228,20 +247,21 @@ export function AdminLinkManagerPanel() {
 
   return (
     <div className="space-y-6">
+      <LinkWorkflow selectedUser={selectedUser} />
       <Panel className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-xl font-semibold text-foreground">
-              Tìm hồ sơ công khai
+              Tìm người dùng
             </h2>
             <p className="text-sm text-muted-foreground">
-              Chỉ dùng email để tìm hồ sơ; không hiển thị dữ liệu y tế.
+              Chỉ dùng email để xác nhận đúng người dùng; dữ liệu y tế không hiển thị ở đây.
             </p>
           </div>
           {selectedUser ? (
             <StatusBadge variant="success">{selectedUser.email}</StatusBadge>
           ) : (
-            <StatusBadge variant="neutral">Chưa chọn hồ sơ</StatusBadge>
+            <StatusBadge variant="neutral">Chưa chọn người dùng</StatusBadge>
           )}
         </div>
         {message ? <Alert variant="info">{message}</Alert> : null}
@@ -302,8 +322,7 @@ export function AdminLinkManagerPanel() {
             Tạo liên kết thẻ chờ gắn
           </h2>
           <p className="text-sm text-muted-foreground">
-            Liên kết luôn bắt đầu ở trạng thái chờ; không có nút kích hoạt khi
-            chưa gắn vào thẻ.
+            Liên kết chỉ tạo URL để mã hóa thẻ. Nó chưa công khai và không thể kích hoạt cho đến khi được gắn, xác minh, rồi phát hành.
           </p>
         </div>
         <TextInput

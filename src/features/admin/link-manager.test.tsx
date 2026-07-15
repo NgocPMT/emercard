@@ -102,7 +102,7 @@ describe("AdminLinkManagerPanel", () => {
     render(<AdminLinkManagerPanel />);
 
     expect(
-      screen.getByRole("heading", { name: "Tìm hồ sơ công khai" }),
+      screen.getByRole("heading", { name: "Tìm người dùng" }),
     ).toBeInTheDocument();
     expect(
       screen.queryByText("Đang tải liên kết hồ sơ"),
@@ -127,7 +127,7 @@ describe("AdminLinkManagerPanel", () => {
     render(<AdminLinkManagerPanel />);
 
     expect(
-      screen.getByRole("heading", { name: "Tìm hồ sơ công khai" }),
+      screen.getByRole("heading", { name: "Tìm người dùng" }),
     ).toBeInTheDocument();
     await user.type(screen.getByLabelText("Email hồ sơ"), "nurse@example.com");
     await user.click(screen.getByRole("button", { name: "Tìm hồ sơ" }));

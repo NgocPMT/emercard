@@ -343,12 +343,13 @@ function ProfileEditor({ profileView }: { profileView: ProfileView }) {
 
       <section className="space-y-4">
         <div>
-          <h3 className="text-lg font-semibold text-foreground">Thông tin cơ bản</h3>
-          <p className="text-sm text-muted-foreground">Các trường này tạo nên hồ sơ và trạng thái sẵn sàng.</p>
+          <h3 className="text-lg font-semibold text-foreground">Thông tin nhận diện</h3>
+          <p className="text-sm text-muted-foreground">Giúp người hỗ trợ xác định đúng người. Các trường bắt buộc được đánh dấu bằng dấu sao.</p>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           <TextInput
             label="Tên hiển thị"
+            hint="Tên này sẽ xuất hiện trên trang thông tin khẩn cấp."
             placeholder="Alex Example"
             error={form.formState.errors.display_name?.message}
             {...form.register("display_name")}
@@ -368,7 +369,7 @@ function ProfileEditor({ profileView }: { profileView: ProfileView }) {
               </option>
             ))}
           </Select>
-          <Select label="Nhóm máu" error={form.formState.errors.blood_type?.message} {...form.register("blood_type")}>
+          <Select label="Nhóm máu" hint="Chỉ chọn khi bạn chắc chắn thông tin là chính xác." error={form.formState.errors.blood_type?.message} {...form.register("blood_type")}>
             <option value="">Chọn nhóm máu</option>
             {bloodTypeOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -470,7 +471,7 @@ function ProfileEditor({ profileView }: { profileView: ProfileView }) {
         </div>
       </section>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="sticky bottom-3 z-10 -mx-2 flex flex-wrap gap-3 rounded-[var(--radius-panel)] border border-border bg-card/95 p-3 shadow-[var(--shadow-soft)] backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
         <Button type="submit" size="lg" busy={saveMutation.isPending}>
           {saveMutation.isPending ? "Đang lưu..." : "Lưu hồ sơ"}
         </Button>

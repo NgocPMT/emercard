@@ -1,26 +1,26 @@
 :root {
   color-scheme: light;
-  --color-page-bg: #f3f8fb;
+  --color-page-bg: #f6f8f7;
   --color-surface: #ffffff;
-  --color-surface-muted: #eaf4f8;
-  --color-text: #132b35;
-  --color-text-muted: #526a74;
-  --color-border: #d3e4ea;
-  --color-primary: #287f9b;
-  --color-primary-strong: #1d657d;
+  --color-surface-muted: #edf3f1;
+  --color-text: #172d36;
+  --color-text-muted: #52656c;
+  --color-border: #d6e0dd;
+  --color-primary: #176b7a;
+  --color-primary-strong: #105563;
   --color-danger: #b42318;
   --color-danger-soft: #fff1ef;
-  --color-warning: #a15c08;
-  --color-warning-soft: #fff7e6;
-  --color-success: #087a55;
-  --color-success-soft: #e8f7ef;
-  --color-focus: #57b5d0;
-  --shadow-soft: 0 16px 40px rgb(19 43 53 / 0.08);
-  --shadow-lifted: 0 24px 64px rgb(19 43 53 / 0.12);
-  --radius-panel: 1.25rem;
-  --radius-control: 0.75rem;
+  --color-warning: #985b12;
+  --color-warning-soft: #fff7e8;
+  --color-success: #16734d;
+  --color-success-soft: #eaf6ef;
+  --color-focus: #3d98a7;
+  --shadow-soft: 0 10px 28px rgb(23 45 54 / 0.06);
+  --shadow-lifted: 0 22px 54px rgb(23 45 54 / 0.1);
+  --radius-panel: 1rem;
+  --radius-control: 0.7rem;
   --space-touch: 2.75rem;
-  --font-source-sans-3: "Source Sans 3", "Avenir Next", ui-sans-serif, system-ui, sans-serif;
+  --font-source-sans-3: "Cabinet Grotesk", "Avenir Next", ui-sans-serif, system-ui, sans-serif;
   --font-inconsolata: "Inconsolata", ui-monospace, SFMono-Regular, monospace;
 }
 

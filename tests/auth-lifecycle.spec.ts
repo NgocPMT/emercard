@@ -31,7 +31,7 @@ test("registers, logs in, restores the session, and logs out", async ({ page }) 
 
   await page.goto("/register");
   await waitForAuthHydration(page);
-  await expect(page.getByRole("heading", { name: /Tạo tài khoản EmerCard/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Tạo nơi tin cậy cho hồ sơ y tế/i })).toBeVisible();
   await page.getByLabel(/Email/).fill(email);
   await page.getByLabel(/Mật khẩu/).first().fill(password);
   await page.getByLabel(/Xác nhận mật khẩu/).fill(password);
@@ -51,11 +51,11 @@ test("registers, logs in, restores the session, and logs out", async ({ page }) 
 
   await page.getByRole("button", { name: "Đăng xuất" }).click();
   await expect(page).toHaveURL(/\/login(?:\/)?$/);
-  await expect(page.getByRole("heading", { name: /Đăng nhập|Truy cập tài khoản EmerCard/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Thông tin quan trọng, luôn sẵn sàng/i })).toBeVisible();
 
   await page.goto("/app");
   await expect(page).toHaveURL(/\/login\?returnTo=/);
-  await expect(page.getByRole("heading", { name: /Đăng nhập|Truy cập tài khoản EmerCard/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Thông tin quan trọng, luôn sẵn sàng/i })).toBeVisible();
 });
 
 test("rejects duplicate registration and invalid login with safe messages", async ({ page }) => {
@@ -124,5 +124,5 @@ test("shows bootstrap failures as service unavailable and leaves /e/* public", a
   await page.unroute("**/api/v1/me");
   await page.goto("/e/");
   await expect(page).not.toHaveURL(/\/login/);
-  await expect(page.getByRole("heading", { name: /Thông tin y tế khẩn cấp/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Thông tin cần biết ngay/i })).toBeVisible();
 });

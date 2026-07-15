@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Alert,
   Button,
+  Dialog,
   Panel,
   Select,
   StatusBadge,
@@ -48,6 +49,27 @@ function historyEntries(card: AdminCard) {
   );
 }
 
+function ProvisioningSteps({ card }: { card: AdminCard }) {
+  const steps = [
+    { label: "Gắn liên kết", complete: Boolean(card.link), current: !card.link },
+    { label: "Xác minh mã hóa", complete: card.encoding_state === "verified", current: Boolean(card.link) && card.encoding_state !== "verified" },
+    { label: "Phát hành thẻ", complete: Boolean(card.issued_at), current: card.encoding_state === "verified" && !card.issued_at },
+    { label: "Mở liên kết công khai", complete: card.link?.status === "active", current: Boolean(card.issued_at) && card.link?.status !== "active" },
+  ];
+
+  return (
+    <ol className="grid gap-3 sm:grid-cols-4" aria-label="Tiến trình cấp phát thẻ">
+      {steps.map((step, index) => (
+        <li key={step.label} className={`rounded-[var(--radius-control)] border p-3 ${step.complete ? "border-success/30 bg-success-soft" : step.current ? "border-primary/35 bg-primary/5" : "border-border bg-muted/30"}`}>
+          <p className="text-xs font-semibold text-muted-foreground">Bước {index + 1}</p>
+          <p className="mt-1 text-sm font-semibold text-foreground">{step.label}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{step.complete ? "Đã hoàn tất" : step.current ? "Cần thực hiện tiếp" : "Chưa thể thực hiện"}</p>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 function apiMessage(error: unknown) {
   if (!isApiError(error)) return null;
   const messages: Record<string, string> = {
@@ -80,6 +102,13 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
   const [selectedLinkId, setSelectedLinkId] = useState("");
   const [reason, setReason] = useState("");
   const [message, setMessage] = useState<string | null>(null);
+  const [pendingAction, setPendingAction] = useState<{
+    title: string;
+    description: string;
+    confirmLabel: string;
+    variant: "primary" | "danger";
+    run: () => void;
+  } | null>(null);
 
   const query = useQuery({
     queryKey: cardKeys.adminCard(cardId),
@@ -308,8 +337,9 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
             {errorMessage}
           </Alert>
         ) : null}
+        <ProvisioningSteps card={card} />
         <div className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-          <p>Trạng thái mã: {card.encoding_state}</p>
+          <p>Trạng thái mã: {card.encoding_state === "verified" ? "Đã xác minh" : card.encoding_state === "link_generated" ? "Đã tạo liên kết, chờ xác minh" : "Chưa có liên kết"}</p>
           <p>Liên kết: {card.link?.status ?? "chưa gắn"}</p>
           <p>Gắn liên kết: {card.assignment?.status ?? "chưa có"}</p>
           <p>
@@ -420,16 +450,15 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
                   type="button"
                   busy={attachMutation.isPending}
                   disabled={!canBind}
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        card.link
-                          ? "Đổi liên kết này trước phát hành? Liên kết cũ sẽ bị thu hồi."
-                          : "Gắn liên kết này vào thẻ?",
-                      )
-                    )
-                      attachMutation.mutate();
-                  }}
+                  onClick={() => setPendingAction({
+                    title: card.link ? "Đổi liên kết hồ sơ" : "Gắn liên kết hồ sơ",
+                    description: card.link
+                      ? "Liên kết cũ sẽ bị thu hồi. Thao tác này chỉ có thể thực hiện trước khi phát hành thẻ."
+                      : "Liên kết đã chọn sẽ trở thành đường truy cập công khai duy nhất của thẻ này sau khi hoàn tất quy trình.",
+                    confirmLabel: card.link ? "Đổi liên kết" : "Gắn liên kết",
+                    variant: "primary",
+                    run: () => attachMutation.mutate(),
+                  })}
                 >
                   {card.link ? "Đổi liên kết" : "Gắn liên kết"}
                 </Button>
@@ -482,14 +511,13 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
               card.encoding_state !== "verified" ||
               Boolean(card.issued_at)
             }
-            onClick={() => {
-              if (
-                window.confirm(
-                  "Phát hành thẻ sau khi đã gắn và xác minh liên kết?",
-                )
-              )
-                issueMutation.mutate();
-            }}
+            onClick={() => setPendingAction({
+              title: "Phát hành thẻ vật lý",
+              description: "Xác nhận rằng URL trên thẻ đã được xác minh. Sau khi phát hành, liên kết không thể được đổi hoặc gỡ.",
+              confirmLabel: "Phát hành thẻ",
+              variant: "primary",
+              run: () => issueMutation.mutate(),
+            })}
           >
             Phát hành thẻ
           </Button>
@@ -516,14 +544,13 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
             variant="ghost"
             busy={revokeMutation.isPending}
             disabled={!card.link || card.link.status === "revoked"}
-            onClick={() => {
-              if (
-                window.confirm(
-                  "Thu hồi là thao tác kết thúc và không thể kích hoạt lại?",
-                )
-              )
-                revokeMutation.mutate();
-            }}
+            onClick={() => setPendingAction({
+              title: "Thu hồi liên kết",
+              description: "Đây là thao tác kết thúc. Trang thông tin hiện tại sẽ không thể được kích hoạt lại.",
+              confirmLabel: "Thu hồi liên kết",
+              variant: "danger",
+              run: () => revokeMutation.mutate(),
+            })}
           >
             Thu hồi liên kết
           </Button>
@@ -577,14 +604,13 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
             type="button"
             variant="ghost"
             busy={lostMutation.isPending}
-            onClick={() => {
-              if (
-                window.confirm(
-                  "Báo mất thẻ này? Liên kết hiện tại sẽ bị thu hồi theo chính sách.",
-                )
-              )
-                lostMutation.mutate();
-            }}
+            onClick={() => setPendingAction({
+              title: "Báo mất thẻ",
+              description: "Thẻ sẽ được đánh dấu là đã mất. Liên kết hiện tại sẽ bị thu hồi theo chính sách.",
+              confirmLabel: "Xác nhận báo mất",
+              variant: "danger",
+              run: () => lostMutation.mutate(),
+            })}
           >
             Báo mất
           </Button>
@@ -592,10 +618,13 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
             type="button"
             variant="danger"
             busy={replaceMutation.isPending}
-            onClick={() => {
-              if (window.confirm("Tạo quy trình thay thế thẻ này?"))
-                replaceMutation.mutate();
-            }}
+            onClick={() => setPendingAction({
+              title: "Thay thế thẻ",
+              description: "Thao tác này bắt đầu quy trình thay thế và thẻ hiện tại sẽ không còn là thẻ đang sử dụng.",
+              confirmLabel: "Tạo thẻ thay thế",
+              variant: "danger",
+              run: () => replaceMutation.mutate(),
+            })}
           >
             Thay thế
           </Button>
@@ -604,19 +633,27 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
             variant="danger"
             busy={voidMutation.isPending}
             disabled={Boolean(card.issued_at)}
-            onClick={() => {
-              if (
-                window.confirm(
-                  "Hủy thẻ chưa phát hành? Liên kết sẽ bị thu hồi.",
-                )
-              )
-                voidMutation.mutate();
-            }}
+            onClick={() => setPendingAction({
+              title: "Hủy thẻ chưa phát hành",
+              description: "Thẻ sẽ không thể được cấp hoặc sử dụng. Liên kết đang gắn, nếu có, sẽ bị thu hồi.",
+              confirmLabel: "Hủy thẻ",
+              variant: "danger",
+              run: () => voidMutation.mutate(),
+            })}
           >
             Hủy
           </Button>
         </div>
       </Panel>
+      <Dialog
+        open={Boolean(pendingAction)}
+        title={pendingAction?.title ?? "Xác nhận thao tác"}
+        description={pendingAction?.description}
+        onClose={() => setPendingAction(null)}
+        actions={<><Button variant="secondary" onClick={() => setPendingAction(null)}>Quay lại</Button><Button variant={pendingAction?.variant ?? "primary"} onClick={() => { pendingAction?.run(); setPendingAction(null); }}>{pendingAction?.confirmLabel ?? "Xác nhận"}</Button></>}
+      >
+        <p className="text-sm leading-6 text-muted-foreground">Kiểm tra kỹ tác động của thao tác trước khi tiếp tục.</p>
+      </Dialog>
     </div>
   );
 }

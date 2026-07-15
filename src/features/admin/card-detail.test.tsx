@@ -1,4 +1,5 @@
 import React from "react";
+import userEvent from "@testing-library/user-event";
 import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AdminCardDetailPanel } from "./card-detail";
@@ -24,6 +25,12 @@ vi.mock("../session", () => ({
 }));
 
 beforeEach(() => {
+  HTMLDialogElement.prototype.showModal = function showModal() {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function close() {
+    this.removeAttribute("open");
+  };
   useQueryMock.mockReturnValue({
     isPending: false,
     error: undefined,
@@ -88,5 +95,15 @@ describe("AdminCardDetailPanel", () => {
     expect(
       screen.getByRole("button", { name: "Thay thế" }),
     ).toBeInTheDocument();
+  });
+
+  it("asks for confirmation before revoking a public link", async () => {
+    const user = userEvent.setup();
+    render(<AdminCardDetailPanel cardId="card-1" />);
+
+    await user.click(screen.getByRole("button", { name: "Thu hồi liên kết" }));
+
+    expect(screen.getByRole("dialog")).toHaveTextContent("Đây là thao tác kết thúc");
+    expect(screen.getAllByRole("button", { name: "Thu hồi liên kết" })).toHaveLength(2);
   });
 });

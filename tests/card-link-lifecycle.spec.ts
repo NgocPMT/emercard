@@ -118,33 +118,19 @@ async function createIssuedCard(request: APIRequestContext, userId: string): Pro
   const createdResponse = await request.post("/api/v1/admin/cards", {
     headers: { "Idempotency-Key": randomUUID() },
   });
-  expect(createdResponse.ok(), `create card failed: ${createdResponse.status()} ${await createdResponse.text()}`).toBeTruthy();
-  const created = await readJson<{ id: string; serial: string }>(createdResponse);
-
-  const provisionResponse = await request.post(`/api/v1/admin/cards/${created.id}/provision-link`);
-  expect(provisionResponse.ok()).toBeTruthy();
-  const provisioned = await readJson<{
-    card: { id: string; serial: string };
-    provisioning: { public_token: string; public_url: string };
-  }>(provisionResponse);
-
-  const encodingResponse = await request.post(`/api/v1/admin/cards/${created.id}/confirm-encoding`, {
-    data: { public_url: provisioned.provisioning.public_url },
-  });
   expect(
-    encodingResponse.ok(),
-    `confirm encoding failed: ${encodingResponse.status()} ${await encodingResponse.text()}`,
+    createdResponse.ok(),
+    `create card failed: ${createdResponse.status()} ${await createdResponse.text()}`,
   ).toBeTruthy();
-
-  const assignResponse = await request.post(`/api/v1/admin/cards/${created.id}/assign`, {
-    data: { user_id: userId },
-  });
-  expect(assignResponse.ok()).toBeTruthy();
+  const created = await readJson<{ id: string; serial: string }>(createdResponse);
 
   const userLinkResponse = await request.post(`/api/v1/admin/users/${userId}/links`, {
     data: { purpose: "card", label: "Card access" },
   });
-  expect(userLinkResponse.ok(), `create user link failed: ${userLinkResponse.status()} ${await userLinkResponse.text()}`).toBeTruthy();
+  expect(
+    userLinkResponse.ok(),
+    `create user link failed: ${userLinkResponse.status()} ${await userLinkResponse.text()}`,
+  ).toBeTruthy();
   const userLink = await readJson<{
     link: { id: string };
     public_token: string;
@@ -159,8 +145,16 @@ async function createIssuedCard(request: APIRequestContext, userId: string): Pro
     `attach link failed: ${attachResponse.status()} ${await attachResponse.text()}`,
   ).toBeTruthy();
 
+  const encodingResponse = await request.post(`/api/v1/admin/cards/${created.id}/confirm-encoding`, {
+    data: { public_url: userLink.public_url },
+  });
+  expect(
+    encodingResponse.ok(),
+    `confirm encoding failed: ${encodingResponse.status()} ${await encodingResponse.text()}`,
+  ).toBeTruthy();
+
   const issueResponse = await request.post(`/api/v1/admin/cards/${created.id}/issue`);
-  expect(issueResponse.ok()).toBeTruthy();
+  expect(issueResponse.ok(), `issue failed: ${issueResponse.status()} ${await issueResponse.text()}`).toBeTruthy();
 
   return {
     id: created.id,
@@ -180,8 +174,9 @@ async function prepareUser(browser: Browser, request: APIRequestContext) {
   return { user, email, password, context, page };
 }
 
-async function acceptConfirm(page: Page) {
-  page.once("dialog", (dialog) => void dialog.accept());
+async function confirmCardAction(page: Page, trigger: () => Promise<void>, confirmation: string) {
+  await trigger();
+  await page.getByRole("dialog").getByRole("button", { name: confirmation }).click();
 }
 
 test("keeps one card URL usable across pending -> active -> disabled -> active and preserves sibling availability", async ({ browser, request }) => {
@@ -197,17 +192,16 @@ test("keeps one card URL usable across pending -> active -> disabled -> active a
     const panelA = cardPanel(page, cardA.serial);
     const panelB = cardPanel(page, cardB.serial);
 
-    await expect(panelA).toContainText("Liên kết: pending");
-    await expect(panelB).toContainText("Liên kết: pending");
+    await expect(panelA).toContainText("Chờ kích hoạt");
+    await expect(panelB).toContainText("Chờ kích hoạt");
 
     await page.goto(`/e/${cardA.token}`);
     await expect(page.getByRole("alert")).toContainText("Liên kết hồ sơ đang chờ kích hoạt");
     await expect(page).toHaveURL(new RegExp(`/e/${cardA.token}$`));
 
     await page.goto("/app/cards");
-    await acceptConfirm(page);
-    await panelA.getByRole("button", { name: "Kích hoạt" }).click();
-    await expect(panelA).toContainText("Liên kết: active");
+    await confirmCardAction(page, () => panelA.getByRole("button", { name: "Kích hoạt" }).click(), "Kích hoạt liên kết");
+    await expect(panelA).toContainText("Đang công khai");
     await expect(panelA.getByRole("button", { name: "Kích hoạt" })).toBeDisabled();
     await expect(panelA.getByRole("button", { name: "Vô hiệu hóa" })).toBeEnabled();
 
@@ -216,25 +210,22 @@ test("keeps one card URL usable across pending -> active -> disabled -> active a
     await expect(page).toHaveURL(new RegExp(`/e/${cardA.token}$`));
 
     await page.goto("/app/cards");
-    await acceptConfirm(page);
-    await panelB.getByRole("button", { name: "Kích hoạt" }).click();
-    await expect(panelB).toContainText("Liên kết: active");
+    await confirmCardAction(page, () => panelB.getByRole("button", { name: "Kích hoạt" }).click(), "Kích hoạt liên kết");
+    await expect(panelB).toContainText("Đang công khai");
     await expect(panelB.getByRole("button", { name: "Vô hiệu hóa" })).toBeEnabled();
 
-    await acceptConfirm(page);
-    await panelA.getByRole("button", { name: "Vô hiệu hóa" }).click();
-    await expect(panelA).toContainText("Liên kết: disabled");
+    await confirmCardAction(page, () => panelA.getByRole("button", { name: "Vô hiệu hóa" }).click(), "Tạm dừng liên kết");
+    await expect(panelA).toContainText("Tạm dừng công khai");
     await expect(panelA.getByRole("button", { name: "Kích hoạt" })).toBeEnabled();
-    await expect(panelB).toContainText("Liên kết: active");
+    await expect(panelB).toContainText("Đang công khai");
 
     await page.goto(`/e/${cardA.token}`);
     await expect(page.getByRole("alert")).toContainText("Liên kết hồ sơ đã bị vô hiệu hóa");
     await expect(page).toHaveURL(new RegExp(`/e/${cardA.token}$`));
 
     await page.goto("/app/cards");
-    await acceptConfirm(page);
-    await panelA.getByRole("button", { name: "Kích hoạt" }).click();
-    await expect(panelA).toContainText("Liên kết: active");
+    await confirmCardAction(page, () => panelA.getByRole("button", { name: "Kích hoạt" }).click(), "Kích hoạt liên kết");
+    await expect(panelA).toContainText("Đang công khai");
 
     await page.goto(`/e/${cardA.token}`);
     await expect(page.getByRole("heading", { name: "EmerCard Demo User" })).toBeVisible();
@@ -261,21 +252,18 @@ test("rejects lost cards on the neutral public view and keeps sibling cards avai
     const panelA = cardPanel(page, cardA.serial);
     const panelB = cardPanel(page, cardB.serial);
 
-    await acceptConfirm(page);
-    await panelA.getByRole("button", { name: "Kích hoạt" }).click();
-    await expect(panelA).toContainText("Liên kết: active");
+    await confirmCardAction(page, () => panelA.getByRole("button", { name: "Kích hoạt" }).click(), "Kích hoạt liên kết");
+    await expect(panelA).toContainText("Đang công khai");
 
-    await acceptConfirm(page);
-    await panelB.getByRole("button", { name: "Kích hoạt" }).click();
-    await expect(panelB).toContainText("Liên kết: active");
+    await confirmCardAction(page, () => panelB.getByRole("button", { name: "Kích hoạt" }).click(), "Kích hoạt liên kết");
+    await expect(panelB).toContainText("Đang công khai");
 
     await page.goto(`/e/${cardA.token}`);
     await expect(page.getByRole("heading", { name: "EmerCard Demo User" })).toBeVisible();
     await expect(page).toHaveURL(new RegExp(`/e/${cardA.token}$`));
 
     await page.goto("/app/cards");
-    await acceptConfirm(page);
-    await panelA.getByRole("button", { name: "Báo mất" }).click();
+    await confirmCardAction(page, () => panelA.getByRole("button", { name: "Báo mất" }).click(), "Xác nhận báo mất");
     await page.reload();
     await expect(page.getByRole("heading", { name: `Thẻ ${cardA.serial}` })).toHaveCount(0);
     await expect(page.getByRole("heading", { name: `Thẻ ${cardB.serial}` })).toBeVisible();

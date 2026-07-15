@@ -7,12 +7,12 @@ test("landing page renders", async ({ page }) => {
 
 test("login page renders a bootstrap or auth shell state", async ({ page }) => {
   await page.goto("/login");
-  await expect(page.getByRole("heading", { name: /Truy cập tài khoản EmerCard|Không thể kiểm tra phiên/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Thông tin quan trọng, luôn sẵn sàng|Không thể kiểm tra phiên/i })).toBeVisible();
 });
 
 test("register page renders a bootstrap or auth shell state", async ({ page }) => {
   await page.goto("/register");
-  await expect(page.getByRole("heading", { name: /Tạo tài khoản EmerCard|Không thể kiểm tra phiên/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Tạo nơi tin cậy cho hồ sơ y tế|Không thể kiểm tra phiên/i })).toBeVisible();
 });
 
 test("protected user route does not leak authenticated content without a session", async ({ page }) => {
@@ -23,5 +23,5 @@ test("protected user route does not leak authenticated content without a session
 test("public emergency route stays public", async ({ page }) => {
   await page.goto("/e/");
   await expect(page).not.toHaveURL(/\/login/);
-  await expect(page.getByRole("heading", { name: /Thông tin y tế khẩn cấp/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Thông tin cần biết ngay/i })).toBeVisible();
 });
