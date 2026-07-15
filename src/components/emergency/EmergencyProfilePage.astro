@@ -157,13 +157,6 @@
         </button>
         <p id="location-alert-status" class="mt-3 text-sm text-muted-foreground" role="status" aria-live="polite"></p>
       </section>
-      <section class="mt-8 rounded-[1rem] border border-border bg-muted/30 p-4">
-        <p class="text-sm font-semibold text-foreground">Cập nhật gần nhất</p><p
-          id="updated-at"
-          class="mt-1 text-sm text-muted-foreground"
-        >
-        </p>
-      </section>
     </article>
   </section>
 </main>
@@ -371,10 +364,6 @@
     setLocationAlertState("idle");
     setLocationAlertBusy(false, "Gửi cảnh báo vị trí");
     show(locationAlertSection);
-    setText(
-      "#updated-at",
-      new Date(profile.profile_updated_at).toLocaleString("vi-VN"),
-    );
     show(profileElement);
   };
   const renderFailure = (kind) => {
