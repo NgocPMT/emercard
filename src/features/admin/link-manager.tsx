@@ -26,6 +26,7 @@ import { isApiError } from "../../api/http-client";
 import { copyText } from "../../lib/clipboard";
 import { assignLocation } from "../../lib/navigation";
 import { useSession } from "../session";
+import { ProfileLinkQrLabel } from "./profile-link-qr";
 
 const linkStatusLabels: Record<PublicLinkSummary["status"], string> = {
   pending: "Chờ gắn thẻ",
@@ -37,16 +38,29 @@ const linkStatusLabels: Record<PublicLinkSummary["status"], string> = {
 
 function LinkWorkflow({ selectedUser }: { selectedUser: SafeUser | null }) {
   const steps = [
-    { label: "Chọn người dùng", state: selectedUser ? "Đã chọn" : "Cần thực hiện" },
+    {
+      label: "Chọn người dùng",
+      state: selectedUser ? "Đã chọn" : "Cần thực hiện",
+    },
     { label: "Tạo liên kết chờ", state: "Không công khai" },
     { label: "Gắn vào thẻ", state: "Thực hiện trong kho thẻ" },
   ];
   return (
-    <ol className="grid gap-3 sm:grid-cols-3" aria-label="Quy trình tạo liên kết thẻ">
+    <ol
+      className="grid gap-3 sm:grid-cols-3"
+      aria-label="Quy trình tạo liên kết thẻ"
+    >
       {steps.map((step, index) => (
-        <li key={step.label} className={`rounded-[var(--radius-control)] border p-3 ${index === 0 && selectedUser ? "border-success/30 bg-success-soft" : "border-border bg-muted/30"}`}>
-          <p className="text-xs font-semibold text-muted-foreground">Bước {index + 1}</p>
-          <p className="mt-1 text-sm font-semibold text-foreground">{step.label}</p>
+        <li
+          key={step.label}
+          className={`rounded-[var(--radius-control)] border p-3 ${index === 0 && selectedUser ? "border-success/30 bg-success-soft" : "border-border bg-muted/30"}`}
+        >
+          <p className="text-xs font-semibold text-muted-foreground">
+            Bước {index + 1}
+          </p>
+          <p className="mt-1 text-sm font-semibold text-foreground">
+            {step.label}
+          </p>
           <p className="mt-1 text-xs text-muted-foreground">{step.state}</p>
         </li>
       ))}
@@ -98,6 +112,7 @@ export function AdminLinkManagerPanel() {
   const [selectedUser, setSelectedUser] = useState<SafeUser | null>(null);
   const [label, setLabel] = useState("");
   const [lastUrl, setLastUrl] = useState<string | null>(null);
+  const [lastLinkLabel, setLastLinkLabel] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const lookupMutation = useMutation({
@@ -105,6 +120,7 @@ export function AdminLinkManagerPanel() {
     onSuccess: (user) => {
       setSelectedUser(user);
       setLastUrl(null);
+      setLastLinkLabel(null);
       setMessage(`Đã chọn hồ sơ ${user.email}.`);
       void queryClient.invalidateQueries({
         queryKey: cardKeys.adminUserLinks(user.id),
@@ -117,7 +133,9 @@ export function AdminLinkManagerPanel() {
     queryFn: ({ signal }) => listAdminUsers("", signal),
     staleTime: 30_000,
     retry: (failureCount, error) =>
-      isApiError(error) ? error.retryable && failureCount < 1 : failureCount < 1,
+      isApiError(error)
+        ? error.retryable && failureCount < 1
+        : failureCount < 1,
   });
 
   const createMutation = useMutation({
@@ -130,6 +148,7 @@ export function AdminLinkManagerPanel() {
     }) => createAdminUserLink(userId, { label: nextLabel.trim() || null }),
     onSuccess: (result, variables) => {
       setLastUrl(result.public_url);
+      setLastLinkLabel(result.link.label ?? null);
       setMessage(
         "Đã tạo liên kết thẻ ở trạng thái chờ gắn. Hãy giữ URL này để xác minh mã trên thẻ.",
       );
@@ -255,7 +274,8 @@ export function AdminLinkManagerPanel() {
               Tìm người dùng
             </h2>
             <p className="text-sm text-muted-foreground">
-              Chỉ dùng email để xác nhận đúng người dùng; dữ liệu y tế không hiển thị ở đây.
+              Chỉ dùng email để xác nhận đúng người dùng; dữ liệu y tế không
+              hiển thị ở đây.
             </p>
           </div>
           {selectedUser ? (
@@ -298,20 +318,24 @@ export function AdminLinkManagerPanel() {
                   setEmail(user.email);
                   setSelectedUser(user);
                   setLastUrl(null);
+                  setLastLinkLabel(null);
                   setMessage(`Đã chọn hồ sơ ${user.email}.`);
                   void queryClient.invalidateQueries({
                     queryKey: cardKeys.adminUserLinks(user.id),
                   });
                 }}
               >
-                <span className="font-medium text-foreground">{user.email}</span>
+                <span className="font-medium text-foreground">
+                  {user.email}
+                </span>
                 <span className="ml-2 text-muted-foreground">Người dùng</span>
               </button>
             ))}
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">
-            Không có người dùng phù hợp. Bạn vẫn có thể tìm chính xác bằng email.
+            Không có người dùng phù hợp. Bạn vẫn có thể tìm chính xác bằng
+            email.
           </p>
         )}
       </Panel>
@@ -322,7 +346,8 @@ export function AdminLinkManagerPanel() {
             Tạo liên kết thẻ chờ gắn
           </h2>
           <p className="text-sm text-muted-foreground">
-            Liên kết chỉ tạo URL để mã hóa thẻ. Nó chưa công khai và không thể kích hoạt cho đến khi được gắn, xác minh, rồi phát hành.
+            Liên kết chỉ tạo URL để mã hóa thẻ. Nó chưa công khai và không thể
+            kích hoạt cho đến khi được gắn, xác minh, rồi phát hành.
           </p>
         </div>
         <TextInput
@@ -350,12 +375,15 @@ export function AdminLinkManagerPanel() {
           </Button>
         </div>
         {lastUrl ? (
-          <Alert variant="success" title="URL dùng để mã hóa thẻ">
-            <div className="break-all text-sm">{lastUrl}</div>
-            <p className="mt-2 text-xs">
-              Không lưu URL này vào danh sách hoặc bộ nhớ trình duyệt.
-            </p>
-          </Alert>
+          <>
+            <Alert variant="success" title="URL dùng để mã hóa thẻ">
+              <div className="break-all text-sm">{lastUrl}</div>
+              <p className="mt-2 text-xs">
+                Không lưu URL này vào danh sách hoặc bộ nhớ trình duyệt.
+              </p>
+            </Alert>
+            <ProfileLinkQrLabel url={lastUrl} label={lastLinkLabel} />
+          </>
         ) : null}
       </Panel>
 

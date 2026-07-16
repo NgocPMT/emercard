@@ -13,7 +13,8 @@
     min-height: 100vh;
     background: var(--color-page-bg);
     color: var(--color-text);
-    font-family: var(--font-source-sans-3), ui-sans-serif, system-ui, sans-serif;
+    font-family:
+      var(--font-source-sans-3), ui-sans-serif, system-ui, sans-serif;
     text-rendering: optimizeLegibility;
   }
 
@@ -27,7 +28,8 @@
 
   button,
   a {
-    transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+    transition-property:
+      color, background-color, border-color, box-shadow, transform, opacity;
     transition-duration: 180ms;
     transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   }
@@ -39,7 +41,11 @@
 
   .brand-surface {
     background:
-      radial-gradient(circle at 92% 8%, rgb(23 107 122 / 0.14), transparent 19rem),
+      radial-gradient(
+        circle at 92% 8%,
+        rgb(23 107 122 / 0.14),
+        transparent 19rem
+      ),
       linear-gradient(145deg, #ffffff, #edf5f3);
   }
 
@@ -70,7 +76,9 @@
   }
 
   .soft-grid {
-    background-image: linear-gradient(rgb(19 43 53 / 0.035) 1px, transparent 1px), linear-gradient(90deg, rgb(19 43 53 / 0.035) 1px, transparent 1px);
+    background-image:
+      linear-gradient(rgb(19 43 53 / 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(19 43 53 / 0.035) 1px, transparent 1px);
     background-size: 32px 32px;
   }
 
@@ -82,6 +90,55 @@
   :focus-visible {
     outline: 3px solid var(--color-focus);
     outline-offset: 3px;
+  }
+
+  @media print {
+    body * {
+      visibility: hidden !important;
+    }
+
+    .profile-link-qr-print-root,
+    .profile-link-qr-print-root * {
+      visibility: visible !important;
+    }
+
+    .profile-link-qr-print-root {
+      position: absolute !important;
+      inset: 0 auto auto 0 !important;
+      width: 3.5in !important;
+      min-height: 4.5in !important;
+      margin: 0 !important;
+      padding: 0.25in !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: white !important;
+      box-shadow: none !important;
+      color: black !important;
+      break-inside: avoid;
+      page-break-inside: avoid;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+
+    .profile-link-qr-print-root .profile-link-qr-actions,
+    .profile-link-qr-print-root .profile-link-qr-loading {
+      display: none !important;
+    }
+
+    .profile-link-qr-print-root .profile-link-qr-label,
+    .profile-link-qr-print-root .profile-link-qr-label * {
+      color: black !important;
+    }
+
+    .profile-link-qr-print-root .profile-link-qr-code {
+      margin: 0.25in auto !important;
+      border: 0 !important;
+      padding: 0 !important;
+    }
+
+    @page {
+      margin: 0.25in;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

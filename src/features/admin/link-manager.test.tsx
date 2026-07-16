@@ -1,6 +1,7 @@
 import React from "react";
 import userEvent from "@testing-library/user-event";
-import { render, screen } from "@testing-library/react";
+import QRCode from "qrcode";
+import { render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AdminLinkManagerPanel } from "./link-manager";
 
@@ -22,6 +23,12 @@ vi.mock("@tanstack/react-query", async () => {
 
 vi.mock("../session", () => ({
   useSession: () => ({ clearSessionCache: vi.fn() }),
+}));
+
+vi.mock("qrcode", () => ({
+  default: {
+    toString: vi.fn(() => Promise.resolve('<svg data-testid="qr-svg"></svg>')),
+  },
 }));
 
 beforeEach(() => {
@@ -71,13 +78,18 @@ beforeEach(() => {
       error: undefined,
       mutate: (...args: any[]) =>
         config.onSuccess?.(
-          {
-            id: "user-1",
-            email: "nurse@example.com",
-            role: "user",
-            created_at: "2026-01-01T00:00:00Z",
-            updated_at: "2026-01-01T00:00:00Z",
-          },
+          typeof args[0] === "object"
+            ? {
+                link: { label: "Thẻ chính" },
+                public_url: "https://example.com/e/one-time-token",
+              }
+            : {
+                id: "user-1",
+                email: "nurse@example.com",
+                role: "user",
+                created_at: "2026-01-01T00:00:00Z",
+                updated_at: "2026-01-01T00:00:00Z",
+              },
           args[0],
         ),
     }),
@@ -88,6 +100,7 @@ afterEach(() => {
   useQueryMock.mockReset();
   useMutationMock.mockReset();
   invalidateQueriesMock.mockReset();
+  vi.mocked(QRCode.toString).mockClear();
 });
 
 describe("AdminLinkManagerPanel", () => {
@@ -118,7 +131,60 @@ describe("AdminLinkManagerPanel", () => {
       screen.getByRole("button", { name: /nurse@example\.com/ }),
     );
 
-    expect(screen.getByText("Đã chọn hồ sơ nurse@example.com.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Đã chọn hồ sơ nurse@example.com."),
+    ).toBeInTheDocument();
+  });
+
+  it("renders a one-time QR label and prints it without exposing the URL in the label", async () => {
+    const user = userEvent.setup();
+    const printSpy = vi
+      .spyOn(window, "print")
+      .mockImplementation(() => undefined);
+    const publicUrl = "https://example.com/e/one-time-token";
+
+    render(<AdminLinkManagerPanel />);
+
+    expect(
+      screen.queryByRole("button", { name: "In nhãn mã QR" }),
+    ).not.toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: /nurse@example\.com/ }),
+    );
+    await user.click(screen.getByRole("button", { name: "Tạo liên kết chờ" }));
+
+    const qrLabel = await screen.findByRole("region", {
+      name: "Nhãn mã QR liên kết hồ sơ",
+    });
+    expect(QRCode.toString).toHaveBeenCalledWith(
+      publicUrl,
+      expect.objectContaining({
+        type: "svg",
+        errorCorrectionLevel: "H",
+      }),
+    );
+    expect(
+      within(qrLabel).getByRole("img", { name: /Mã QR tĩnh/ }),
+    ).toBeInTheDocument();
+    expect(
+      within(qrLabel).getByText(/mã QR tĩnh chứa liên kết truy cập một lần/i),
+    ).toBeInTheDocument();
+    expect(qrLabel).not.toHaveTextContent(publicUrl);
+
+    await user.click(
+      within(qrLabel).getByRole("button", { name: "In nhãn mã QR" }),
+    );
+    expect(printSpy).toHaveBeenCalledOnce();
+
+    await user.click(
+      screen.getByRole("button", { name: /nurse@example\.com/ }),
+    );
+    expect(
+      screen.queryByRole("button", { name: "In nhãn mã QR" }),
+    ).not.toBeInTheDocument();
+
+    printSpy.mockRestore();
   });
 
   it("looks up a profile and shows safe link controls", async () => {
