@@ -14,6 +14,7 @@ const adminPassword = process.env.EMERCARD_ADMIN_PASSWORD ?? "password-123";
 let backendReady = false;
 
 const profilePayload: Omit<PublicEmergencyProfile, "profile_updated_at"> = {
+  profile_id: "profile-e2e",
   display_name: "EmerCard Demo User",
   birth_year: 1996,
   gender: "female",

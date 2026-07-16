@@ -1,8 +1,22 @@
 import { z } from "zod";
+import {
+  privateProfileEnvelopeSchema,
+  type PrivateProfileEnvelope,
+} from "../lib/private-profile-crypto";
 
 export const sessionRoleSchema = z.enum(["user", "admin"]);
 const genderSchema = z.enum(["female", "male", "other", "prefer_not_to_say"]);
-const bloodTypeSchema = z.enum(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "unknown"]);
+const bloodTypeSchema = z.enum([
+  "A+",
+  "A-",
+  "B+",
+  "B-",
+  "AB+",
+  "AB-",
+  "O+",
+  "O-",
+  "unknown",
+]);
 
 export const currentSessionSchema = z
   .object({
@@ -26,6 +40,7 @@ export const publicEmergencyContactSchema = z
 
 export const publicEmergencyProfileSchema = z
   .object({
+    profile_id: z.string().min(1),
     display_name: z.string().nullable(),
     birth_year: z.number().int().nullable(),
     gender: genderSchema.nullable(),
@@ -34,15 +49,25 @@ export const publicEmergencyProfileSchema = z
     important_conditions: z.array(z.string()),
     critical_medications: z.array(z.string()),
     emergency_note: z.string().nullable(),
+    private_profile_envelope: privateProfileEnvelopeSchema
+      .nullable()
+      .optional(),
     emergency_contacts: z.array(publicEmergencyContactSchema),
     profile_updated_at: z.string(),
   })
   .strict();
 
-export const publicEmergencyResponseSchema = z.object({ profile: publicEmergencyProfileSchema }).strict();
+export const publicEmergencyResponseSchema = z
+  .object({ profile: publicEmergencyProfileSchema })
+  .strict();
 
-export type PublicEmergencyContact = z.infer<typeof publicEmergencyContactSchema>;
-export type PublicEmergencyProfile = z.infer<typeof publicEmergencyProfileSchema>;
+export type PublicEmergencyContact = z.infer<
+  typeof publicEmergencyContactSchema
+>;
+export type PublicEmergencyProfile = z.infer<
+  typeof publicEmergencyProfileSchema
+>;
+export type { PrivateProfileEnvelope };
 
 export const validationDetailSchema = z
   .object({

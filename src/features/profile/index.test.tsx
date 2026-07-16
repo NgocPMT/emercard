@@ -48,6 +48,7 @@ describe("ProfilePageRoot", () => {
       error: undefined,
       data: {
         profile: {
+          profile_id: "profile-test-1",
           display_name: "Alex Example",
           birth_year: 1995,
           gender: "female",

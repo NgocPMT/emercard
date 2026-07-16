@@ -5,6 +5,7 @@ import type { ProfileView } from "../../api/profile";
 describe("profile form helpers", () => {
   it("maps a profile view into editable form values", () => {
     const profileView: ProfileView["profile"] = {
+      profile_id: "profile-1",
       display_name: "Alex Example",
       birth_year: 1995,
       gender: "other",

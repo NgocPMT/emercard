@@ -5,14 +5,27 @@
     class="w-full border border-border bg-card p-5 shadow-[var(--shadow-lifted)] sm:rounded-[1.5rem] sm:p-10"
   >
     <div class="mb-8 flex items-center gap-3">
-      <img src="/logo.png" alt="EmerCard" class="h-10 w-10 rounded-2xl border border-primary/20 bg-white object-contain" />
-      <p class="text-sm font-extrabold tracking-[0.16em] text-primary">EMERCARD</p>
+      <img
+        src="/logo.png"
+        alt="EmerCard"
+        class="h-10 w-10 rounded-2xl border border-primary/20 bg-white object-contain"
+      />
+      <p class="text-sm font-extrabold tracking-[0.16em] text-primary">
+        EMERCARD
+      </p>
     </div>
-    <p class="mt-8 text-sm font-semibold text-muted-foreground">Hồ sơ y tế khẩn cấp</p>
-    <h1 class="mt-1 text-3xl font-black tracking-[-0.035em] text-foreground sm:text-4xl">
+    <p class="mt-8 text-sm font-semibold text-muted-foreground">
+      Hồ sơ y tế khẩn cấp
+    </p>
+    <h1
+      class="mt-1 text-3xl font-black tracking-[-0.035em] text-foreground sm:text-4xl"
+    >
       Thông tin cần biết ngay
     </h1>
-    <p class="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">Dùng thông tin này để hỗ trợ khẩn cấp. Đây không phải chẩn đoán hoặc hồ sơ bệnh án chính thức.</p>
+    <p class="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
+      Dùng thông tin này để hỗ trợ khẩn cấp. Đây không phải chẩn đoán hoặc hồ sơ
+      bệnh án chính thức.
+    </p>
 
     <div id="loading" role="status" class="mt-8 text-muted-foreground">
       Đang tải thông tin khẩn cấp…
@@ -69,7 +82,8 @@
         id="retry"
         type="button"
         class="mt-4 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
-        >Thử lại</button>
+        >Thử lại</button
+      >
     </div>
 
     <article id="profile" class="mt-10 hidden" aria-live="polite">
@@ -91,7 +105,10 @@
           >
           </dd>
         </div>
-        <div id="allergies-row" class="emergency-critical rounded-[1rem] border p-5">
+        <div
+          id="allergies-row"
+          class="emergency-critical rounded-[1rem] border p-5"
+        >
           <dt class="font-semibold text-foreground">Dị ứng quan trọng</dt><dd
             id="allergies"
             class="mt-1 whitespace-pre-line text-muted-foreground"
@@ -129,6 +146,49 @@
         </div>
       </dl>
       <section
+        id="private-details-section"
+        class="mt-8 hidden rounded-[1rem] border border-warning/40 bg-warning/5 p-5"
+        aria-labelledby="private-details-title"
+      >
+        <h3
+          id="private-details-title"
+          class="text-lg font-semibold text-foreground"
+        >
+          Thông tin riêng tư được mã hóa
+        </h3>
+        <p class="mt-2 text-sm leading-6 text-muted-foreground">
+          Phần này chỉ được giải mã trong trình duyệt. Mã truy cập không được
+          gửi đến máy chủ.
+        </p>
+        <div id="private-details-locked" class="mt-4 space-y-3">
+          <label
+            for="private-access-code"
+            class="block text-sm font-semibold text-foreground"
+            >Mã truy cập</label
+          >
+          <input
+            id="private-access-code"
+            type="password"
+            autocomplete="off"
+            class="min-h-11 w-full rounded-[var(--radius-control)] border border-border bg-white/80 px-4 py-2.5 text-foreground outline-none focus:border-primary focus:ring-4 focus:ring-primary/15"
+          />
+          <button
+            id="private-unlock-button"
+            type="button"
+            class="inline-flex min-h-11 items-center justify-center rounded-[var(--radius-control)] bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground"
+            >Mở khóa</button
+          >
+          <p
+            id="private-details-status"
+            class="text-sm text-muted-foreground"
+            role="status"
+            aria-live="polite"
+          >
+          </p>
+        </div>
+        <dl id="private-details" class="mt-4 hidden space-y-3"></dl>
+      </section>
+      <section
         id="contacts-section"
         class="mt-8 hidden rounded-[1rem] border border-primary/20 bg-primary/5 p-5"
         aria-labelledby="contacts-title"
@@ -142,11 +202,16 @@
         class="mt-8 hidden rounded-[1rem] border border-primary/20 bg-primary/5 p-5"
         aria-labelledby="location-alert-title"
       >
-        <h3 id="location-alert-title" class="text-lg font-semibold text-foreground">
+        <h3
+          id="location-alert-title"
+          class="text-lg font-semibold text-foreground"
+        >
           Gửi cảnh báo vị trí
         </h3>
         <p class="mt-2 text-sm leading-6 text-muted-foreground">
-          Khi bạn nhấn nút, vị trí gần đúng của bạn sẽ được gửi qua email cho các liên hệ khẩn cấp của chủ thẻ. Chỉ sử dụng khi cần thiết; đây không thay thế dịch vụ cấp cứu.
+          Khi bạn nhấn nút, vị trí gần đúng của bạn sẽ được gửi qua email cho
+          các liên hệ khẩn cấp của chủ thẻ. Chỉ sử dụng khi cần thiết; đây không
+          thay thế dịch vụ cấp cứu.
         </p>
         <button
           id="location-alert-button"
@@ -155,7 +220,13 @@
         >
           Gửi cảnh báo vị trí
         </button>
-        <p id="location-alert-status" class="mt-3 text-sm text-muted-foreground" role="status" aria-live="polite"></p>
+        <p
+          id="location-alert-status"
+          class="mt-3 text-sm text-muted-foreground"
+          role="status"
+          aria-live="polite"
+        >
+        </p>
       </section>
     </article>
   </section>
@@ -168,6 +239,7 @@
     sendPublicEmergencyLocationAlert,
   } from "../../api/public-emergency";
   import { bloodTypeLabel, genderLabel } from "../../lib/profile-labels";
+  import { decryptPrivateProfileWithAccessCode } from "../../lib/private-profile-crypto";
 
   const loading = document.querySelector("#loading");
   const notFound = document.querySelector("#not-found");
@@ -179,9 +251,26 @@
   const serviceUnavailable = document.querySelector("#service-unavailable");
   const retryButton = document.querySelector("#retry");
   const profileElement = document.querySelector("#profile");
-  const locationAlertSection = document.querySelector("#location-alert-section");
+  const locationAlertSection = document.querySelector(
+    "#location-alert-section",
+  );
   const locationAlertButton = document.querySelector("#location-alert-button");
   const locationAlertStatus = document.querySelector("#location-alert-status");
+  const privateDetailsSection = document.querySelector(
+    "#private-details-section",
+  );
+  const privateDetailsLocked = document.querySelector(
+    "#private-details-locked",
+  );
+  const privateDetailsElement = document.querySelector("#private-details");
+  const privateAccessCode = document.querySelector("#private-access-code");
+  const privateUnlockButton = document.querySelector("#private-unlock-button");
+  const privateDetailsStatus = document.querySelector(
+    "#private-details-status",
+  );
+  let privateEnvelope = null;
+  let privateProfileId = null;
+  let privateUnlockBusy = false;
   let locationAlertBusy = false;
 
   const hide = (element) => element?.classList.add("hidden");
@@ -198,6 +287,7 @@
       serviceUnavailable,
       profileElement,
       locationAlertSection,
+      privateDetailsSection,
     ])
       hide(element);
   };
@@ -231,7 +321,8 @@
     for (const contact of Array.isArray(contacts) ? contacts : []) {
       if (!contact || typeof contact.phone !== "string") continue;
       const item = document.createElement("li");
-      item.className = "rounded-[1rem] border border-border bg-card p-4 shadow-sm";
+      item.className =
+        "rounded-[1rem] border border-border bg-card p-4 shadow-sm";
       const row = document.createElement("div");
       row.className = "flex items-center justify-between gap-4";
       const details = document.createElement("div");
@@ -263,17 +354,22 @@
     unavailable: "Hiện chưa thể gửi cảnh báo vị trí. Vui lòng thử lại khi cần.",
     cooldown: "Cảnh báo vị trí vừa được xử lý. Vui lòng chờ trước khi gửi lại.",
     rate_limited: "Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau.",
-    permission_denied: "Bạn đã từ chối quyền vị trí. Hãy bật quyền vị trí trong trình duyệt nếu muốn thử lại.",
+    permission_denied:
+      "Bạn đã từ chối quyền vị trí. Hãy bật quyền vị trí trong trình duyệt nếu muốn thử lại.",
     unsupported: "Trình duyệt này không hỗ trợ chia sẻ vị trí.",
-    timeout: "Không nhận được vị trí kịp thời. Hãy thử lại ở nơi có tín hiệu tốt hơn.",
-    unavailable_position: "Không thể xác định vị trí hiện tại. Hãy thử lại sau.",
+    timeout:
+      "Không nhận được vị trí kịp thời. Hãy thử lại ở nơi có tín hiệu tốt hơn.",
+    unavailable_position:
+      "Không thể xác định vị trí hiện tại. Hãy thử lại sau.",
     invalid_request: "Vị trí nhận được không hợp lệ. Vui lòng thử lại.",
-    service_unavailable: "Máy chủ tạm thời không thể gửi cảnh báo. Vui lòng thử lại sau.",
+    service_unavailable:
+      "Máy chủ tạm thời không thể gửi cảnh báo. Vui lòng thử lại sau.",
     link_unavailable: "Liên kết hồ sơ không còn sẵn sàng để gửi cảnh báo.",
   };
   const setLocationAlertState = (state) => {
     if (!locationAlertStatus) return;
-    locationAlertStatus.textContent = locationAlertMessages[state] ?? locationAlertMessages.service_unavailable;
+    locationAlertStatus.textContent =
+      locationAlertMessages[state] ?? locationAlertMessages.service_unavailable;
     locationAlertStatus.className = `mt-3 text-sm ${state === "sent" ? "text-success" : state === "service_unavailable" || state === "permission_denied" ? "text-destructive" : "text-muted-foreground"}`;
   };
   const setLocationAlertBusy = (busy, label) => {
@@ -306,7 +402,16 @@
     try {
       const position = await readScannerPosition();
       const { latitude, longitude, accuracy } = position.coords;
-      if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || !Number.isFinite(accuracy) || accuracy <= 0 || latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+      if (
+        !Number.isFinite(latitude) ||
+        !Number.isFinite(longitude) ||
+        !Number.isFinite(accuracy) ||
+        accuracy <= 0 ||
+        latitude < -90 ||
+        latitude > 90 ||
+        longitude < -180 ||
+        longitude > 180
+      ) {
         setLocationAlertState("invalid_request");
         return;
       }
@@ -322,7 +427,15 @@
     } catch (error) {
       if (error && typeof error === "object" && "code" in error) {
         const code = error.code;
-        setLocationAlertState(code === 1 ? "permission_denied" : code === 2 ? "unavailable_position" : code === 3 ? "timeout" : "service_unavailable");
+        setLocationAlertState(
+          code === 1
+            ? "permission_denied"
+            : code === 2
+              ? "unavailable_position"
+              : code === 3
+                ? "timeout"
+                : "service_unavailable",
+        );
       } else {
         setLocationAlertState("invalid_request");
       }
@@ -330,7 +443,109 @@
       setLocationAlertBusy(false, "Gửi cảnh báo vị trí");
     }
   };
-  locationAlertButton?.addEventListener("click", () => void handleLocationAlert());
+  locationAlertButton?.addEventListener(
+    "click",
+    () => void handleLocationAlert(),
+  );
+
+  const clearPrivateDetails = () => {
+    privateDetailsElement?.classList.add("hidden");
+    privateDetailsElement?.replaceChildren();
+    privateDetailsLocked?.classList.remove("hidden");
+    if (privateAccessCode) privateAccessCode.value = "";
+    if (privateDetailsStatus) privateDetailsStatus.textContent = "";
+  };
+  const renderPrivateDetails = (privateProfile) => {
+    if (!privateDetailsElement) return;
+    privateDetailsElement.replaceChildren();
+    for (const [label, value] of [
+      ["Địa chỉ", privateProfile.address || "Chưa cung cấp"],
+      [
+        "CCCD / mã định danh công dân",
+        privateProfile.citizen_id || "Chưa cung cấp",
+      ],
+      [
+        "Tình trạng nhạy cảm",
+        privateProfile.sensitive_conditions.length
+          ? privateProfile.sensitive_conditions.join("\\n")
+          : "Chưa cung cấp",
+      ],
+    ]) {
+      const row = document.createElement("div");
+      row.className = "rounded-[0.8rem] border border-border bg-card p-4";
+      const labelElement = document.createElement("dt");
+      labelElement.className = "text-sm font-semibold text-foreground";
+      labelElement.textContent = label;
+      const valueElement = document.createElement("dd");
+      valueElement.className = "mt-1 whitespace-pre-line text-muted-foreground";
+      valueElement.textContent = value;
+      row.append(labelElement, valueElement);
+      privateDetailsElement.append(row);
+    }
+    const lockButton = document.createElement("button");
+    lockButton.id = "private-lock-button";
+    lockButton.type = "button";
+    lockButton.className =
+      "inline-flex min-h-11 items-center justify-center rounded-[var(--radius-control)] border border-border bg-card px-5 py-2 text-sm font-semibold text-foreground";
+    lockButton.textContent = "Khóa lại";
+    privateDetailsElement.append(lockButton);
+  };
+  const setPrivateStatus = (message, isError = false) => {
+    if (!privateDetailsStatus) return;
+    privateDetailsStatus.textContent = message;
+    privateDetailsStatus.className = `text-sm ${isError ? "text-destructive" : "text-muted-foreground"}`;
+  };
+  const handlePrivateUnlock = async () => {
+    if (
+      privateUnlockBusy ||
+      !privateEnvelope ||
+      !privateProfileId ||
+      !privateAccessCode
+    )
+      return;
+    const code = privateAccessCode.value;
+    if (code.length < 10) {
+      setPrivateStatus("Mã truy cập không hợp lệ.", true);
+      return;
+    }
+    privateUnlockBusy = true;
+    if (privateUnlockButton) privateUnlockButton.textContent = "Đang giải mã…";
+    setPrivateStatus("Đang giải mã cục bộ…");
+    try {
+      const privateProfile = await decryptPrivateProfileWithAccessCode(
+        privateEnvelope,
+        privateProfileId,
+        code,
+      );
+      renderPrivateDetails(privateProfile);
+      privateDetailsLocked?.classList.add("hidden");
+      privateDetailsElement?.classList.remove("hidden");
+      if (privateAccessCode) privateAccessCode.value = "";
+      setPrivateStatus("");
+    } catch {
+      clearPrivateDetails();
+      setPrivateStatus("Không thể mở khóa thông tin riêng tư.", true);
+    } finally {
+      privateUnlockBusy = false;
+      if (privateUnlockButton)
+        privateUnlockButton.textContent = "Mở khóa cục bộ";
+    }
+  };
+  privateUnlockButton?.addEventListener(
+    "click",
+    () => void handlePrivateUnlock(),
+  );
+  privateAccessCode?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") void handlePrivateUnlock();
+  });
+  privateDetailsElement?.addEventListener("click", (event) => {
+    if (
+      event.target instanceof HTMLElement &&
+      event.target.id === "private-lock-button"
+    )
+      clearPrivateDetails();
+  });
+  window.addEventListener("pagehide", clearPrivateDetails, { once: true });
 
   const renderProfile = (profile) => {
     hideAll();
@@ -361,6 +576,10 @@
     setListText("medications-row", "medications", profile.critical_medications);
     setSectionText("note-row", "note", profile.emergency_note);
     renderContacts(profile.emergency_contacts);
+    clearPrivateDetails();
+    privateEnvelope = profile.private_profile_envelope ?? null;
+    privateProfileId = profile.profile_id;
+    if (privateEnvelope) show(privateDetailsSection);
     setLocationAlertState("idle");
     setLocationAlertBusy(false, "Gửi cảnh báo vị trí");
     show(locationAlertSection);

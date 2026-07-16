@@ -7,6 +7,7 @@ import {
 
 const okProfile = {
   profile: {
+    profile_id: "profile-public-1",
     display_name: "Emergency User",
     birth_year: 1995,
     gender: "male",

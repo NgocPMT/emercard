@@ -61,6 +61,10 @@ export type AdminCardOutput = {
  */
 export type AuthenticatedProfileOutput = {
     /**
+     * Profile Id
+     */
+    profile_id: string;
+    /**
      * Display Name
      */
     display_name: string | null;
@@ -90,6 +94,7 @@ export type AuthenticatedProfileOutput = {
      * Location Alerts Enabled
      */
     location_alerts_enabled?: boolean;
+    private_profile_envelope?: EncryptedPrivateProfileEnvelope | null;
     /**
      * Emergency Contacts
      */
@@ -300,6 +305,29 @@ export type EmergencyProfileResponse = {
 };
 
 /**
+ * EncryptedPrivateProfileEnvelope
+ *
+ * Client-side encrypted private details; plaintext never crosses this boundary.
+ */
+export type EncryptedPrivateProfileEnvelope = {
+    /**
+     * Version
+     */
+    version: 1;
+    kdf: PrivateProfileKdfParameters;
+    /**
+     * Nonce
+     */
+    nonce: string;
+    /**
+     * Ciphertext
+     */
+    ciphertext: string;
+    access_code_wrap: PrivateProfileKeyWrap;
+    recovery_key_wrap: PrivateProfileKeyWrap;
+};
+
+/**
  * Gender
  */
 export type Gender = 'female' | 'male' | 'other' | 'prefer_not_to_say';
@@ -397,6 +425,86 @@ export type LocationAlertResponse = {
 };
 
 /**
+ * PrivateProfileAuthorizationInput
+ *
+ * Current account password used only to authorize private-profile changes.
+ */
+export type PrivateProfileAuthorizationInput = {
+    /**
+     * Password
+     */
+    password: string;
+};
+
+/**
+ * PrivateProfileAuthorizationOutput
+ *
+ * Short-lived bearer authorization for an owner private-profile write.
+ */
+export type PrivateProfileAuthorizationOutput = {
+    /**
+     * Authorization Token
+     */
+    authorization_token: string;
+    /**
+     * Expires At
+     */
+    expires_at: string;
+    /**
+     * Purpose
+     */
+    purpose: 'private_profile_write';
+};
+
+/**
+ * PrivateProfileKdfParameters
+ *
+ * Opaque, versioned KDF metadata produced by the trusted frontend.
+ */
+export type PrivateProfileKdfParameters = {
+    /**
+     * Algorithm
+     */
+    algorithm: 'argon2id';
+    /**
+     * Salt
+     */
+    salt: string;
+    /**
+     * Memory Cost Kib
+     */
+    memory_cost_kib: number;
+    /**
+     * Time Cost
+     */
+    time_cost: number;
+    /**
+     * Parallelism
+     */
+    parallelism: number;
+};
+
+/**
+ * PrivateProfileKeyWrap
+ *
+ * Opaque AES-GCM wrapped data-encryption key material.
+ */
+export type PrivateProfileKeyWrap = {
+    /**
+     * Algorithm
+     */
+    algorithm: 'aes-256-gcm';
+    /**
+     * Nonce
+     */
+    nonce: string;
+    /**
+     * Ciphertext
+     */
+    ciphertext: string;
+};
+
+/**
  * ProfileReadiness
  *
  * Derived profile completion state for authenticated UI flows.
@@ -460,6 +568,7 @@ export type ProfileUpsertInput = {
      * Location Alerts Enabled
      */
     location_alerts_enabled?: boolean;
+    private_profile_envelope?: EncryptedPrivateProfileEnvelope | null;
     /**
      * Emergency Contacts
      */
@@ -557,9 +666,13 @@ export type PublicLinkSummaryOutput = {
 /**
  * PublicProfileOutput
  *
- * Explicit emergency-page allowlist with no persistence or ownership metadata.
+ * Explicit emergency-page allowlist with an opaque stable crypto context.
  */
 export type PublicProfileOutput = {
+    /**
+     * Profile Id
+     */
+    profile_id: string;
     /**
      * Display Name
      */
@@ -586,6 +699,7 @@ export type PublicProfileOutput = {
      * Emergency Note
      */
     emergency_note: string | null;
+    private_profile_envelope?: EncryptedPrivateProfileEnvelope | null;
     /**
      * Emergency Contacts
      */
@@ -892,6 +1006,31 @@ export type CurrentUserApiV1MeGetResponses = {
 
 export type CurrentUserApiV1MeGetResponse = CurrentUserApiV1MeGetResponses[keyof CurrentUserApiV1MeGetResponses];
 
+export type AuthorizePrivateProfileWriteApiV1MeProfilePrivateAuthorizePostData = {
+    body: PrivateProfileAuthorizationInput;
+    path?: never;
+    query?: never;
+    url: '/api/v1/me/profile/private/authorize';
+};
+
+export type AuthorizePrivateProfileWriteApiV1MeProfilePrivateAuthorizePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AuthorizePrivateProfileWriteApiV1MeProfilePrivateAuthorizePostError = AuthorizePrivateProfileWriteApiV1MeProfilePrivateAuthorizePostErrors[keyof AuthorizePrivateProfileWriteApiV1MeProfilePrivateAuthorizePostErrors];
+
+export type AuthorizePrivateProfileWriteApiV1MeProfilePrivateAuthorizePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: PrivateProfileAuthorizationOutput;
+};
+
+export type AuthorizePrivateProfileWriteApiV1MeProfilePrivateAuthorizePostResponse = AuthorizePrivateProfileWriteApiV1MeProfilePrivateAuthorizePostResponses[keyof AuthorizePrivateProfileWriteApiV1MeProfilePrivateAuthorizePostResponses];
+
 export type GetProfileApiV1MeProfileGetData = {
     body?: never;
     path?: never;
@@ -910,6 +1049,12 @@ export type GetProfileApiV1MeProfileGetResponse = GetProfileApiV1MeProfileGetRes
 
 export type ReplaceProfileApiV1MeProfilePutData = {
     body: ProfileUpsertInput;
+    headers?: {
+        /**
+         * X-Private-Profile-Authorization
+         */
+        'X-Private-Profile-Authorization'?: string | null;
+    };
     path?: never;
     query?: never;
     url: '/api/v1/me/profile';

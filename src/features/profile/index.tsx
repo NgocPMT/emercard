@@ -18,6 +18,7 @@ import { isApiError } from "../../api/http-client";
 import { assignLocation } from "../../lib/navigation";
 import { bloodTypeLabel, genderLabel } from "../../lib/profile-labels";
 import { PageApplicationRoot, useSession } from "../session";
+import { PrivateProfilePanel, type PendingChange } from "./PrivateProfilePanel";
 
 const userNavigation = [
   { href: "/app", label: "Tổng quan" },
@@ -284,6 +285,7 @@ function ProfileEditor({ profileView }: { profileView: ProfileView }) {
   const queryClient = useQueryClient();
   const [rootMessage, setRootMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [privatePendingChange, setPrivatePendingChange] = useState<PendingChange | null>(null);
   const formDefaults = useMemo(() => profileViewToFormValues(profileView.profile), [profileView.profile]);
   const form = useForm<ProfileFormValues>({
     defaultValues: formDefaults,
@@ -291,7 +293,7 @@ function ProfileEditor({ profileView }: { profileView: ProfileView }) {
   });
   const { fields, append, remove, replace } = useFieldArray({ control: form.control, name: "emergency_contacts" });
   const saveMutation = useMutation({
-    mutationFn: (payload: ProfileUpsertInput) => saveCurrentProfile(payload),
+    mutationFn: (payload: ProfileUpsertInput) => saveCurrentProfile(payload, undefined, privatePendingChange?.authorizationToken),
   });
 
   useEffect(() => {
@@ -299,6 +301,7 @@ function ProfileEditor({ profileView }: { profileView: ProfileView }) {
     replace(formDefaults.emergency_contacts);
     setRootMessage(null);
     setSuccessMessage(null);
+    setPrivatePendingChange(null);
   }, [form, formDefaults, replace]);
 
   const submit = form.handleSubmit(async (values) => {
@@ -313,11 +316,20 @@ function ProfileEditor({ profileView }: { profileView: ProfileView }) {
     }
 
     try {
-      const saved = await saveMutation.mutateAsync(profileFormValuesToPayload(values));
+      if (privatePendingChange && !privatePendingChange.ready) {
+        setRootMessage("Hãy xác nhận đã lưu khóa khôi phục trước khi lưu hồ sơ.");
+        return;
+      }
+      const payload = profileFormValuesToPayload(values);
+      if (privatePendingChange) {
+        payload.private_profile_envelope = privatePendingChange.envelope;
+      }
+      const saved = await saveMutation.mutateAsync(payload);
       queryClient.setQueryData(profileKeys.current, saved);
       const nextValues = profileViewToFormValues(saved.profile);
       form.reset(nextValues);
       replace(nextValues.emergency_contacts);
+      setPrivatePendingChange(null);
       setSuccessMessage(saved.readiness.status === "ready" ? "Hồ sơ đã sẵn sàng để sử dụng." : "Hồ sơ đã được lưu.");
     } catch (error) {
       if (isApiError(error) && error.status === 401) {
@@ -506,6 +518,12 @@ function ProfileEditor({ profileView }: { profileView: ProfileView }) {
           {...form.register("location_alerts_enabled")}
         />
       </section>
+
+      <PrivateProfilePanel
+        profileId={profileView.profile?.profile_id ?? ""}
+        envelope={profileView.profile?.private_profile_envelope}
+        onPendingChange={setPrivatePendingChange}
+      />
 
       <div className="sticky bottom-3 z-10 -mx-2 flex flex-wrap gap-3 rounded-[var(--radius-panel)] border border-border bg-card/95 p-3 shadow-[var(--shadow-soft)] backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
         <Button type="submit" size="lg" busy={saveMutation.isPending}>

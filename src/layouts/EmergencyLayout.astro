@@ -2,6 +2,7 @@
 import "../styles/global.css";
 
 const { title = "Thông tin y tế khẩn cấp | EmerCard" } = Astro.props;
+const styleSources = import.meta.env.DEV ? "'self' 'unsafe-inline'" : "'self'";
 ---
 
 <!doctype html>
@@ -11,6 +12,10 @@ const { title = "Thông tin y tế khẩn cấp | EmerCard" } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow, noarchive" />
     <meta name="referrer" content="no-referrer" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content={`default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'; connect-src 'self'; img-src 'self' data:; script-src 'self' 'wasm-unsafe-eval'; style-src ${styleSources}`}
+    />
     <title>{title}</title>
   </head>
   <body class="bg-background text-foreground">

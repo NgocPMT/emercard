@@ -1,9 +1,27 @@
 import { z } from "zod";
+import {
+  privateProfileEnvelopeSchema,
+  type PrivateProfileEnvelope,
+} from "../lib/private-profile-crypto";
 import { requestJson } from "./http-client";
 
-const profileReadinessStatusSchema = z.enum(["not_started", "incomplete", "ready"]);
+const profileReadinessStatusSchema = z.enum([
+  "not_started",
+  "incomplete",
+  "ready",
+]);
 const genderSchema = z.enum(["female", "male", "other", "prefer_not_to_say"]);
-const bloodTypeSchema = z.enum(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "unknown"]);
+const bloodTypeSchema = z.enum([
+  "A+",
+  "A-",
+  "B+",
+  "B-",
+  "AB+",
+  "AB-",
+  "O+",
+  "O-",
+  "unknown",
+]);
 
 const emergencyContactSchema = z.object({
   name: z.string(),
@@ -13,6 +31,7 @@ const emergencyContactSchema = z.object({
 });
 
 const authenticatedProfileSchema = z.object({
+  profile_id: z.string().min(1),
   display_name: z.string().nullable(),
   birth_year: z.number().int().nullable(),
   gender: genderSchema.nullable(),
@@ -22,6 +41,7 @@ const authenticatedProfileSchema = z.object({
   critical_medications: z.array(z.string()),
   emergency_note: z.string().nullable(),
   location_alerts_enabled: z.boolean().default(false),
+  private_profile_envelope: privateProfileEnvelopeSchema.nullable().optional(),
   emergency_contacts: z.array(emergencyContactSchema),
   created_at: z.string(),
   updated_at: z.string(),
@@ -50,6 +70,7 @@ const profileUpsertInputSchema = z.object({
   critical_medications: z.array(z.string()).default([]),
   emergency_note: z.string().nullable().optional(),
   location_alerts_enabled: z.boolean().default(false),
+  private_profile_envelope: privateProfileEnvelopeSchema.nullable().optional(),
   emergency_contacts: z
     .array(
       z.object({
@@ -62,9 +83,17 @@ const profileUpsertInputSchema = z.object({
     .default([]),
 });
 
-export type ProfileReadinessStatus = z.infer<typeof profileReadinessStatusSchema>;
+export type ProfileReadinessStatus = z.infer<
+  typeof profileReadinessStatusSchema
+>;
 export type ProfileView = z.infer<typeof profileViewSchema>;
 export type ProfileUpsertInput = z.infer<typeof profileUpsertInputSchema>;
+export type { PrivateProfileEnvelope };
+export type PrivateProfileAuthorization = {
+  authorization_token: string;
+  expires_at: string;
+  purpose: "private_profile_write";
+};
 export const profileKeys = {
   current: ["profile", "current"] as const,
 };
@@ -98,7 +127,9 @@ export function profileMissingFieldLabel(field: string) {
   }
 }
 
-export async function getCurrentProfile(signal?: AbortSignal): Promise<ProfileView> {
+export async function getCurrentProfile(
+  signal?: AbortSignal,
+): Promise<ProfileView> {
   const response = await requestJson<unknown>({
     path: "/me/profile",
     signal,
@@ -106,13 +137,38 @@ export async function getCurrentProfile(signal?: AbortSignal): Promise<ProfileVi
   return profileViewSchema.parse(response);
 }
 
-export async function saveCurrentProfile(payload: ProfileUpsertInput, signal?: AbortSignal): Promise<ProfileView> {
+export async function authorizePrivateProfileWrite(
+  password: string,
+  signal?: AbortSignal,
+): Promise<PrivateProfileAuthorization> {
+  const response = await requestJson<unknown>({
+    path: "/me/profile/private/authorize",
+    method: "POST",
+    body: { password },
+    signal,
+  });
+  return z
+    .object({
+      authorization_token: z.string().min(1),
+      expires_at: z.string().datetime({ offset: true }),
+      purpose: z.literal("private_profile_write"),
+    })
+    .parse(response);
+}
+
+export async function saveCurrentProfile(
+  payload: ProfileUpsertInput,
+  signal?: AbortSignal,
+  privateAuthorizationToken?: string,
+): Promise<ProfileView> {
   const response = await requestJson<unknown>({
     path: "/me/profile",
     method: "PUT",
     body: profileUpsertInputSchema.parse(payload),
     signal,
+    headers: privateAuthorizationToken
+      ? { "X-Private-Profile-Authorization": privateAuthorizationToken }
+      : undefined,
   });
   return profileViewSchema.parse(response);
 }
-
