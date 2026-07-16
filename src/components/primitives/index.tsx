@@ -347,7 +347,7 @@ export function Dialog({ open, title, description, children, onClose, actions, i
   return (
     <dialog
       ref={dialogRef}
-      className="w-[min(100%-1.5rem,36rem)] rounded-[1.5rem] border border-border bg-card p-0 shadow-2xl backdrop:bg-slate-950/40"
+      className="fixed left-1/2 top-1/2 m-0 w-[min(100%-1.5rem,36rem)] -translate-x-1/2 -translate-y-1/2 rounded-[1.5rem] border border-border bg-card p-0 shadow-2xl backdrop:bg-slate-950/40"
       onClose={onClose}
       onCancel={(event) => {
         event.preventDefault();

@@ -132,7 +132,7 @@ function AuthLayout({
         ) : null}
       </div>
 
-      <Panel className="flex items-center p-6 sm:p-10">
+      <Panel className="flex items-center justify-center p-6 sm:p-10">
         {mode === "login" ? <LoginForm initialEmail={initialEmail} returnTo={returnTo} /> : <RegisterForm initialEmail={initialEmail} />}
       </Panel>
     </section>
@@ -171,7 +171,7 @@ function LoginForm({ initialEmail, returnTo }: { initialEmail?: string | null; r
   });
 
   return (
-    <form className="space-y-5" onSubmit={(event) => void onSubmit(event)} noValidate>
+    <form className="w-full max-w-md space-y-5" onSubmit={(event) => void onSubmit(event)} noValidate>
       {rootMessage ? (
         <Alert variant="danger" title="Không thể đăng nhập">
           {rootMessage}
@@ -242,7 +242,7 @@ function RegisterForm({ initialEmail }: { initialEmail?: string | null }) {
   });
 
   return (
-    <form className="space-y-5" onSubmit={(event) => void onSubmit(event)} noValidate>
+    <form className="w-full max-w-md space-y-5" onSubmit={(event) => void onSubmit(event)} noValidate>
       {rootMessage ? (
         <Alert variant="danger" title="Không thể đăng ký">
           {rootMessage}
