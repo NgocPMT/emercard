@@ -117,6 +117,14 @@ const linkProvisioningResponseSchema = z.object({
 const linkListResponseSchema = z.object({
   items: z.array(publicLinkSummarySchema),
 });
+const linkAccessEventSchema = z.object({
+  id: z.string(),
+  accessed_at: z.string(),
+});
+const linkAccessHistoryResponseSchema = z.object({
+  items: z.array(linkAccessEventSchema),
+  next_cursor: z.string().nullable().optional(),
+});
 const adminCardResponseSchema = adminCardSchema;
 
 export type UserCard = z.infer<typeof userCardSchema>;
@@ -129,12 +137,15 @@ export type LinkProvisioningResponse = z.infer<
 export type UserCardsResponse = z.infer<typeof userCardsResponseSchema>;
 export type AdminCardsResponse = z.infer<typeof adminCardsResponseSchema>;
 export type PublicLinkListResponse = z.infer<typeof linkListResponseSchema>;
+export type LinkAccessEvent = z.infer<typeof linkAccessEventSchema>;
+export type LinkAccessHistoryResponse = z.infer<typeof linkAccessHistoryResponseSchema>;
 export type SafeUser = z.infer<typeof safeUserSchema>;
 export type SafeUserListResponse = z.infer<typeof safeUserListResponseSchema>;
 
 export const cardKeys = {
   myCards: ["cards", "my"] as const,
   myCard: (cardId: string) => ["cards", "my", cardId] as const,
+  myCardAccessHistory: (cardId: string) => ["cards", "my", cardId, "access-history"] as const,
   adminCards: ["cards", "admin"] as const,
   adminCard: (cardId: string) => ["cards", "admin", cardId] as const,
   adminUsers: (search = "") =>
@@ -143,6 +154,22 @@ export const cardKeys = {
     ["users", "admin", "lookup", email.trim().toLowerCase()] as const,
   adminUserLinks: (userId: string) => ["links", "admin", userId] as const,
 };
+
+export async function getMyCardAccessHistory(
+  cardId: string,
+  cursor?: string | null,
+  signal?: AbortSignal,
+): Promise<LinkAccessHistoryResponse> {
+  const params = new URLSearchParams();
+  if (cursor) params.set("cursor", cursor);
+  const query = params.toString();
+  return linkAccessHistoryResponseSchema.parse(
+    await requestJson<unknown>({
+      path: `/me/cards/${encodeURIComponent(cardId)}/access-history${query ? `?${query}` : ""}`,
+      signal,
+    }),
+  );
+}
 
 export async function getMyCards(
   signal?: AbortSignal,

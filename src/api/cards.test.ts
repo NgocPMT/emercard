@@ -3,6 +3,7 @@ import {
   activateMyCard,
   createAdminUserLink,
   getAdminCard,
+  getMyCardAccessHistory,
   getMyCards,
   listAdminUserLinks,
   listAdminUsers,
@@ -36,6 +37,22 @@ const userCard = {
 };
 
 describe("cards api helpers", () => {
+  it("parses paginated card access history and encodes the cursor", async () => {
+    requestJsonMock.mockResolvedValue({
+      items: [{ id: "event-1", accessed_at: "2026-01-01T00:00:00Z" }],
+      next_cursor: "opaque cursor",
+    });
+    await expect(getMyCardAccessHistory("card/1", "opaque cursor")).resolves.toEqual({
+      items: [{ id: "event-1", accessed_at: "2026-01-01T00:00:00Z" }],
+      next_cursor: "opaque cursor",
+    });
+    expect(requestJsonMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: "/me/cards/card%2F1/access-history?cursor=opaque+cursor",
+      }),
+    );
+  });
+
   it("parses the owner cards response", async () => {
     requestJsonMock.mockResolvedValue({ cards: [] });
     await expect(getMyCards()).resolves.toEqual({ cards: [] });

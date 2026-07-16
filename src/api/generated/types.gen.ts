@@ -343,6 +343,36 @@ export type HttpValidationError = {
 };
 
 /**
+ * LinkAccessEventOutput
+ *
+ * Minimal event projection exposed to the authenticated profile owner.
+ */
+export type LinkAccessEventOutput = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Accessed At
+     */
+    accessed_at: string;
+};
+
+/**
+ * LinkAccessHistoryOutput
+ */
+export type LinkAccessHistoryOutput = {
+    /**
+     * Items
+     */
+    items: Array<LinkAccessEventOutput>;
+    /**
+     * Next Cursor
+     */
+    next_cursor?: string | null;
+};
+
+/**
  * LinkAttachInput
  */
 export type LinkAttachInput = {
@@ -1229,6 +1259,45 @@ export type RevokeMyCardLinkApiV1MeCardsCardIdRevokePostResponses = {
 };
 
 export type RevokeMyCardLinkApiV1MeCardsCardIdRevokePostResponse = RevokeMyCardLinkApiV1MeCardsCardIdRevokePostResponses[keyof RevokeMyCardLinkApiV1MeCardsCardIdRevokePostResponses];
+
+export type ListMyCardAccessHistoryApiV1MeCardsCardIdAccessHistoryGetData = {
+    body?: never;
+    path: {
+        /**
+         * Card Id
+         */
+        card_id: string;
+    };
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+    };
+    url: '/api/v1/me/cards/{card_id}/access-history';
+};
+
+export type ListMyCardAccessHistoryApiV1MeCardsCardIdAccessHistoryGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListMyCardAccessHistoryApiV1MeCardsCardIdAccessHistoryGetError = ListMyCardAccessHistoryApiV1MeCardsCardIdAccessHistoryGetErrors[keyof ListMyCardAccessHistoryApiV1MeCardsCardIdAccessHistoryGetErrors];
+
+export type ListMyCardAccessHistoryApiV1MeCardsCardIdAccessHistoryGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: LinkAccessHistoryOutput;
+};
+
+export type ListMyCardAccessHistoryApiV1MeCardsCardIdAccessHistoryGetResponse = ListMyCardAccessHistoryApiV1MeCardsCardIdAccessHistoryGetResponses[keyof ListMyCardAccessHistoryApiV1MeCardsCardIdAccessHistoryGetResponses];
 
 export type ReportMyCardLostApiV1MeCardsCardIdLostPostData = {
     body?: never;

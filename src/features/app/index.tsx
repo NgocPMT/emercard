@@ -12,9 +12,11 @@ import {
   activateMyCard,
   cardKeys,
   disableMyCard,
+  getMyCardAccessHistory,
   getMyCards,
   reportMyCardLost,
   revokeMyCard,
+  type LinkAccessEvent,
   type UserCard,
 } from "../../api/cards";
 import {
@@ -255,6 +257,118 @@ function ProfileSummaryCard() {
   );
 }
 
+function formatAccessTime(event: LinkAccessEvent): string {
+  return new Intl.DateTimeFormat("vi-VN", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(event.accessed_at));
+}
+
+function CardAccessHistoryPanel({ cardId }: { cardId: string }) {
+  const { clearSessionCache } = useSession();
+  const [items, setItems] = useState<LinkAccessEvent[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadMoreError, setLoadMoreError] = useState(false);
+  const query = useQuery({
+    queryKey: cardKeys.myCardAccessHistory(cardId),
+    queryFn: ({ signal }) => getMyCardAccessHistory(cardId, null, signal),
+    staleTime: 10_000,
+    retry: (failureCount, error) => {
+      if (isApiError(error)) {
+        return error.retryable && failureCount < 1;
+      }
+      return failureCount < 1;
+    },
+  });
+
+  useEffect(() => {
+    if (query.data) {
+      setItems(query.data.items);
+      setNextCursor(query.data.next_cursor ?? null);
+    }
+  }, [query.data]);
+
+  useEffect(() => {
+    if (isApiError(query.error) && query.error.status === 401) {
+      clearSessionCache();
+      assignLocation("/login?returnTo=/app/cards");
+    }
+  }, [clearSessionCache, query.error]);
+
+  if (query.isPending) {
+    return (
+      <section className="rounded-[var(--radius-control)] border border-border bg-muted/30 p-4">
+        <p className="text-xs font-semibold text-muted-foreground">Lịch sử mở liên kết</p>
+        <p className="mt-2 text-sm text-muted-foreground">Đang tải lịch sử truy cập.</p>
+      </section>
+    );
+  }
+
+  if (query.error) {
+    return (
+      <section className="rounded-[var(--radius-control)] border border-border bg-muted/30 p-4">
+        <p className="text-xs font-semibold text-muted-foreground">Lịch sử mở liên kết</p>
+        <p className="mt-2 text-sm text-muted-foreground">Chưa thể tải lịch sử truy cập. Vui lòng thử lại sau.</p>
+      </section>
+    );
+  }
+
+  const loadMore = async () => {
+    if (!nextCursor || loadingMore) return;
+    setLoadingMore(true);
+    setLoadMoreError(false);
+    try {
+      const response = await getMyCardAccessHistory(cardId, nextCursor);
+      setItems((current) => [...current, ...response.items]);
+      setNextCursor(response.next_cursor ?? null);
+    } catch (error) {
+      if (isApiError(error) && error.status === 401) {
+        clearSessionCache();
+        assignLocation("/login?returnTo=/app/cards");
+      }
+      setLoadMoreError(true);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  return (
+    <section className="rounded-[var(--radius-control)] border border-border bg-muted/30 p-4">
+      <p className="text-xs font-semibold text-muted-foreground">Lịch sử mở liên kết</p>
+      {items.length === 0 ? (
+        <p className="mt-2 text-sm text-muted-foreground">Chưa có lần mở liên kết nào được ghi nhận.</p>
+      ) : (
+        <>
+          <p className="mt-2 text-sm text-muted-foreground">Các lần mở gần đây của thẻ này:</p>
+          <ol className="mt-2 space-y-2" aria-label="Các lần mở liên kết gần đây">
+            {items.map((event) => (
+              <li key={event.id} className="text-sm text-foreground">
+                {formatAccessTime(event)}
+              </li>
+            ))}
+          </ol>
+          {nextCursor ? (
+            <Button
+              type="button"
+              variant="ghost"
+              className="mt-3"
+              busy={loadingMore}
+              disabled={loadingMore}
+              onClick={() => void loadMore()}
+            >
+              Xem thêm
+            </Button>
+          ) : null}
+          {loadMoreError ? (
+            <p className="mt-2 text-sm text-muted-foreground">Không thể tải thêm lịch sử. Vui lòng thử lại.</p>
+          ) : null}
+        </>
+      )}
+    </section>
+  );
+}
+
 function MyCardsPanel() {
   const { clearSessionCache } = useSession();
   const [pendingAction, setPendingAction] = useState<{
@@ -387,6 +501,7 @@ function MyCardsPanel() {
               <p className="mt-2 text-sm text-muted-foreground">{card.link_label ? `Liên kết: ${card.link_label}` : "Chưa có nhãn liên kết."}</p>
             </section>
           </div>
+          <CardAccessHistoryPanel cardId={card.id} />
           <div className="flex flex-wrap gap-3">
             <Button
               type="button"
