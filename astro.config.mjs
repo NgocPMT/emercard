@@ -4,9 +4,9 @@ import { defineConfig, fontProviders } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 
 // Keep browser auth/session traffic same-origin in local dev and tests.
-// Astro proxies `/api/*` to FastAPI so the frontend sees one origin.
+// Astro proxies `/api/*` to Express TypeScript backend so the frontend sees one origin.
 const apiProxyTarget =
-  process.env.EMERCARD_API_PROXY_TARGET ?? "http://127.0.0.1:8000";
+  process.env.EMERCARD_API_PROXY_TARGET ?? "http://127.0.0.1:3000";
 
 function emergencyPreviewRouteRewrite() {
   /**
