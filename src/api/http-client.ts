@@ -1,5 +1,45 @@
 import { publicEnv } from "../config/public-env";
 import { ApiError, readApiError } from "./errors";
+import { clearTokens, getAccessToken, getRefreshToken, setTokens } from "./token-storage";
+
+let activeRefreshPromise: Promise<boolean> | null = null;
+
+export async function tryRefreshToken(): Promise<boolean> {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) return false;
+
+  if (activeRefreshPromise) {
+    return activeRefreshPromise;
+  }
+
+  activeRefreshPromise = (async () => {
+    try {
+      const refreshResponse = await fetch(buildApiUrl("/auth/refresh"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (!refreshResponse.ok) {
+        clearTokens();
+        return false;
+      }
+
+      const data = (await refreshResponse.json()) as { accessToken: string; refreshToken?: string };
+      setTokens({
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken ?? refreshToken,
+      });
+      return true;
+    } catch {
+      return false;
+    } finally {
+      activeRefreshPromise = null;
+    }
+  })();
+
+  return activeRefreshPromise;
+}
 
 export type ApiRequestOptions = {
   path: string;
@@ -82,6 +122,10 @@ export async function requestJson<TResponse>({
   const timeoutController = typeof window !== "undefined" ? createTimeoutSignal(timeoutMs) : null;
   const requestSignal = joinSignals(signal, timeoutController?.signal);
   const requestHeaders = new Headers(headers);
+  const token = getAccessToken();
+  if (token && !requestHeaders.has("Authorization")) {
+    requestHeaders.set("Authorization", `Bearer ${token}`);
+  }
   const serializedBody = serializeBody(body);
 
   if (serializedBody !== undefined && !requestHeaders.has("Content-Type") && !(serializedBody instanceof FormData)) {
@@ -106,6 +150,35 @@ export async function requestJson<TResponse>({
       message: "Không thể kết nối tới máy chủ",
       retryable: true,
     });
+  }
+
+  if (response.status === 401 && !path.includes("/auth/refresh") && !path.includes("/auth/login")) {
+    const refreshed = await tryRefreshToken();
+    if (refreshed) {
+      const retryHeaders = new Headers(requestHeaders);
+      const newToken = getAccessToken();
+      if (newToken) {
+        retryHeaders.set("Authorization", `Bearer ${newToken}`);
+      }
+      try {
+        response = await fetch(buildApiUrl(path), {
+          method,
+          body: serializedBody as BodyInit | null | undefined,
+          headers: retryHeaders,
+          signal: requestSignal ?? undefined,
+          credentials,
+          cache,
+          referrerPolicy,
+        });
+      } catch {
+        throw new ApiError({
+          status: 0,
+          code: "network_error",
+          message: "Không thể kết nối tới máy chủ",
+          retryable: true,
+        });
+      }
+    }
   }
 
   if (!response.ok) {
