@@ -1,23 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
-
-vi.mock("./generated/client.gen", () => ({
-  client: {
-    setConfig: vi.fn(),
-  },
-}));
-
-vi.mock("./generated/sdk.gen", () => ({
-  currentUserApiV1MeGet: vi.fn(),
-  loginApiV1AuthLoginPost: vi.fn(),
-  logoutApiV1AuthLogoutPost: vi.fn(),
-  registerApiV1AuthRegisterPost: vi.fn(),
-}));
-
-import { currentUserApiV1MeGet, loginApiV1AuthLoginPost, logoutApiV1AuthLogoutPost, registerApiV1AuthRegisterPost } from "./generated/sdk.gen";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getCurrentUser, login, logout, normalizeCurrentSession, registerAccount } from "./auth";
 import { ApiError } from "./errors";
+import { clearTokens, getAccessToken, setTokens } from "./token-storage";
 
-const user = {
+const rawUserSnake = {
   id: "user-1",
   email: "user@example.com",
   role: "user" as const,
@@ -25,67 +11,139 @@ const user = {
   updated_at: "2026-01-01T00:00:00.000Z",
 };
 
+const rawUserCamel = {
+  id: "user-2",
+  email: "camel@example.com",
+  role: "admin" as const,
+  createdAt: "2026-02-01T00:00:00.000Z",
+  updatedAt: "2026-02-01T00:00:00.000Z",
+};
+
+const mockTokens = {
+  accessToken: "mock-access-token",
+  refreshToken: "mock-refresh-token",
+};
+
 describe("auth adapter", () => {
-  it("normalizes current-user output into the safe session shape", () => {
-    expect(normalizeCurrentSession(user)).toEqual(user);
+  beforeEach(() => {
+    clearTokens();
+    vi.restoreAllMocks();
   });
 
-  it("returns the normalized user for register and login success", async () => {
-    vi.mocked(registerApiV1AuthRegisterPost).mockResolvedValueOnce({ data: user, error: undefined } as never);
-    vi.mocked(loginApiV1AuthLoginPost).mockResolvedValueOnce({ data: user, error: undefined } as never);
+  it("normalizes current-user output from snake_case and camelCase", () => {
+    expect(normalizeCurrentSession(rawUserSnake)).toEqual({
+      id: "user-1",
+      email: "user@example.com",
+      role: "user",
+      created_at: "2026-01-01T00:00:00.000Z",
+      updated_at: "2026-01-01T00:00:00.000Z",
+    });
 
-    await expect(registerAccount({ email: user.email, password: "password123" })).resolves.toEqual(user);
-    await expect(login({ email: user.email, password: "password123" })).resolves.toEqual(user);
-  });
-
-  it("maps registration errors to ApiError instances", async () => {
-    vi.mocked(registerApiV1AuthRegisterPost).mockResolvedValueOnce({
-      data: undefined,
-      error: undefined,
-      response: new Response(
-        JSON.stringify({ error: { code: "auth.email_already_registered", message: "Already used", request_id: "req-1" } }),
-        { status: 409, headers: { "content-type": "application/json" } },
-      ),
-    } as never);
-
-    await expect(registerAccount({ email: user.email, password: "password123" })).rejects.toMatchObject({
-      code: "auth.email_already_registered",
-      status: 409,
+    expect(normalizeCurrentSession(rawUserCamel)).toEqual({
+      id: "user-2",
+      email: "camel@example.com",
+      role: "admin",
+      created_at: "2026-02-01T00:00:00.000Z",
+      updated_at: "2026-02-01T00:00:00.000Z",
     });
   });
 
-  it("returns null for unauthenticated current-user responses", async () => {
-    vi.mocked(currentUserApiV1MeGet).mockResolvedValueOnce({
-      data: undefined,
-      error: undefined,
-      response: new Response(
-        JSON.stringify({ error: { code: "auth.authentication_required", message: "Auth required", request_id: "req-2" } }),
-        { status: 401, headers: { "content-type": "application/json" } },
-      ),
-    } as never);
+  it("returns normalized user and stores tokens on login success", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ user: rawUserCamel, tokens: mockTokens }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
 
-    await expect(getCurrentUser()).resolves.toBeNull();
+    const session = await login({ email: "camel@example.com", password: "password123" });
+
+    expect(session.email).toBe("camel@example.com");
+    expect(session.role).toBe("admin");
+    expect(getAccessToken()).toBe("mock-access-token");
+
+    const call = fetchMock.mock.calls[0];
+    const body = JSON.parse((call?.[1] as RequestInit | undefined)?.body as string);
+    expect(body).toEqual({
+      identifier: "camel@example.com",
+      password: "password123",
+    });
   });
 
-  it("surfaces forbidden current-user responses", async () => {
-    vi.mocked(currentUserApiV1MeGet).mockResolvedValueOnce({
-      data: undefined,
-      error: undefined,
-      response: new Response(
-        JSON.stringify({ error: { code: "auth.forbidden", message: "Forbidden", request_id: "req-3" } }),
-        { status: 403, headers: { "content-type": "application/json" } },
-      ),
-    } as never);
+  it("returns normalized user and stores tokens on registerAccount success", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ user: rawUserSnake, tokens: mockTokens }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
 
-    await expect(getCurrentUser()).rejects.toBeInstanceOf(ApiError);
+    const session = await registerAccount({ email: "user@example.com", password: "password123" });
+
+    expect(session.email).toBe("user@example.com");
+    expect(session.role).toBe("user");
+    expect(getAccessToken()).toBe("mock-access-token");
+
+    const call = fetchMock.mock.calls[0];
+    const body = JSON.parse((call?.[1] as RequestInit | undefined)?.body as string);
+    expect(body.email).toBe("user@example.com");
+    expect(body.password).toBe("password123");
+    expect(body.username).toBeDefined();
   });
 
-  it("allows logout to complete on a 204 response", async () => {
-    vi.mocked(logoutApiV1AuthLogoutPost).mockResolvedValueOnce({
-      data: undefined,
-      error: undefined,
-      response: new Response(null, { status: 204 }),
-    } as never);
-    await expect(logout()).resolves.toBeUndefined();
+  it("returns null immediately when no token is in storage for getCurrentUser", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const session = await getCurrentUser();
+
+    expect(session).toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("fetches and returns current user when token exists in storage", async () => {
+    setTokens(mockTokens);
+
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(rawUserSnake), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const session = await getCurrentUser();
+
+    expect(session).toEqual(rawUserSnake);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const call = fetchMock.mock.calls[0];
+    expect(call?.[0]?.toString()).toContain("/auth/me");
+  });
+
+  it("clears tokens and returns null on 401 for getCurrentUser", async () => {
+    setTokens({ accessToken: "bad-token", refreshToken: "bad-refresh" });
+
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ error: { message: "Unauthorized", code: "unauthorized" } }), {
+        status: 401,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const session = await getCurrentUser();
+
+    expect(session).toBeNull();
+    expect(getAccessToken()).toBeNull();
+  });
+
+  it("clears tokens on logout", async () => {
+    setTokens(mockTokens);
+    expect(getAccessToken()).toBe("mock-access-token");
+
+    await logout();
+    expect(getAccessToken()).toBeNull();
   });
 });

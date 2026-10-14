@@ -1,108 +1,117 @@
 import { client as generatedClient } from "./generated/client.gen";
-import {
-  currentUserApiV1MeGet,
-  loginApiV1AuthLoginPost,
-  logoutApiV1AuthLogoutPost,
-  registerApiV1AuthRegisterPost,
-} from "./generated/sdk.gen";
-import type { CurrentUserOutput, UserLoginInput, UserRegistrationInput } from "./generated/types.gen";
-import { ApiError, readApiError } from "./errors";
-import { isApiError } from "./http-client";
+import { isApiError, requestJson } from "./http-client";
+import { clearTokens, getAccessToken, setTokens } from "./token-storage";
 import type { CurrentSession } from "./types";
 
 const authClientConfig = {
   cache: "no-store" as const,
   credentials: "same-origin" as const,
   referrerPolicy: "strict-origin-when-cross-origin" as const,
+  auth: () => getAccessToken() ?? undefined,
 };
 
 generatedClient.setConfig(authClientConfig);
 
-type FieldsResult<TData, TError> =
-  | {
-      data: TData;
-      error: undefined;
-      request?: Request;
-      response?: Response;
-    }
-  | {
-      data: undefined;
-      error: TError;
-      request?: Request;
-      response?: Response;
-    };
+export type RawUserOutput = {
+  id: string;
+  email: string;
+  role: "user" | "admin" | string;
+  created_at?: string;
+  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
 
-function networkError() {
-  return new ApiError({
-    status: 0,
-    code: "network_error",
-    message: "Không thể kết nối tới máy chủ",
-    retryable: true,
-  });
-}
+export type AuthTokensResponse = {
+  accessToken: string;
+  refreshToken: string;
+};
 
-function normalizeCurrentSession(user: CurrentUserOutput): CurrentSession {
+export type AuthSuccessResponse = {
+  user: RawUserOutput;
+  tokens: AuthTokensResponse;
+};
+
+export type UserLoginInput = {
+  email: string;
+  password: string;
+  identifier?: string;
+};
+
+export type UserRegistrationInput = {
+  email: string;
+  password: string;
+  username?: string;
+};
+
+export function normalizeCurrentSession(user: RawUserOutput): CurrentSession {
   return {
     id: user.id,
     email: user.email,
-    role: user.role,
-    created_at: user.created_at,
-    updated_at: user.updated_at,
+    role: user.role === "admin" ? "admin" : "user",
+    created_at: user.created_at ?? user.createdAt,
+    updated_at: user.updated_at ?? user.updatedAt,
   };
 }
 
-async function resolveResult<TData, TError>(resultPromise: Promise<FieldsResult<TData, TError>>): Promise<TData> {
-  try {
-    const result = await resultPromise;
-    if (result.data !== undefined) {
-      return result.data;
-    }
-    if (result.response) {
-      if (result.response.ok) {
-        return undefined as TData;
-      }
-      throw await readApiError(result.response);
-    }
-    throw networkError();
-  } catch (error) {
-    if (isApiError(error)) {
-      throw error;
-    }
-    throw networkError();
-  }
-}
-
 export async function registerAccount(payload: UserRegistrationInput, signal?: AbortSignal): Promise<CurrentSession> {
-  const user = await resolveResult<CurrentUserOutput, unknown>(
-    registerApiV1AuthRegisterPost({ body: payload, signal }) as Promise<FieldsResult<CurrentUserOutput, unknown>>,
-  );
-  return normalizeCurrentSession(user);
+  const fallbackUsername =
+    payload.email.split("@")[0]?.replace(/[^a-zA-Z0-9_]/g, "_").slice(0, 20) || "user";
+  const username = payload.username ?? fallbackUsername;
+
+  const response = await requestJson<AuthSuccessResponse>({
+    path: "/auth/register",
+    method: "POST",
+    body: {
+      email: payload.email,
+      username,
+      password: payload.password,
+    },
+    signal,
+  });
+
+  setTokens(response.tokens);
+  return normalizeCurrentSession(response.user);
 }
 
 export async function login(payload: UserLoginInput, signal?: AbortSignal): Promise<CurrentSession> {
-  const user = await resolveResult<CurrentUserOutput, unknown>(
-    loginApiV1AuthLoginPost({ body: payload, signal }) as Promise<FieldsResult<CurrentUserOutput, unknown>>,
-  );
-  return normalizeCurrentSession(user);
+  const response = await requestJson<AuthSuccessResponse>({
+    path: "/auth/login",
+    method: "POST",
+    body: {
+      identifier: payload.identifier ?? payload.email,
+      password: payload.password,
+    },
+    signal,
+  });
+
+  setTokens(response.tokens);
+  return normalizeCurrentSession(response.user);
 }
 
 export async function getCurrentUser(signal?: AbortSignal): Promise<CurrentSession | null> {
+  const token = getAccessToken();
+  if (!token) {
+    return null;
+  }
+
   try {
-    const user = await resolveResult<CurrentUserOutput, unknown>(
-      currentUserApiV1MeGet({ signal }) as Promise<FieldsResult<CurrentUserOutput, unknown>>,
-    );
+    const user = await requestJson<RawUserOutput>({
+      path: "/auth/me",
+      signal,
+    });
     return normalizeCurrentSession(user);
   } catch (error) {
     if (isApiError(error) && error.status === 401) {
+      clearTokens();
       return null;
     }
     throw error;
   }
 }
 
-export async function logout(signal?: AbortSignal): Promise<void> {
-  await resolveResult(logoutApiV1AuthLogoutPost({ signal }));
+export async function logout(_signal?: AbortSignal): Promise<void> {
+  clearTokens();
 }
 
 export type { CurrentSession };
-export { normalizeCurrentSession };
