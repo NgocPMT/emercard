@@ -209,24 +209,6 @@ function AdminCardsPanel() {
       className="w-full max-w-[420px] mx-auto flex flex-col gap-4"
       data-od-id="board-inventory-overview"
     >
-      {/* Board Header Meta */}
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-mono text-[11px] font-bold bg-[#eef6fc] border border-[#b9ddf5] text-[#0f3554]">
-            UC-CARD-02
-          </span>
-          <span className="text-xs text-[#64748b] font-medium">
-            Giám sát kho thẻ vật lý
-          </span>
-        </div>
-        <h2 className="font-['Plus_Jakarta_Sans',sans-serif] text-[17px] font-bold text-[#1e242c]">
-          02 · Giám Sát Kho Thẻ &amp; KPI Vận Hành
-        </h2>
-        <p className="text-[13px] text-[#64748b]">
-          Theo dõi tổng lượng phôi thẻ NFC trong kho, phân loại trạng thái hoạt động và tra cứu nhanh theo mã serial.
-        </p>
-      </div>
-
       <div className="phone-frame">
         {/* App Top Header */}
         <div className="app-top-header">

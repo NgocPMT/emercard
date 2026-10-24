@@ -347,23 +347,6 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
         className="w-full max-w-[420px] mx-auto flex flex-col gap-4"
         data-od-id="board-card-details-privacy"
       >
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-mono text-[11px] font-bold bg-[#eef6fc] border border-[#b9ddf5] text-[#0f3554]">
-              UC-CARD-03
-            </span>
-            <span className="text-xs text-[#64748b] font-medium">
-              Zero-Knowledge PHI
-            </span>
-          </div>
-          <h2 className="font-['Plus_Jakarta_Sans',sans-serif] text-[17px] font-bold text-[#1e242c]">
-            04 · Chi Tiết Thẻ &amp; Bảo Mật Zero-Knowledge
-          </h2>
-          <p className="text-[13px] text-[#64748b]">
-            Kiểm tra thông số kỹ thuật chip NFC, định danh chủ thẻ mờ hóa và cam kết tuyệt đối không thể đọc hồ sơ y tế cá nhân.
-          </p>
-        </div>
-
         <div className="phone-frame">
           <div className="app-top-header">
             <div className="app-brand">

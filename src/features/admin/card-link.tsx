@@ -125,23 +125,6 @@ export function AdminCardLinkPanel({
       className="w-full max-w-[420px] mx-auto flex flex-col gap-4"
       data-od-id="board-link-unlink"
     >
-      {/* Board Header Meta */}
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-mono text-[11px] font-bold bg-[#eef6fc] border border-[#b9ddf5] text-[#0f3554]">
-            UC-CARD-06 / 07
-          </span>
-          <span className="text-xs text-[#64748b] font-medium">
-            Cấp phát &amp; Liên kết
-          </span>
-        </div>
-        <h2 className="font-['Plus_Jakarta_Sans',sans-serif] text-[17px] font-bold text-[#1e242c]">
-          06 · Liên Kết &amp; Hủy Liên Kết Chủ Thẻ
-        </h2>
-        <p className="text-[13px] text-[#64748b]">
-          Gán phôi thẻ trắng cho tài khoản người dùng qua email / user_id, hoặc hủy liên kết khi thay thế thẻ mới.
-        </p>
-      </div>
 
       <div className="phone-frame">
         {/* App Top Header */}
@@ -173,7 +156,7 @@ export function AdminCardLinkPanel({
           {/* Flow 1: Link Available Card to User */}
           <div className="link-workspace-card">
             <div className="link-workspace-title">
-              1. Gán Thẻ Trắng Cho Tài Khoản (UC-CARD-06)
+              1. Gán Thẻ Trắng Cho Tài Khoản
             </div>
 
             <div className="bg-white border border-[var(--border)] rounded-[var(--radius-control)] p-2.5 flex justify-between items-center text-xs">
@@ -245,7 +228,7 @@ export function AdminCardLinkPanel({
           {card.owner?.id && (
             <div className="link-workspace-card bg-white">
               <div className="link-workspace-title">
-                2. Hủy Liên Kết Thẻ Cũ (UC-CARD-07)
+                2. Hủy Liên Kết Thẻ Cũ
               </div>
               <p className="text-xs text-[#64748b] leading-relaxed">
                 Dành cho trường hợp chủ thẻ làm mất hoặc gãy thẻ vật lý. Thẻ cũ sẽ được ngắt kết nối và chuyển về kho để tái cấp phát hoặc thu hồi.

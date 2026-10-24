@@ -77,24 +77,6 @@ export function AdminCardLifecyclePanel({
       className="w-full max-w-[420px] mx-auto flex flex-col gap-4"
       data-od-id="board-card-lifecycle"
     >
-      {/* Board Header Meta */}
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-mono text-[11px] font-bold bg-[#eef6fc] border border-[#b9ddf5] text-[#0f3554]">
-            UC-CARD-04 / 05
-          </span>
-          <span className="text-xs text-[#64748b] font-medium">
-            Quản lý vòng đời thẻ
-          </span>
-        </div>
-        <h2 className="font-['Plus_Jakarta_Sans',sans-serif] text-[17px] font-bold text-[#1e242c]">
-          05 · Vòng Đời Thẻ &amp; Thay Đổi Trạng Thái
-        </h2>
-        <p className="text-[13px] text-[#64748b]">
-          Chuyển đổi trạng thái hoạt động, tạm đình chỉ, báo mất cắp khẩn cấp hoặc thu hồi vĩnh viễn phôi thẻ bị lỗi phần cứng.
-        </p>
-      </div>
-
       <div className="phone-frame">
         {/* App Top Header */}
         <div className="app-top-header">
@@ -215,7 +197,7 @@ export function AdminCardLifecyclePanel({
           {/* Danger Zone: Permanent Retirement */}
           <div className="danger-zone-box">
             <div className="danger-header">
-              <span className="danger-title">Khu Vực Nguy Hiểm: Thu Hồi Thẻ (UC-CARD-05)</span>
+              <span className="danger-title">Khu Vực Nguy Hiểm: Thu Hồi Thẻ</span>
               <span className="danger-pill">RETIRE</span>
             </div>
             <p className="text-xs text-[#64748b] leading-relaxed">

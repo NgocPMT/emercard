@@ -112,9 +112,7 @@ describe("AdminCardDetailPanel", () => {
     render(<AdminCardDetailPanel cardId="card-1" />);
 
     // Board 04 verification
-    expect(
-      screen.getByText("04 · Chi Tiết Thẻ & Bảo Mật Zero-Knowledge"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Chi Tiết Thẻ NFC")).toBeInTheDocument();
     expect(screen.getByText("EMERCARD TAG")).toBeInTheDocument();
     expect(screen.getByText("OPAQUE ID")).toBeInTheDocument();
     expect(
@@ -125,33 +123,25 @@ describe("AdminCardDetailPanel", () => {
     await user.click(
       screen.getByRole("button", { name: "Quản Lý Trạng Thái Thẻ Này →" }),
     );
-    expect(
-      screen.getByText("05 · Vòng Đời Thẻ & Thay Đổi Trạng Thái"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Vòng Đời Thẻ")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Lưu Thay Đổi Trạng Thái" }),
     ).toBeInTheDocument();
 
     // Go back to Detail
     await user.click(screen.getByRole("button", { name: "Quay lại" }));
-    expect(
-      screen.getByText("04 · Chi Tiết Thẻ & Bảo Mật Zero-Knowledge"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Chi Tiết Thẻ NFC")).toBeInTheDocument();
 
     // Navigate to Board 06 Link Panel
     await user.click(
       screen.getByRole("button", { name: "Liên Kết / Hủy Liên Kết Chủ Thẻ →" }),
     );
-    expect(
-      screen.getByText("06 · Liên Kết & Hủy Liên Kết Chủ Thẻ"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Liên Kết Thẻ")).toBeInTheDocument();
     expect(screen.getByText("Nhật Ký Cấp Phát Gần Nhất")).toBeInTheDocument();
 
     // Go back
     await user.click(screen.getByRole("button", { name: "Quay lại" }));
-    expect(
-      screen.getByText("04 · Chi Tiết Thẻ & Bảo Mật Zero-Knowledge"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Chi Tiết Thẻ NFC")).toBeInTheDocument();
   });
 });
 

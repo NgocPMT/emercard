@@ -71,25 +71,6 @@ export function AdminBatchProvisioningPanel({
       className="w-full max-w-[420px] mx-auto flex flex-col gap-4"
       data-od-id="board-batch-provisioning"
     >
-      {/* Board Header Meta */}
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-mono text-[11px] font-bold bg-[#eef6fc] border border-[#b9ddf5] text-[#0f3554]">
-            UC-CARD-01
-          </span>
-          <span className="text-xs text-[#64748b] font-medium">
-            Batch Provisioning
-          </span>
-        </div>
-        <h2 className="font-['Plus_Jakarta_Sans',sans-serif] text-[17px] font-bold text-[#1e242c]">
-          03 · Đăng Ký &amp; Nhập Lô Thẻ NFC Mới
-        </h2>
-        <p className="text-[13px] text-[#64748b]">
-          Nhập kho thẻ sản xuất mới theo lô hàng loạt, tự sinh dải số serial duy
-          nhất và ngăn ngừa xung đột mã thẻ.
-        </p>
-      </div>
-
       <div className="phone-frame">
         {/* Top App Header */}
         <div className="app-top-header">

@@ -106,7 +106,7 @@ describe("AdminApplicationRoot", () => {
     render(<AdminApplicationRoot section="cards" />);
 
     // Board 02 Verification
-    expect(screen.getByText("02 · Giám Sát Kho Thẻ & KPI Vận Hành")).toBeInTheDocument();
+    expect(screen.getByText("Kho Thẻ NFC")).toBeInTheDocument();
     expect(screen.getByText("Tổng Số Thẻ Trong Hệ Thống")).toBeInTheDocument();
     expect(screen.getByText("EMC-08422")).toBeInTheDocument();
     expect(screen.getByText("Chi tiết thẻ →")).toBeInTheDocument();
@@ -116,14 +116,14 @@ describe("AdminApplicationRoot", () => {
     await user.click(batchButton);
 
     // Board 03 Verification
-    expect(screen.getByText("03 · Đăng Ký & Nhập Lô Thẻ NFC Mới")).toBeInTheDocument();
+    expect(screen.getByText("Nhập Kho Lô Mới")).toBeInTheDocument();
     expect(screen.getByLabelText("Mã Lô Sản Xuất (Batch ID)")).toHaveValue("BATCH-2026-Q4-VN");
     expect(screen.getByRole("button", { name: /Xác Nhận Nhập 100 Thẻ Vào Kho/ })).toBeInTheDocument();
 
     // Cancel back to Board 02
     const cancelButton = screen.getByRole("button", { name: "Hủy" });
     await user.click(cancelButton);
-    expect(screen.getByText("02 · Giám Sát Kho Thẻ & KPI Vận Hành")).toBeInTheDocument();
+    expect(screen.getByText("Kho Thẻ NFC")).toBeInTheDocument();
   });
 });
 
