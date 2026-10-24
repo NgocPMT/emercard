@@ -72,11 +72,8 @@ export function AdminBatchProvisioningPanel({
       data-od-id="board-batch-provisioning"
     >
       <div className="phone-frame">
-        <div className="p-4 pb-0 flex items-center justify-between">
-          <span className="font-['Plus_Jakarta_Sans',sans-serif] font-bold text-sm text-[#1e242c]">
-            Đăng Ký &amp; Nhập Lô Mới
-          </span>
-          {onCancel && (
+        {onCancel && (
+          <div className="p-4 pb-0 flex items-center">
             <button
               type="button"
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)] hover:underline cursor-pointer bg-transparent border-none p-0"
@@ -84,8 +81,8 @@ export function AdminBatchProvisioningPanel({
             >
               ← Quay lại Kho Thẻ
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="screen-content">
           {/* Batch ID Input */}

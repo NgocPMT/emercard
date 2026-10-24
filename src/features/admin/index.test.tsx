@@ -45,7 +45,6 @@ describe("AdminApplicationRoot", () => {
     render(<AdminApplicationRoot section="cards" />);
 
     expect(screen.getByRole("img", { name: "EmerCard" })).toHaveAttribute("src", "/logo.png");
-    expect(screen.getAllByRole("heading", { name: "Kho thẻ" })).toHaveLength(1);
     expect(screen.getByText("Đang tải kho thẻ")).toBeInTheDocument();
     expect(screen.queryByText("Chưa có hành động quản trị ở màn hình này")).not.toBeInTheDocument();
   });
@@ -65,7 +64,7 @@ describe("AdminApplicationRoot", () => {
 
     render(<AdminApplicationRoot section="links" />);
 
-    expect(screen.getByRole("heading", { name: "Liên kết hồ sơ" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Tìm người dùng" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Tìm hồ sơ" })).toBeInTheDocument();
   });
 
@@ -106,7 +105,7 @@ describe("AdminApplicationRoot", () => {
     render(<AdminApplicationRoot section="cards" />);
 
     // Board 02 Verification
-    expect(screen.getByText("Danh Mục Thẻ Vật Lý")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "+ Nhập Lô Mới" })).toBeInTheDocument();
     expect(screen.getByText("Tổng Số Thẻ Trong Hệ Thống")).toBeInTheDocument();
     expect(screen.getByText("EMC-08422")).toBeInTheDocument();
     expect(screen.getByText("Chi tiết thẻ →")).toBeInTheDocument();
@@ -116,14 +115,14 @@ describe("AdminApplicationRoot", () => {
     await user.click(batchButton);
 
     // Board 03 Verification
-    expect(screen.getByText("Đăng Ký & Nhập Lô Mới")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "← Quay lại Kho Thẻ" })).toBeInTheDocument();
     expect(screen.getByLabelText("Mã Lô Sản Xuất (Batch ID)")).toHaveValue("BATCH-2026-Q4-VN");
     expect(screen.getByRole("button", { name: /Xác Nhận Nhập 100 Thẻ Vào Kho/ })).toBeInTheDocument();
 
     // Cancel back to Board 02
     const cancelButton = screen.getByRole("button", { name: "← Quay lại Kho Thẻ" });
     await user.click(cancelButton);
-    expect(screen.getByText("Danh Mục Thẻ Vật Lý")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "+ Nhập Lô Mới" })).toBeInTheDocument();
   });
 });
 

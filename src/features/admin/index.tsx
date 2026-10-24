@@ -210,20 +210,16 @@ function AdminCardsPanel() {
       data-od-id="board-inventory-overview"
     >
       <div className="phone-frame">
-        <div className="p-4 pb-0 flex items-center justify-between">
-          <span className="text-xs font-semibold text-[#64748b] uppercase tracking-wider">
-            Danh Mục Thẻ Vật Lý
-          </span>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--accent)] hover:underline cursor-pointer bg-transparent border-none p-0"
-            onClick={() => setView("batch")}
-          >
-            + Nhập Lô Mới
-          </button>
-        </div>
-
         <div className="screen-content">
+          <div className="flex justify-end items-center">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-[var(--accent)] rounded-[var(--radius-control)] shadow-sm hover:opacity-90 cursor-pointer border-none"
+              onClick={() => setView("batch")}
+            >
+              + Nhập Lô Mới
+            </button>
+          </div>
           {/* KPI Summary Grid */}
           <div className="kpi-summary-grid">
             <div className="kpi-metric-card full-width">
@@ -531,8 +527,6 @@ export function AdminApplicationRoot({
     <PageApplicationRoot
       role="admin"
       brand={appBrand}
-      title={copy.title}
-      description={copy.description}
       navigation={navigation.map((item) => ({
         ...item,
         current: item.href === currentPath,
