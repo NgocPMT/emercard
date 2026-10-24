@@ -1915,6 +1915,94 @@
     }
   }
 
+  /* ─── Admin Inventory Clinical Styles (Section 7) ─────────────────── */
+  .two-fa-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+  .two-fa-digit { width: 100%; height: 46px; text-align: center; font-family: var(--font-mono); font-size: 18px; font-weight: 700; color: var(--fg); background: var(--bg); border: var(--border-width) solid var(--border); border-radius: var(--radius-control); outline: none; transition: border-color 0.15s ease; }
+  .two-fa-digit:focus { border-color: var(--accent); }
+
+  .kpi-summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .kpi-metric-card { background: var(--surface); border: var(--border-width) solid var(--border); border-radius: var(--radius-card); padding: 14px 16px; display: flex; flex-direction: column; gap: 3px; box-shadow: 0 2px 8px rgba(30, 36, 44, 0.03); }
+  .kpi-metric-card.full-width { grid-column: span 2; background: var(--bg); border-left: 3px solid var(--accent); }
+  .kpi-num { font-family: var(--font-mono); font-size: 22px; font-weight: 700; color: var(--accent); line-height: 1.15; }
+  .kpi-label { font-size: 12px; font-weight: 500; color: var(--muted); }
+  .kpi-subtext { font-size: 11px; color: var(--muted); font-family: var(--font-mono); margin-top: 2px; }
+
+  .search-filter-wrap { display: flex; flex-direction: column; gap: 10px; }
+  .filter-pills-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+  .filter-pill { padding: 6px 14px; border-radius: var(--radius-pill); border: var(--border-width) solid var(--border); background: var(--bg); color: var(--fg); font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.15s ease, transform 0.1s ease; }
+  .filter-pill:hover { border-color: var(--accent); }
+  .filter-pill:active { transform: scale(0.98); }
+  .filter-pill.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+
+  .card-inventory-list { display: flex; flex-direction: column; gap: 8px; }
+  .card-item-row { background: var(--bg); border: var(--border-width) solid var(--border); border-radius: var(--radius-card); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; transition: border-color 0.15s ease; box-shadow: 0 2px 8px rgba(30, 36, 44, 0.03); }
+  .card-item-row:hover { border-color: var(--accent); }
+  .card-item-top { display: flex; align-items: center; justify-content: space-between; }
+  .card-serial { font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: var(--accent); }
+  .card-status-pill { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: var(--radius-pill); border: var(--border-width) solid var(--border); }
+  .status-active { background: var(--success-bg); color: var(--success-text); border-color: var(--success-border); }
+  .status-available { background: var(--info-bg); color: var(--info-text); border-color: var(--info-border); }
+  .status-suspended { background: var(--warning-bg); color: var(--warning-text); border-color: var(--warning-border); }
+  .status-retired { background: var(--danger-bg); color: var(--danger-text); border-color: var(--danger-border); text-decoration: line-through; }
+  .card-meta-row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--muted); }
+  .card-user-id { font-family: var(--font-mono); font-weight: 600; color: var(--fg); }
+
+  .invariant-banner { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 var(--radius-card) var(--radius-card) 0; padding: 12px 14px; font-size: 12px; color: var(--muted); line-height: 1.45; }
+  .invariant-title { font-family: var(--font-display); font-weight: 600; color: var(--fg); margin-bottom: 2px; display: block; }
+
+  .privacy-guard-box { background: var(--surface); border: var(--border-width) solid var(--border); border-radius: var(--radius-card); padding: 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 2px 8px rgba(30, 36, 44, 0.03); }
+  .guard-header { display: flex; align-items: center; justify-content: space-between; }
+  .guard-title { font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--fg); display: flex; align-items: center; gap: 6px; }
+  .guard-badge { font-family: var(--font-mono); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: var(--radius-pill); background: var(--info-bg); border: var(--border-width) solid var(--info-border); color: var(--info-text); }
+  .guard-mask-row { display: flex; align-items: center; justify-content: space-between; background: var(--bg); border: var(--border-width) solid var(--border); border-radius: var(--radius-control); padding: 9px 12px; font-size: 13px; }
+  .guard-mask-label { font-size: 12px; color: var(--muted); }
+  .guard-mask-val { font-family: var(--font-mono); font-weight: 600; color: var(--accent); }
+  .locked-section-card { background: var(--bg); border: var(--border-width) dashed var(--border); border-radius: var(--radius-control); padding: 12px; text-align: center; color: var(--muted); font-size: 12px; line-height: 1.4; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .locked-icon-wrap { width: 32px; height: 32px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; color: var(--muted); margin-bottom: 2px; }
+
+  .nfc-hardware-card { background: var(--surface); border: var(--border-width) solid var(--border); border-radius: var(--radius-card); padding: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 2px 8px rgba(30, 36, 44, 0.03); }
+  .nfc-card-chip-row { display: flex; align-items: center; justify-content: space-between; }
+  .nfc-card-brand { display: flex; align-items: center; gap: 8px; }
+  .nfc-emblem { width: 24px; height: 24px; border-radius: 6px; background: var(--accent); color: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; font-family: var(--font-display); }
+  .nfc-card-brand-text { font-family: var(--font-display); font-weight: 700; font-size: 14px; letter-spacing: 0.04em; color: var(--fg); }
+  .nfc-serial-display { background: var(--bg); border: var(--border-width) solid var(--border); border-radius: var(--radius-control); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; }
+  .nfc-serial-label { font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 600; }
+  .nfc-serial-val { font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: var(--accent); letter-spacing: 0.05em; }
+  .nfc-specs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .nfc-spec-box { background: var(--bg); border: var(--border-width) solid var(--border); border-radius: var(--radius-control); padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; }
+  .nfc-spec-key { font-size: 11px; color: var(--muted); }
+  .nfc-spec-val { font-size: 12px; font-weight: 600; color: var(--fg); font-family: var(--font-mono); word-break: break-all; }
+
+  .state-options-list { display: flex; flex-direction: column; gap: 8px; }
+  .state-radio-card { border: var(--border-width) solid var(--border); border-radius: var(--radius-card); padding: 12px 14px; background: var(--bg); display: flex; align-items: flex-start; gap: 10px; cursor: pointer; transition: all 0.15s ease; }
+  .state-radio-card:hover { border-color: var(--accent); }
+  .state-radio-card.active { border-color: var(--accent); background: var(--surface); }
+  .state-radio-indicator { width: 18px; height: 18px; border-radius: 50%; border: var(--border-width) solid var(--border); background: var(--bg); margin-top: 2px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .state-radio-card.active .state-radio-indicator { border-color: var(--accent); background: var(--accent); }
+  .state-radio-card.active .state-radio-indicator::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--bg); }
+  .state-radio-info { display: flex; flex-direction: column; gap: 2px; }
+  .state-radio-title { font-size: 13px; font-weight: 600; color: var(--fg); }
+  .state-radio-desc { font-size: 12px; color: var(--muted); line-height: 1.4; }
+
+  .danger-zone-box { border: var(--border-width) solid var(--danger-border); border-radius: var(--radius-card); padding: 14px; background: var(--danger-bg); display: flex; flex-direction: column; gap: 10px; }
+  .danger-header { display: flex; align-items: center; justify-content: space-between; }
+  .danger-title { font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--danger-text); }
+  .danger-pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: var(--radius-pill); background: var(--bg); border: var(--border-width) solid var(--danger-border); color: var(--danger-text); }
+
+  .link-workspace-card { background: var(--surface); border: var(--border-width) solid var(--border); border-radius: var(--radius-card); padding: 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 2px 8px rgba(30, 36, 44, 0.03); }
+  .link-workspace-title { font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--fg); }
+  .search-user-box { display: flex; gap: 8px; }
+  .user-search-match { background: var(--bg); border: var(--border-width) solid var(--border); border-radius: var(--radius-control); padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; }
+  .user-match-meta { display: flex; flex-direction: column; gap: 2px; }
+  .user-match-name { font-weight: 600; font-size: 13px; color: var(--fg); }
+  .user-match-id { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+  .audit-log-item { background: var(--bg); border: var(--border-width) solid var(--border); border-radius: var(--radius-control); padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .audit-log-top { display: flex; align-items: center; justify-content: space-between; }
+  .audit-log-action { font-size: 12px; font-weight: 600; color: var(--fg); }
+  .audit-log-time { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+  .audit-log-detail { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
+
+
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
