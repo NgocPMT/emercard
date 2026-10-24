@@ -284,16 +284,7 @@ function RegisterForm({ initialEmail, notice }: { initialEmail?: string | null; 
 
   if (isSuccess) {
     return (
-      <div className="phone-frame w-full max-w-[420px] mx-auto shadow-sm" data-od-id="board-register-success">
-        <div className="phone-status-bar">
-          <span className="status-time">10:25</span>
-          <div className="status-icons">
-            <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4z"/></svg>
-            <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
-          </div>
-        </div>
-
+      <div className="w-full max-w-md mx-auto" data-od-id="board-register-success">
         <div className="reg-success-wrap">
           <div className="reg-success-content">
             <div className="success-icon-badge">
@@ -317,16 +308,7 @@ function RegisterForm({ initialEmail, notice }: { initialEmail?: string | null; 
   }
 
   return (
-    <div className="phone-frame w-full max-w-[420px] mx-auto shadow-sm" data-od-id="board-register-form">
-      <div className="phone-status-bar">
-        <span className="status-time">10:24</span>
-        <div className="status-icons">
-          <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/></svg>
-          <svg viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4z"/></svg>
-          <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
-        </div>
-      </div>
-
+    <div className="w-full max-w-md mx-auto" data-od-id="board-register-form">
       <div className="register-screen-wrap">
         <div className="register-header">
           <h2 className="register-title">Đăng Ký Tài Khoản</h2>
