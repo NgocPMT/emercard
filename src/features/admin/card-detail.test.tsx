@@ -106,4 +106,52 @@ describe("AdminCardDetailPanel", () => {
     expect(screen.getByRole("dialog")).toHaveTextContent("Đây là thao tác kết thúc");
     expect(screen.getAllByRole("button", { name: "Thu hồi liên kết" })).toHaveLength(2);
   });
+
+  it("renders Board 04 Zero-Knowledge specs and navigates to Board 05 and Board 06", async () => {
+    const user = userEvent.setup();
+    render(<AdminCardDetailPanel cardId="card-1" />);
+
+    // Board 04 verification
+    expect(
+      screen.getByText("04 · Chi Tiết Thẻ & Bảo Mật Zero-Knowledge"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("EMERCARD TAG")).toBeInTheDocument();
+    expect(screen.getByText("OPAQUE ID")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Cam kết Zero-Knowledge: Hệ thống quản trị thẻ vật lý/i),
+    ).toBeInTheDocument();
+
+    // Navigate to Board 05 Lifecycle
+    await user.click(
+      screen.getByRole("button", { name: "Quản Lý Trạng Thái Thẻ Này →" }),
+    );
+    expect(
+      screen.getByText("05 · Vòng Đời Thẻ & Thay Đổi Trạng Thái"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Lưu Thay Đổi Trạng Thái" }),
+    ).toBeInTheDocument();
+
+    // Go back to Detail
+    await user.click(screen.getByRole("button", { name: "Quay lại" }));
+    expect(
+      screen.getByText("04 · Chi Tiết Thẻ & Bảo Mật Zero-Knowledge"),
+    ).toBeInTheDocument();
+
+    // Navigate to Board 06 Link Panel
+    await user.click(
+      screen.getByRole("button", { name: "Liên Kết / Hủy Liên Kết Chủ Thẻ →" }),
+    );
+    expect(
+      screen.getByText("06 · Liên Kết & Hủy Liên Kết Chủ Thẻ"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Nhật Ký Cấp Phát Gần Nhất")).toBeInTheDocument();
+
+    // Go back
+    await user.click(screen.getByRole("button", { name: "Quay lại" }));
+    expect(
+      screen.getByText("04 · Chi Tiết Thẻ & Bảo Mật Zero-Knowledge"),
+    ).toBeInTheDocument();
+  });
 });
+
