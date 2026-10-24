@@ -40,6 +40,7 @@ export type UserLoginInput = {
 
 export type UserRegistrationInput = {
   email: string;
+  phone?: string;
   password: string;
   username?: string;
 };
@@ -64,6 +65,7 @@ export async function registerAccount(payload: UserRegistrationInput, signal?: A
     method: "POST",
     body: {
       email: payload.email,
+      phone: payload.phone?.trim() || undefined,
       username,
       password: payload.password,
     },

@@ -91,6 +91,25 @@ describe("auth adapter", () => {
     expect(body.email).toBe("user@example.com");
     expect(body.password).toBe("password123");
     expect(body.username).toBeDefined();
+    expect(body.phone).toBeUndefined();
+  });
+
+  it("includes phone number in registerAccount payload when provided", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ user: rawUserSnake, tokens: mockTokens }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await registerAccount({ email: "phone@example.com", phone: "0901234567", password: "password123" });
+
+    const call = fetchMock.mock.calls[0];
+    const body = JSON.parse((call?.[1] as RequestInit | undefined)?.body as string);
+    expect(body.email).toBe("phone@example.com");
+    expect(body.phone).toBe("0901234567");
+    expect(body.password).toBe("password123");
   });
 
   it("returns null immediately when no token is in storage for getCurrentUser", async () => {

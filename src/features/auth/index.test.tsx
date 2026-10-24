@@ -43,7 +43,7 @@ function renderAuth(mode: "login" | "register", props: Partial<Parameters<typeof
 }
 
 describe("auth page root", () => {
-  it("registers successfully, clears passwords, and redirects to login", async () => {
+  it("registers successfully, shows Board 06 success screen, and navigates to login", async () => {
     const user = userEvent.setup();
     const session = {
       id: "user-1",
@@ -59,12 +59,57 @@ describe("auth page root", () => {
     expect(screen.getByDisplayValue("new@example.com")).toBeInTheDocument();
     await user.type(screen.getByLabelText(/Mật khẩu/), "password123");
     await user.type(screen.getByLabelText(/Xác nhận mật khẩu/), "password123");
-    await user.click(screen.getByRole("button", { name: "Tạo tài khoản" }));
+    await user.click(screen.getByRole("button", { name: /Tạo tài khoản|Đăng Ký/i }));
 
     await waitFor(() => expect(registerMock).toHaveBeenCalledWith({ email: "new@example.com", password: "password123" }));
+    expect(await screen.findByText("Đăng ký thành công!")).toBeInTheDocument();
+    expect(screen.getByText(/Tài khoản EmerCard của bạn đã sẵn sàng/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Đăng Nhập" }));
     expect(navigateMock).toHaveBeenCalledWith("/login?notice=registration-success&email=new%40example.com");
-    expect((screen.getByLabelText(/Mật khẩu/) as HTMLInputElement).value).toBe("");
-    expect((screen.getByLabelText(/Xác nhận mật khẩu/) as HTMLInputElement).value).toBe("");
+  });
+
+  it("registers successfully with phone number", async () => {
+    const user = userEvent.setup();
+    const session = {
+      id: "user-phone",
+      email: "user@example.com",
+      role: "user" as const,
+      created_at: "2026-01-01T00:00:00.000Z",
+      updated_at: "2026-01-01T00:00:00.000Z",
+    };
+    registerMock.mockResolvedValueOnce(session);
+
+    renderAuth("register");
+
+    await user.type(screen.getByLabelText(/Email/), "user@example.com");
+    await user.type(screen.getByLabelText(/Số điện thoại/), "0901234567");
+    await user.type(screen.getByLabelText(/Mật khẩu/), "password123");
+    await user.type(screen.getByLabelText(/Xác nhận mật khẩu/), "password123");
+    await user.click(screen.getByRole("button", { name: /Tạo tài khoản|Đăng Ký/i }));
+
+    await waitFor(() =>
+      expect(registerMock).toHaveBeenCalledWith({
+        email: "user@example.com",
+        phone: "0901234567",
+        password: "password123",
+      }),
+    );
+    expect(await screen.findByText("Đăng ký thành công!")).toBeInTheDocument();
+  });
+
+  it("validates invalid phone number format", async () => {
+    const user = userEvent.setup();
+    renderAuth("register");
+
+    await user.type(screen.getByLabelText(/Email/), "user@example.com");
+    await user.type(screen.getByLabelText(/Số điện thoại/), "12345");
+    await user.type(screen.getByLabelText(/Mật khẩu/), "password123");
+    await user.type(screen.getByLabelText(/Xác nhận mật khẩu/), "password123");
+    await user.click(screen.getByRole("button", { name: /Tạo tài khoản|Đăng Ký/i }));
+
+    expect(await screen.findByText("Số điện thoại không hợp lệ")).toBeInTheDocument();
+    expect(registerMock).not.toHaveBeenCalled();
   });
 
   it("maps registration validation errors to the correct field messages", async () => {
@@ -84,7 +129,7 @@ describe("auth page root", () => {
     await user.type(screen.getByLabelText(/Email/), "bad-email");
     await user.type(screen.getByLabelText(/Mật khẩu/), "password123");
     await user.type(screen.getByLabelText(/Xác nhận mật khẩu/), "password123");
-    await user.click(screen.getByRole("button", { name: "Tạo tài khoản" }));
+    await user.click(screen.getByRole("button", { name: /Tạo tài khoản|Đăng Ký/i }));
 
     expect(await screen.findByText("Email không hợp lệ")).toBeInTheDocument();
     expect(navigateMock).not.toHaveBeenCalled();
@@ -106,9 +151,32 @@ describe("auth page root", () => {
     await user.type(screen.getByLabelText(/Email/), "user@example.com");
     await user.type(screen.getByLabelText(/Mật khẩu/), "password123");
     await user.type(screen.getByLabelText(/Xác nhận mật khẩu/), "password123");
-    await user.click(screen.getByRole("button", { name: "Tạo tài khoản" }));
+    await user.click(screen.getByRole("button", { name: /Tạo tài khoản|Đăng Ký/i }));
 
     expect((await screen.findAllByText("Email này đã được sử dụng.")).length).toBeGreaterThan(0);
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
+
+  it("maps duplicate phone registration to the phone field", async () => {
+    const user = userEvent.setup();
+    registerMock.mockRejectedValueOnce(
+      new ApiError({
+        status: 409,
+        code: "auth.phone_already_registered",
+        message: "Already used",
+        retryable: false,
+      }),
+    );
+
+    renderAuth("register");
+
+    await user.type(screen.getByLabelText(/Email/), "user@example.com");
+    await user.type(screen.getByLabelText(/Số điện thoại/), "0901234567");
+    await user.type(screen.getByLabelText(/Mật khẩu/), "password123");
+    await user.type(screen.getByLabelText(/Xác nhận mật khẩu/), "password123");
+    await user.click(screen.getByRole("button", { name: /Tạo tài khoản|Đăng Ký/i }));
+
+    expect((await screen.findAllByText("Số điện thoại này đã được sử dụng.")).length).toBeGreaterThan(0);
     expect(navigateMock).not.toHaveBeenCalled();
   });
 
