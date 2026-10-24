@@ -50,7 +50,122 @@
   }
 
   .emergency-page {
-    background: linear-gradient(180deg, #f7faf9 0, #ffffff 18rem);
+    background: var(--surface);
+    color: var(--fg);
+    font-family: var(--font-body);
+  }
+
+  .med-card {
+    background: var(--bg);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 2px 8px rgba(30, 36, 44, 0.03);
+  }
+
+  .med-card-highlight {
+    background: var(--bg);
+    border: var(--border-width) solid var(--border);
+  }
+
+  .med-card-danger {
+    background: var(--danger-bg);
+    border: var(--border-width) solid var(--danger-border);
+  }
+  .med-card-danger .med-label {
+    color: var(--danger-text);
+  }
+  .med-card-danger .med-val {
+    color: var(--danger-text);
+    font-weight: 600;
+  }
+
+  .med-card-warning {
+    background: var(--warning-bg);
+    border: var(--border-width) solid var(--warning-border);
+  }
+  .med-card-warning .med-label {
+    color: var(--warning-text);
+  }
+  .med-card-warning .med-val {
+    color: var(--warning-text);
+    font-weight: 600;
+  }
+
+  .med-card-info {
+    background: var(--info-bg);
+    border: var(--border-width) solid var(--info-border);
+  }
+  .med-card-info .med-label {
+    color: var(--info-text);
+  }
+  .med-card-info .med-val {
+    color: var(--info-text);
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .status-pill-success {
+    background: var(--success-bg);
+    border: var(--border-width) solid var(--success-border);
+    color: var(--success-text);
+  }
+  .status-pill-danger {
+    background: var(--danger-bg);
+    border: var(--border-width) solid var(--danger-border);
+    color: var(--danger-text);
+  }
+  .status-pill-warning {
+    background: var(--warning-bg);
+    border: var(--border-width) solid var(--warning-border);
+    color: var(--warning-text);
+  }
+  .status-pill-info {
+    background: var(--info-bg);
+    border: var(--border-width) solid var(--info-border);
+    color: var(--info-text);
+  }
+
+  .med-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .med-val {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  @keyframes radar-pulse {
+    0% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(50, 123, 176, 0.7);
+    }
+    70% {
+      transform: scale(1);
+      box-shadow: 0 0 0 16px rgba(50, 123, 176, 0);
+    }
+    100% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(50, 123, 176, 0);
+    }
+  }
+
+  .radar-pulsing {
+    animation: radar-pulse 2s infinite;
   }
 
   .emergency-critical {
