@@ -138,16 +138,7 @@ function AuthLayout({
 
   return (
     <div className="w-full max-w-[420px] mx-auto py-6" data-od-id="board-auth-login">
-      {/* App Top Header */}
-      <div className="app-top-header rounded-t-[18px]">
-        <div className="app-brand">
-          <div className="brand-mark">+</div>
-          <span className="brand-name">EmerCard</span>
-        </div>
-        <span className="portal-tag">Cổng Chủ Thẻ</span>
-      </div>
-
-      <div className="screen-content bg-white border border-[#d3d9e0] border-t-0 rounded-b-[18px] p-5 sm:p-6 shadow-[0_4px_20px_rgba(30,36,44,0.06)]">
+      <div className="screen-content bg-white border border-[#d3d9e0] rounded-[18px] p-5 sm:p-6 shadow-[0_4px_20px_rgba(30,36,44,0.06)]">
         <div>
           <h2 className="text-xl font-bold text-[#1e242c] mb-1 font-display">Đăng Nhập</h2>
           <p className="text-[13px] text-[#64748b]">Nhập tài khoản để quản lý hồ sơ y tế khẩn cấp và thẻ NFC vật lý của bạn.</p>

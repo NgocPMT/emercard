@@ -214,13 +214,11 @@ function ProfileSummaryCard() {
 
   return (
     <div className="w-full max-w-[420px] mx-auto flex flex-col gap-4" data-od-id="board-account-details">
-      {/* App Top Header */}
-      <div className="app-top-header rounded-[18px]">
-        <div className="app-brand">
-          <div className="brand-mark">+</div>
-          <span className="brand-name">Tài Khoản</span>
-        </div>
-        <a href="/app/profile" className="portal-tag" style={{ textDecoration: "none" }}>
+      <div className="flex items-center justify-between px-1">
+        <span className="text-xs font-semibold text-[#64748b] uppercase tracking-wider">
+          Thông Tin Chủ Thẻ
+        </span>
+        <a href="/app/profile" className="portal-tag text-xs" style={{ textDecoration: "none" }}>
           Xem Hồ Sơ Y Tế →
         </a>
       </div>
@@ -379,13 +377,11 @@ function CardAccessHistoryPanel({ cardId }: { cardId: string }) {
 
   return viewMode === "sos" ? (
     <div className="w-full flex flex-col gap-4 mt-2" data-od-id="board-alert-history">
-      {/* Header */}
-      <div className="app-top-header rounded-[14px]">
-        <div className="app-brand">
-          <div className="brand-mark">+</div>
-          <span className="brand-name">Nhật Ký SOS</span>
-        </div>
-        <span className="portal-tag">1 sự cố ghi nhận</span>
+      <div className="flex items-center justify-between px-1">
+        <span className="text-xs font-semibold text-[#64748b] uppercase tracking-wider">
+          Nhật Ký Sự Cố Khẩn Cấp
+        </span>
+        <span className="portal-tag text-xs">1 sự cố ghi nhận</span>
       </div>
 
       <div className="screen-content bg-white border border-[#d3d9e0] rounded-[14px] p-5 shadow-[0_4px_20px_rgba(30,36,44,0.06)] flex flex-col gap-4">
@@ -453,13 +449,11 @@ function CardAccessHistoryPanel({ cardId }: { cardId: string }) {
     </div>
   ) : (
     <div className="w-full flex flex-col gap-4 mt-2" data-od-id="board-passive-audit">
-      {/* Header */}
-      <div className="app-top-header rounded-[14px]">
-        <div className="app-brand">
-          <div className="brand-mark">+</div>
-          <span className="brand-name">Giám Sát Thẻ</span>
-        </div>
-        <span className="portal-tag">NFC Audit</span>
+      <div className="flex items-center justify-between px-1">
+        <span className="text-xs font-semibold text-[#64748b] uppercase tracking-wider">
+          Giám Sát Truy Cập Thẻ
+        </span>
+        <span className="portal-tag text-xs">NFC Audit</span>
       </div>
 
       <div className="screen-content bg-white border border-[#d3d9e0] rounded-[14px] p-5 shadow-[0_4px_20px_rgba(30,36,44,0.06)] flex flex-col gap-4">

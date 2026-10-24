@@ -127,24 +127,18 @@ export function AdminCardLinkPanel({
     >
 
       <div className="phone-frame">
-        {/* App Top Header */}
-        <div className="app-top-header">
-          <div className="app-brand">
-            <div className="brand-mark">+</div>
-            <span className="brand-name">Liên Kết Thẻ</span>
-          </div>
-          {onBack ? (
+        {onBack && (
+          <div className="p-4 pb-0 flex items-center justify-between">
             <button
               type="button"
-              className="link-subtle bg-transparent border-none cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)] hover:underline cursor-pointer bg-transparent border-none p-0"
               onClick={onBack}
             >
-              Quay lại
+              ← Quay lại Chi Tiết Thẻ
             </button>
-          ) : (
-            <span className="portal-tag">Phân Phối</span>
-          )}
-        </div>
+            <span className="portal-tag font-mono text-xs">{card.serial}</span>
+          </div>
+        )}
 
         <div className="screen-content">
           {actionError && (

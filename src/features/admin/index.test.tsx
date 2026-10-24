@@ -106,24 +106,24 @@ describe("AdminApplicationRoot", () => {
     render(<AdminApplicationRoot section="cards" />);
 
     // Board 02 Verification
-    expect(screen.getByText("Kho Thẻ NFC")).toBeInTheDocument();
+    expect(screen.getByText("Danh Mục Thẻ Vật Lý")).toBeInTheDocument();
     expect(screen.getByText("Tổng Số Thẻ Trong Hệ Thống")).toBeInTheDocument();
     expect(screen.getByText("EMC-08422")).toBeInTheDocument();
     expect(screen.getByText("Chi tiết thẻ →")).toBeInTheDocument();
 
     // Toggle to Board 03 Batch Provisioning
-    const batchButton = screen.getByRole("button", { name: "+ Nhập Lô" });
+    const batchButton = screen.getByRole("button", { name: "+ Nhập Lô Mới" });
     await user.click(batchButton);
 
     // Board 03 Verification
-    expect(screen.getByText("Nhập Kho Lô Mới")).toBeInTheDocument();
+    expect(screen.getByText("Đăng Ký & Nhập Lô Mới")).toBeInTheDocument();
     expect(screen.getByLabelText("Mã Lô Sản Xuất (Batch ID)")).toHaveValue("BATCH-2026-Q4-VN");
     expect(screen.getByRole("button", { name: /Xác Nhận Nhập 100 Thẻ Vào Kho/ })).toBeInTheDocument();
 
     // Cancel back to Board 02
-    const cancelButton = screen.getByRole("button", { name: "Hủy" });
+    const cancelButton = screen.getByRole("button", { name: "← Quay lại Kho Thẻ" });
     await user.click(cancelButton);
-    expect(screen.getByText("Kho Thẻ NFC")).toBeInTheDocument();
+    expect(screen.getByText("Danh Mục Thẻ Vật Lý")).toBeInTheDocument();
   });
 });
 

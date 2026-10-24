@@ -72,19 +72,17 @@ export function AdminBatchProvisioningPanel({
       data-od-id="board-batch-provisioning"
     >
       <div className="phone-frame">
-        {/* Top App Header */}
-        <div className="app-top-header">
-          <div className="app-brand">
-            <div className="brand-mark">+</div>
-            <span className="brand-name">Nhập Kho Lô Mới</span>
-          </div>
+        <div className="p-4 pb-0 flex items-center justify-between">
+          <span className="font-['Plus_Jakarta_Sans',sans-serif] font-bold text-sm text-[#1e242c]">
+            Đăng Ký &amp; Nhập Lô Mới
+          </span>
           {onCancel && (
             <button
               type="button"
-              className="link-subtle bg-transparent border-none cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)] hover:underline cursor-pointer bg-transparent border-none p-0"
               onClick={onCancel}
             >
-              Hủy
+              ← Quay lại Kho Thẻ
             </button>
           )}
         </div>

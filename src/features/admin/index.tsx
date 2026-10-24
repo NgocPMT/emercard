@@ -210,18 +210,16 @@ function AdminCardsPanel() {
       data-od-id="board-inventory-overview"
     >
       <div className="phone-frame">
-        {/* App Top Header */}
-        <div className="app-top-header">
-          <div className="app-brand">
-            <div className="brand-mark">+</div>
-            <span className="brand-name">Kho Thẻ NFC</span>
-          </div>
+        <div className="p-4 pb-0 flex items-center justify-between">
+          <span className="text-xs font-semibold text-[#64748b] uppercase tracking-wider">
+            Danh Mục Thẻ Vật Lý
+          </span>
           <button
             type="button"
-            className="link-subtle bg-transparent border-none cursor-pointer"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--accent)] hover:underline cursor-pointer bg-transparent border-none p-0"
             onClick={() => setView("batch")}
           >
-            + Nhập Lô
+            + Nhập Lô Mới
           </button>
         </div>
 
