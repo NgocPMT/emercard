@@ -1,44 +1,90 @@
 :root {
   color-scheme: light;
-  --color-page-bg: #f6f8f7;
-  --color-surface: #ffffff;
-  --color-surface-muted: #edf3f1;
-  --color-text: #172d36;
-  --color-text-muted: #52656c;
-  --color-border: #d6e0dd;
-  --color-primary: #176b7a;
-  --color-primary-strong: #105563;
-  --color-danger: #b42318;
-  --color-danger-soft: #fff1ef;
-  --color-warning: #985b12;
-  --color-warning-soft: #fff7e8;
-  --color-success: #16734d;
-  --color-success-soft: #eaf6ef;
-  --color-focus: #3d98a7;
-  --shadow-soft: 0 10px 28px rgb(23 45 54 / 0.06);
-  --shadow-lifted: 0 22px 54px rgb(23 45 54 / 0.1);
-  --radius-panel: 1rem;
-  --radius-control: 0.7rem;
+
+  /* Clinical Design System Core Tokens */
+  --bg: #ffffff;
+  --surface: #f0f3f6;
+  --fg: #1e242c;
+  --muted: #64748b;
+  --border: #d3d9e0;
+  --accent: #327bb0;
+  --border-width: 1px;
+
+  /* Semantic Status Palette (Clinical Pastel) */
+  --danger: #cc3336;
+  --danger-bg: #fdf2f2;
+  --danger-border: #f8c8c8;
+  --danger-text: #991b1b;
+
+  --warning: #cf710a;
+  --warning-bg: #fff8eb;
+  --warning-border: #fde3b3;
+  --warning-text: #7a3c00;
+
+  --success: #237f52;
+  --success-bg: #edf7f1;
+  --success-border: #bee6cd;
+  --success-text: #165b37;
+
+  --info: #327bb0;
+  --info-bg: #eef6fc;
+  --info-border: #b9ddf5;
+  --info-text: #0f3554;
+
+  /* Typography */
+  --font-display: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+
+  /* Radii & Elevation */
+  --radius-card: 18px;
+  --radius-control: 14px;
+  --radius-pill: 9999px;
+  --radius: 18px;
+  --shadow-soft: 0 4px 20px rgba(30, 36, 44, 0.06);
+  --shadow-lifted: 0 8px 30px rgba(30, 36, 44, 0.08);
+
+  /* Compatibility Aliases */
+  --color-page-bg: var(--surface);
+  --color-surface: var(--bg);
+  --color-surface-muted: var(--surface);
+  --color-text: var(--fg);
+  --color-text-muted: var(--muted);
+  --color-border: var(--border);
+  --color-primary: var(--accent);
+  --color-primary-strong: #25618d;
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-bg);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-bg);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-bg);
+  --color-focus: var(--accent);
+  --radius-panel: var(--radius-card);
   --space-touch: 2.75rem;
-  --font-source-sans-3: "Cabinet Grotesk", "Avenir Next", ui-sans-serif, system-ui, sans-serif;
-  --font-inconsolata: "Inconsolata", ui-monospace, SFMono-Regular, monospace;
+  --font-source-sans-3: var(--font-body);
+  --font-inconsolata: var(--font-mono);
 }
 
 @theme inline {
-  --color-background: var(--color-page-bg);
-  --color-foreground: var(--color-text);
-  --color-card: var(--color-surface);
-  --color-card-foreground: var(--color-text);
-  --color-popover: var(--color-surface);
-  --color-popover-foreground: var(--color-text);
-  --color-muted: var(--color-surface-muted);
-  --color-muted-foreground: var(--color-text-muted);
-  --color-border: var(--color-border);
-  --color-primary: var(--color-primary);
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-card: var(--bg);
+  --color-card-foreground: var(--fg);
+  --color-popover: var(--bg);
+  --color-popover-foreground: var(--fg);
+  --color-muted: var(--surface);
+  --color-muted-foreground: var(--muted);
+  --color-border: var(--border);
+  --color-primary: var(--accent);
   --color-primary-foreground: #ffffff;
-  --color-destructive: var(--color-danger);
+  --color-destructive: var(--danger);
   --color-destructive-foreground: #ffffff;
-  --color-ring: var(--color-focus);
-  --font-sans: var(--font-source-sans-3), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-inconsolata), ui-monospace, SFMono-Regular, monospace;
+  --color-ring: var(--accent);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+  --radius-card: var(--radius-card);
+  --radius-control: var(--radius-control);
+  --radius-pill: var(--radius-pill);
 }
