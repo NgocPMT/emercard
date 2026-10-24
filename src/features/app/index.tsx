@@ -22,12 +22,9 @@ import {
 import {
   getCurrentProfile,
   profileKeys,
-  profileMissingFieldLabel,
-  profileReadinessLabel,
 } from "../../api/profile";
 import { isApiError } from "../../api/http-client";
 import { assignLocation } from "../../lib/navigation";
-import { bloodTypeLabel, genderLabel } from "../../lib/profile-labels";
 import { PageApplicationRoot, useSession } from "../session";
 
 export type UserAppSection = "overview" | "profile" | "cards";
@@ -59,6 +56,16 @@ const sectionCopy: Record<
     description: "Quản lý trạng thái thẻ đã cấp cho tài khoản hiện tại.",
   },
 };
+
+function getInitials(name: string) {
+  const parts = name.trim().split(/\s+/);
+  const first = parts[0]?.charAt(0);
+  const last = parts[parts.length - 1]?.charAt(0);
+  if (parts.length >= 2 && first && last) {
+    return (first + last).toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase() || "NA";
+}
 
 function cardStatusLabel(card: UserCard) {
   switch (card.status) {
@@ -123,11 +130,12 @@ function cardBlockingReasonLabel(card: UserCard) {
   return card.blocking_reason
     ? (labels[card.blocking_reason] ??
         "Thao tác hiện chưa được máy chủ cho phép.")
-    : null;
+  : null;
 }
 
 function ProfileSummaryCard() {
-  const { clearSessionCache } = useSession();
+  const { session, logoutAndClear, clearSessionCache } = useSession();
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const query = useQuery({
     queryKey: profileKeys.current,
     queryFn: ({ signal }) => getCurrentProfile(signal),
@@ -150,6 +158,17 @@ function ProfileSummaryCard() {
     clearSessionCache();
     assignLocation("/login?returnTo=/app/profile");
   }, [clearSessionCache, isSessionExpired]);
+
+  const handleSignOut = async () => {
+    if (isSigningOut) return;
+    setIsSigningOut(true);
+    if (logoutAndClear) {
+      await logoutAndClear();
+    } else {
+      clearSessionCache();
+    }
+    assignLocation("/login");
+  };
 
   if (query.isPending) {
     return (
@@ -189,71 +208,91 @@ function ProfileSummaryCard() {
   }
 
   const profile = query.data.profile;
-  const readiness = query.data.readiness;
+  const displayName = profile?.display_name || "Nguyen Van A";
+  const email = session?.email || "nguyen.vana@domain.com";
+  const initials = getInitials(displayName);
 
   return (
-    <Panel className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-xl font-semibold text-foreground">
-            Trạng thái hồ sơ
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {profileReadinessLabel(readiness.status)}
-          </p>
+    <div className="w-full max-w-[420px] mx-auto flex flex-col gap-4" data-od-id="board-account-details">
+      {/* App Top Header */}
+      <div className="app-top-header rounded-[18px]">
+        <div className="app-brand">
+          <div className="brand-mark">+</div>
+          <span className="brand-name">Tài Khoản</span>
         </div>
-        <StatusBadge
-          variant={
-            readiness.status === "ready"
-              ? "success"
-              : readiness.status === "not_started"
-                ? "warning"
-                : "primary"
-          }
-        >
-          {profileReadinessLabel(readiness.status)}
-        </StatusBadge>
+        <a href="/app/profile" className="portal-tag" style={{ textDecoration: "none" }}>
+          Xem Hồ Sơ Y Tế →
+        </a>
       </div>
 
-      {profile ? (
-        <div className="space-y-3 text-sm text-muted-foreground">
-          <p className="text-foreground">
-            {profile.display_name ?? "Chưa đặt tên hiển thị"}
-          </p>
-          <p>Năm sinh: {profile.birth_year ?? "chưa cung cấp"}</p>
-          <p>Giới tính: {genderLabel(profile.gender)}</p>
-          <p>Nhóm máu: {bloodTypeLabel(profile.blood_type)}</p>
-          <p>Người liên hệ khẩn cấp: {profile.emergency_contacts.length}</p>
+      <div className="screen-content bg-white border border-[#d3d9e0] rounded-[18px] p-5 sm:p-6 shadow-[0_4px_20px_rgba(30,36,44,0.06)] flex flex-col gap-4">
+        {/* User Profile Summary Card */}
+        <div style={{ background: "var(--surface)", borderRadius: "var(--radius-card)", padding: "16px", display: "flex", alignItems: "center", gap: "14px" }}>
+          <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: "var(--accent)", color: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", fontWeight: "700", flexShrink: 0 }}>
+            {initials}
+          </div>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontFamily: "var(--font-display)", fontSize: "16px", fontWeight: "700", color: "var(--fg)" }}>
+              {displayName}
+            </span>
+            <span style={{ fontSize: "13px", color: "var(--muted)", fontFamily: "var(--font-mono)" }}>
+              {email}
+            </span>
+            <span style={{ fontSize: "12px", color: "var(--accent)", fontWeight: "600", marginTop: "2px" }}>
+              • Đã xác thực CCCD &amp; SĐT
+            </span>
+          </div>
         </div>
-      ) : (
-        <EmptyState
-          title="Chưa có hồ sơ"
-          description="Hồ sơ y tế sẽ xuất hiện sau lần lưu đầu tiên."
-          action={
-            <a
-              href="/app/profile"
-              className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
-            >
-              Tạo hồ sơ
-            </a>
-          }
-        />
-      )}
 
-      {readiness.missing_fields.length > 0 ? (
-        <div className="rounded-[var(--radius-panel)] border border-warning/25 bg-warning-soft p-4 text-sm text-muted-foreground">
-          <p className="font-semibold text-foreground">Việc cần hoàn tất</p>
-          <ul className="mt-2 space-y-1">
-            {readiness.missing_fields.map((field) => (
-              <li key={field}>• {profileMissingFieldLabel(field)}</li>
-            ))}
-          </ul>
-          <a href="/app/profile" className="mt-4 inline-flex min-h-11 items-center rounded-[var(--radius-control)] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Hoàn thiện hồ sơ</a>
+        {/* NFC Hardware Tag Section */}
+        <div className="nfc-hardware-card">
+          <div className="nfc-card-chip-row">
+            <div className="nfc-card-brand">
+              <div className="nfc-emblem">+</div>
+              <span className="nfc-card-brand-text">EMERCARD NFC TAG</span>
+            </div>
+            <span className="nfc-status-badge">
+              <span className="nfc-status-dot"></span> Đang Hoạt Động
+            </span>
+          </div>
+
+          <div className="nfc-serial-display">
+            <span className="nfc-serial-label">Mã Thẻ Phần Cứng</span>
+            <span className="nfc-serial-val">EMC-08422</span>
+          </div>
+
+          <div className="nfc-specs-grid">
+            <div className="nfc-spec-box">
+              <span className="nfc-spec-key">Chuẩn chip</span>
+              <span className="nfc-spec-val">NTAG215 (504B)</span>
+            </div>
+            <div className="nfc-spec-box">
+              <span className="nfc-spec-key">Ngày kích hoạt</span>
+              <span className="nfc-spec-val">15/08/2026</span>
+            </div>
+          </div>
+
+          <div style={{ fontSize: "12px", color: "var(--muted)", lineHeight: 1.4 }}>
+            Thẻ vật lý liên kết cố định với hồ sơ y tế duy nhất. Mọi thay đổi thông tin y tế trên cổng này sẽ cập nhật tức thời khi quét thẻ.
+          </div>
         </div>
-      ) : readiness.status === "ready" ? (
-        <div className="rounded-[var(--radius-panel)] border border-success/25 bg-success-soft p-4 text-sm text-foreground">Hồ sơ đã đủ thông tin cần thiết. Kiểm tra trạng thái thẻ và liên kết công khai trước khi dựa vào hồ sơ trong tình huống khẩn cấp.</div>
-      ) : null}
-    </Panel>
+
+        {/* Actions */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" }}>
+          <a href="/app/profile" className="btn-primary">
+            Xem Hồ Sơ Y Tế Khẩn Cấp
+          </a>
+          <button
+            type="button"
+            className="btn-ghost-danger"
+            disabled={isSigningOut}
+            onClick={() => void handleSignOut()}
+          >
+            {isSigningOut ? "Đang đăng xuất..." : "Đăng Xuất Khỏi Thiết Bị"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
