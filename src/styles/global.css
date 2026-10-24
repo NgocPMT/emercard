@@ -1173,6 +1173,660 @@
     transform: scale(0.98);
   }
 
+  /* ─── Cardholder Presentation & Primitives (user-cardholder.html) ─── */
+  .app-top-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 18px;
+    border-bottom: var(--border-width) solid var(--border);
+    background: var(--bg);
+  }
+  .app-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--fg);
+  }
+  .brand-mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: var(--font-display);
+  }
+  .brand-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+  }
+  .portal-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    background: var(--info-bg);
+    border: var(--border-width) solid var(--info-border);
+    color: var(--info-text);
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .field-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .field-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .field-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .input-text {
+    width: 100%;
+    padding: 11px 14px;
+    font-size: 14px;
+    font-family: var(--font-body);
+    color: var(--fg);
+    background: var(--bg);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-control);
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+  .input-text:focus {
+    border-color: var(--accent);
+  }
+  .input-mono {
+    font-family: var(--font-mono);
+  }
+  .input-icon-btn {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    padding: 4px;
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .input-icon-btn:hover {
+    color: var(--fg);
+  }
+  .input-icon-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 12px 18px;
+    background: var(--accent);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-control);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: opacity 0.15s ease, transform 0.1s ease;
+    text-decoration: none;
+  }
+  .btn-primary:hover {
+    opacity: 0.92;
+  }
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+  .btn-secondary {
+    width: 100%;
+    padding: 11px 16px;
+    background: var(--bg);
+    color: var(--fg);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-control);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+  .btn-secondary:hover {
+    background: var(--surface);
+    border-color: var(--muted);
+  }
+  .btn-secondary:active {
+    transform: scale(0.98);
+  }
+  .btn-ghost-danger {
+    width: 100%;
+    padding: 11px 14px;
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border: var(--border-width) solid var(--danger-border);
+    border-radius: var(--radius-control);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: opacity 0.15s ease, transform 0.1s ease;
+  }
+  .btn-ghost-danger:hover {
+    opacity: 0.92;
+  }
+  .btn-ghost-danger:active {
+    transform: scale(0.98);
+  }
+  .link-subtle {
+    font-size: 12px;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+  .link-subtle:hover {
+    text-decoration: underline;
+  }
+
+  /* Hardware Card Styling (Board 02) */
+  .nfc-hardware-card {
+    background: var(--surface);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(30, 36, 44, 0.03);
+  }
+  .nfc-card-chip-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nfc-card-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nfc-emblem {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--accent);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .nfc-card-brand-text {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    color: var(--fg);
+  }
+  .nfc-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    background: var(--success-bg);
+    border: var(--border-width) solid var(--success-border);
+    color: var(--success-text);
+  }
+  .nfc-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--success);
+  }
+  .nfc-serial-display {
+    background: var(--bg);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-control);
+    padding: 10px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .nfc-serial-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .nfc-serial-val {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .nfc-specs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .nfc-spec-box {
+    background: var(--bg);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-control);
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .nfc-spec-key {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .nfc-spec-val {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--fg);
+    font-family: var(--font-mono);
+  }
+
+  /* Interactive Form Controls (Board 04) */
+  .blood-selector-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .blood-option-btn {
+    padding: 10px 6px;
+    background: var(--bg);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-control);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--fg);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s ease;
+  }
+  .blood-option-btn:hover {
+    border-color: var(--accent);
+  }
+  .blood-option-btn:active {
+    transform: scale(0.98);
+  }
+  .blood-option-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #ffffff;
+  }
+  .tag-cloud-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .removable-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-pill);
+    padding: 4px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg);
+  }
+  .removable-tag-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .removable-tag-btn:hover {
+    color: var(--fg);
+  }
+  .add-tag-row {
+    display: flex;
+    gap: 8px;
+  }
+  .btn-add-tag {
+    padding: 9px 14px;
+    background: var(--surface);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-control);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+  }
+  .btn-add-tag:hover {
+    background: var(--bg);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .btn-add-tag:active {
+    transform: scale(0.98);
+  }
+  .med-edit-card {
+    background: var(--surface);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .med-edit-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .med-edit-title {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .btn-remove-item {
+    background: none;
+    border: none;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .btn-remove-item:hover {
+    color: var(--danger);
+  }
+  .toast-success-banner {
+    display: none;
+    background: var(--success-bg);
+    border: var(--border-width) solid var(--success-border);
+    border-left: 3px solid var(--success);
+    border-radius: var(--radius-card);
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--success-text);
+    font-weight: 500;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .toast-success-banner.show {
+    display: flex;
+  }
+
+  /* Incident Audit & Map (Board 05) */
+  .incident-meta-card {
+    background: var(--bg);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(30, 36, 44, 0.03);
+  }
+  .incident-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 8px;
+    border-bottom: var(--border-width) solid var(--surface);
+  }
+  .incident-time {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .incident-tag {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    background: var(--danger-bg);
+    border: var(--border-width) solid var(--danger-border);
+    color: var(--danger-text);
+  }
+  .gps-telemetry-box {
+    background: var(--surface);
+    border-radius: var(--radius-control);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .gps-coord-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .gps-label {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .gps-val-mono {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .mock-map-canvas {
+    height: 110px;
+    background: var(--surface);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-control);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mock-map-grid {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(to right, var(--border) 1px, transparent 1px), linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.5;
+  }
+  .radar-circle {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 1px dashed var(--accent);
+    background: var(--surface);
+  }
+  .map-pin {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .pin-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+    box-shadow: 0 2px 6px rgba(30, 36, 44, 0.15);
+  }
+  .pin-label {
+    font-size: 10px;
+    font-weight: 700;
+    background: var(--bg);
+    border: var(--border-width) solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--fg);
+    white-space: nowrap;
+  }
+  .sms-log-container {
+    background: var(--surface);
+    border-radius: var(--radius-control);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .sms-log-item {
+    background: var(--bg);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-control);
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .sms-recipient-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .sms-name {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .sms-phone {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .sms-status-pill {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    background: var(--success-bg);
+    border: var(--border-width) solid var(--success-border);
+    color: var(--success-text);
+    white-space: nowrap;
+  }
+
+  /* Passive Tap Timeline & Stats (Board 06) */
+  .timeline-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .timeline-card {
+    background: var(--bg);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 2px 8px rgba(30, 36, 44, 0.03);
+  }
+  .timeline-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .timeline-time {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .timeline-badge {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .timeline-device-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .timeline-device {
+    color: var(--fg);
+    font-weight: 500;
+  }
+  .timeline-ip {
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+  .stats-summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .stat-metric-card {
+    background: var(--surface);
+    border-radius: var(--radius-card);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .stat-metric-num {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .stat-metric-label {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
   .emergency-critical {
     border-color: color-mix(in srgb, var(--color-danger) 32%, white);
     background: var(--color-danger-soft);

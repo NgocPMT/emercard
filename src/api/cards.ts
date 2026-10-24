@@ -120,10 +120,14 @@ const linkListResponseSchema = z.object({
 const linkAccessEventSchema = z.object({
   id: z.string(),
   accessed_at: z.string(),
+  device: z.string().nullable().optional(),
+  latency_ms: z.number().nullable().optional(),
 });
 const linkAccessHistoryResponseSchema = z.object({
   items: z.array(linkAccessEventSchema),
   next_cursor: z.string().nullable().optional(),
+  scans_this_month: z.number().nullable().optional(),
+  average_latency_ms: z.number().nullable().optional(),
 });
 const adminCardResponseSchema = adminCardSchema;
 

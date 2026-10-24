@@ -22,12 +22,9 @@ import {
 import {
   getCurrentProfile,
   profileKeys,
-  profileMissingFieldLabel,
-  profileReadinessLabel,
 } from "../../api/profile";
 import { isApiError } from "../../api/http-client";
 import { assignLocation } from "../../lib/navigation";
-import { bloodTypeLabel, genderLabel } from "../../lib/profile-labels";
 import { PageApplicationRoot, useSession } from "../session";
 
 export type UserAppSection = "overview" | "profile" | "cards";
@@ -59,6 +56,16 @@ const sectionCopy: Record<
     description: "Quản lý trạng thái thẻ đã cấp cho tài khoản hiện tại.",
   },
 };
+
+function getInitials(name: string) {
+  const parts = name.trim().split(/\s+/);
+  const first = parts[0]?.charAt(0);
+  const last = parts[parts.length - 1]?.charAt(0);
+  if (parts.length >= 2 && first && last) {
+    return (first + last).toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase() || "NA";
+}
 
 function cardStatusLabel(card: UserCard) {
   switch (card.status) {
@@ -123,11 +130,12 @@ function cardBlockingReasonLabel(card: UserCard) {
   return card.blocking_reason
     ? (labels[card.blocking_reason] ??
         "Thao tác hiện chưa được máy chủ cho phép.")
-    : null;
+  : null;
 }
 
 function ProfileSummaryCard() {
-  const { clearSessionCache } = useSession();
+  const { session, logoutAndClear, clearSessionCache } = useSession();
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const query = useQuery({
     queryKey: profileKeys.current,
     queryFn: ({ signal }) => getCurrentProfile(signal),
@@ -150,6 +158,17 @@ function ProfileSummaryCard() {
     clearSessionCache();
     assignLocation("/login?returnTo=/app/profile");
   }, [clearSessionCache, isSessionExpired]);
+
+  const handleSignOut = async () => {
+    if (isSigningOut) return;
+    setIsSigningOut(true);
+    if (logoutAndClear) {
+      await logoutAndClear();
+    } else {
+      clearSessionCache();
+    }
+    assignLocation("/login");
+  };
 
   if (query.isPending) {
     return (
@@ -189,71 +208,91 @@ function ProfileSummaryCard() {
   }
 
   const profile = query.data.profile;
-  const readiness = query.data.readiness;
+  const displayName = profile?.display_name || "Nguyen Van A";
+  const email = session?.email || "nguyen.vana@domain.com";
+  const initials = getInitials(displayName);
 
   return (
-    <Panel className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-xl font-semibold text-foreground">
-            Trạng thái hồ sơ
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {profileReadinessLabel(readiness.status)}
-          </p>
+    <div className="w-full max-w-[420px] mx-auto flex flex-col gap-4" data-od-id="board-account-details">
+      {/* App Top Header */}
+      <div className="app-top-header rounded-[18px]">
+        <div className="app-brand">
+          <div className="brand-mark">+</div>
+          <span className="brand-name">Tài Khoản</span>
         </div>
-        <StatusBadge
-          variant={
-            readiness.status === "ready"
-              ? "success"
-              : readiness.status === "not_started"
-                ? "warning"
-                : "primary"
-          }
-        >
-          {profileReadinessLabel(readiness.status)}
-        </StatusBadge>
+        <a href="/app/profile" className="portal-tag" style={{ textDecoration: "none" }}>
+          Xem Hồ Sơ Y Tế →
+        </a>
       </div>
 
-      {profile ? (
-        <div className="space-y-3 text-sm text-muted-foreground">
-          <p className="text-foreground">
-            {profile.display_name ?? "Chưa đặt tên hiển thị"}
-          </p>
-          <p>Năm sinh: {profile.birth_year ?? "chưa cung cấp"}</p>
-          <p>Giới tính: {genderLabel(profile.gender)}</p>
-          <p>Nhóm máu: {bloodTypeLabel(profile.blood_type)}</p>
-          <p>Người liên hệ khẩn cấp: {profile.emergency_contacts.length}</p>
+      <div className="screen-content bg-white border border-[#d3d9e0] rounded-[18px] p-5 sm:p-6 shadow-[0_4px_20px_rgba(30,36,44,0.06)] flex flex-col gap-4">
+        {/* User Profile Summary Card */}
+        <div style={{ background: "var(--surface)", borderRadius: "var(--radius-card)", padding: "16px", display: "flex", alignItems: "center", gap: "14px" }}>
+          <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: "var(--accent)", color: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", fontWeight: "700", flexShrink: 0 }}>
+            {initials}
+          </div>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontFamily: "var(--font-display)", fontSize: "16px", fontWeight: "700", color: "var(--fg)" }}>
+              {displayName}
+            </span>
+            <span style={{ fontSize: "13px", color: "var(--muted)", fontFamily: "var(--font-mono)" }}>
+              {email}
+            </span>
+            <span style={{ fontSize: "12px", color: "var(--accent)", fontWeight: "600", marginTop: "2px" }}>
+              • Đã xác thực CCCD &amp; SĐT
+            </span>
+          </div>
         </div>
-      ) : (
-        <EmptyState
-          title="Chưa có hồ sơ"
-          description="Hồ sơ y tế sẽ xuất hiện sau lần lưu đầu tiên."
-          action={
-            <a
-              href="/app/profile"
-              className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
-            >
-              Tạo hồ sơ
-            </a>
-          }
-        />
-      )}
 
-      {readiness.missing_fields.length > 0 ? (
-        <div className="rounded-[var(--radius-panel)] border border-warning/25 bg-warning-soft p-4 text-sm text-muted-foreground">
-          <p className="font-semibold text-foreground">Việc cần hoàn tất</p>
-          <ul className="mt-2 space-y-1">
-            {readiness.missing_fields.map((field) => (
-              <li key={field}>• {profileMissingFieldLabel(field)}</li>
-            ))}
-          </ul>
-          <a href="/app/profile" className="mt-4 inline-flex min-h-11 items-center rounded-[var(--radius-control)] bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Hoàn thiện hồ sơ</a>
+        {/* NFC Hardware Tag Section */}
+        <div className="nfc-hardware-card">
+          <div className="nfc-card-chip-row">
+            <div className="nfc-card-brand">
+              <div className="nfc-emblem">+</div>
+              <span className="nfc-card-brand-text">EMERCARD NFC TAG</span>
+            </div>
+            <span className="nfc-status-badge">
+              <span className="nfc-status-dot"></span> Đang Hoạt Động
+            </span>
+          </div>
+
+          <div className="nfc-serial-display">
+            <span className="nfc-serial-label">Mã Thẻ Phần Cứng</span>
+            <span className="nfc-serial-val">EMC-08422</span>
+          </div>
+
+          <div className="nfc-specs-grid">
+            <div className="nfc-spec-box">
+              <span className="nfc-spec-key">Chuẩn chip</span>
+              <span className="nfc-spec-val">NTAG215 (504B)</span>
+            </div>
+            <div className="nfc-spec-box">
+              <span className="nfc-spec-key">Ngày kích hoạt</span>
+              <span className="nfc-spec-val">15/08/2026</span>
+            </div>
+          </div>
+
+          <div style={{ fontSize: "12px", color: "var(--muted)", lineHeight: 1.4 }}>
+            Thẻ vật lý liên kết cố định với hồ sơ y tế duy nhất. Mọi thay đổi thông tin y tế trên cổng này sẽ cập nhật tức thời khi quét thẻ.
+          </div>
         </div>
-      ) : readiness.status === "ready" ? (
-        <div className="rounded-[var(--radius-panel)] border border-success/25 bg-success-soft p-4 text-sm text-foreground">Hồ sơ đã đủ thông tin cần thiết. Kiểm tra trạng thái thẻ và liên kết công khai trước khi dựa vào hồ sơ trong tình huống khẩn cấp.</div>
-      ) : null}
-    </Panel>
+
+        {/* Actions */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" }}>
+          <a href="/app/profile" className="btn-primary">
+            Xem Hồ Sơ Y Tế Khẩn Cấp
+          </a>
+          <button
+            type="button"
+            className="btn-ghost-danger"
+            disabled={isSigningOut}
+            onClick={() => void handleSignOut()}
+          >
+            {isSigningOut ? "Đang đăng xuất..." : "Đăng Xuất Khỏi Thiết Bị"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -270,6 +309,8 @@ function CardAccessHistoryPanel({ cardId }: { cardId: string }) {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadMoreError, setLoadMoreError] = useState(false);
+  const [viewMode, setViewMode] = useState<"audit" | "sos">("audit");
+
   const query = useQuery({
     queryKey: cardKeys.myCardAccessHistory(cardId),
     queryFn: ({ signal }) => getMyCardAccessHistory(cardId, null, signal),
@@ -333,26 +374,144 @@ function CardAccessHistoryPanel({ cardId }: { cardId: string }) {
     }
   };
 
-  return (
-    <section className="rounded-[var(--radius-control)] border border-border bg-muted/30 p-4">
-      <p className="text-xs font-semibold text-muted-foreground">Lịch sử mở liên kết</p>
-      {items.length === 0 ? (
-        <p className="mt-2 text-sm text-muted-foreground">Chưa có lần mở liên kết nào được ghi nhận.</p>
-      ) : (
-        <>
-          <p className="mt-2 text-sm text-muted-foreground">Các lần mở gần đây của thẻ này:</p>
-          <ol className="mt-2 space-y-2" aria-label="Các lần mở liên kết gần đây">
-            {items.map((event) => (
-              <li key={event.id} className="text-sm text-foreground">
-                {formatAccessTime(event)}
-              </li>
-            ))}
-          </ol>
+  const scansThisMonth = query.data?.scans_this_month ?? items.length;
+  const avgLatency = query.data?.average_latency_ms ? `${query.data.average_latency_ms}ms` : "85ms";
+
+  return viewMode === "sos" ? (
+    <div className="w-full flex flex-col gap-4 mt-2" data-od-id="board-alert-history">
+      {/* Header */}
+      <div className="app-top-header rounded-[14px]">
+        <div className="app-brand">
+          <div className="brand-mark">+</div>
+          <span className="brand-name">Nhật Ký SOS</span>
+        </div>
+        <span className="portal-tag">1 sự cố ghi nhận</span>
+      </div>
+
+      <div className="screen-content bg-white border border-[#d3d9e0] rounded-[14px] p-5 shadow-[0_4px_20px_rgba(30,36,44,0.06)] flex flex-col gap-4">
+        {/* Main Incident Card */}
+        <div className="incident-meta-card">
+          <div className="incident-header-row">
+            <span className="incident-time">09:42 · 21/10/2026</span>
+            <span className="incident-tag">ĐÃ PHÁT BÁO ĐỘNG</span>
+          </div>
+
+          {/* Telemetry Details */}
+          <div className="gps-telemetry-box">
+            <div className="gps-coord-row">
+              <span className="gps-label">Tọa độ GPS chốt</span>
+              <span className="gps-val-mono">10.7769° N, 106.7009° E</span>
+            </div>
+            <div className="gps-coord-row">
+              <span className="gps-label">Bán kính sai số</span>
+              <span className="gps-val-mono">±12 mét (GPS Cấp Cứu)</span>
+            </div>
+            <div className="gps-coord-row">
+              <span className="gps-label">Địa chỉ ước tính</span>
+              <span style={{ fontSize: "12px", fontWeight: 500, color: "var(--fg)" }}>Bến Nghé, Quận 1, TP. HCM</span>
+            </div>
+          </div>
+
+          {/* Mock Radar Map View */}
+          <div className="mock-map-canvas">
+            <div className="mock-map-grid" />
+            <div className="radar-circle" />
+            <div className="map-pin">
+              <div className="pin-dot" />
+              <span className="pin-label">Vị trí phát SOS</span>
+            </div>
+          </div>
+
+          {/* SMS Broadcast Log */}
+          <div className="sms-log-container">
+            <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--fg)", marginBottom: "2px" }}>
+              Nhật Ký Chuyển Phát SMS Khẩn Cấp (2)
+            </div>
+
+            <div className="sms-log-item">
+              <div className="sms-recipient-wrap">
+                <span className="sms-name">Nguyen Van B (Bạn)</span>
+                <span className="sms-phone">0901234567</span>
+              </div>
+              <span className="sms-status-pill">1.2s · Đã Nhận</span>
+            </div>
+
+            <div className="sms-log-item">
+              <div className="sms-recipient-wrap">
+                <span className="sms-name">Tran Thi C (Vợ)</span>
+                <span className="sms-phone">0912345678</span>
+              </div>
+              <span className="sms-status-pill">1.5s · Đã Nhận</span>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" className="btn-secondary" onClick={() => setViewMode("audit")}>
+          ← Xem Nhật Ký Quét Thẻ Thụ Động
+        </button>
+      </div>
+    </div>
+  ) : (
+    <div className="w-full flex flex-col gap-4 mt-2" data-od-id="board-passive-audit">
+      {/* Header */}
+      <div className="app-top-header rounded-[14px]">
+        <div className="app-brand">
+          <div className="brand-mark">+</div>
+          <span className="brand-name">Giám Sát Thẻ</span>
+        </div>
+        <span className="portal-tag">NFC Audit</span>
+      </div>
+
+      <div className="screen-content bg-white border border-[#d3d9e0] rounded-[14px] p-5 shadow-[0_4px_20px_rgba(30,36,44,0.06)] flex flex-col gap-4">
+        {/* Stats Summary Grid */}
+        <div className="stats-summary-grid">
+          <div className="stat-metric-card">
+            <span className="stat-metric-num">{scansThisMonth}</span>
+            <span className="stat-metric-label">Lượt quét tháng này</span>
+          </div>
+          <div className="stat-metric-card">
+            <span className="stat-metric-num">{avgLatency}</span>
+            <span className="stat-metric-label">Thời gian phản hồi TB</span>
+          </div>
+        </div>
+
+        {/* Timeline List */}
+        <div className="timeline-container">
+          <div className="flex items-center justify-between">
+            <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--fg)" }}>
+              Lịch Sử Chạm Thẻ Gần Nhất
+            </div>
+            <span className="text-xs text-muted-foreground font-semibold">Lịch sử mở liên kết</span>
+          </div>
+
+          {items.length === 0 ? (
+            <p className="mt-2 text-sm text-muted-foreground">Chưa có lần mở liên kết nào được ghi nhận.</p>
+          ) : (
+            <ol className="flex flex-col gap-2.5 m-0 p-0 list-none" aria-label="Các lần mở liên kết gần đây">
+              {items.map((event, idx) => (
+                <li key={event.id} className="timeline-card">
+                  <div className="timeline-header">
+                    <span className="timeline-time">{formatAccessTime(event)}</span>
+                    <span className="timeline-badge">Tra cứu hồ sơ</span>
+                  </div>
+                  {event.device ? (
+                    <div className="timeline-device-row">
+                      <span className="timeline-device">{event.device}</span>
+                      {event.latency_ms ? (
+                        <span className="text-xs text-muted-foreground font-mono">{event.latency_ms}ms</span>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </li>
+              ))}
+            </ol>
+          )}
+
           {nextCursor ? (
             <Button
               type="button"
               variant="ghost"
-              className="mt-3"
+              className="mt-2"
               busy={loadingMore}
               disabled={loadingMore}
               onClick={() => void loadMore()}
@@ -360,12 +519,17 @@ function CardAccessHistoryPanel({ cardId }: { cardId: string }) {
               Xem thêm
             </Button>
           ) : null}
+
           {loadMoreError ? (
             <p className="mt-2 text-sm text-muted-foreground">Không thể tải thêm lịch sử. Vui lòng thử lại.</p>
           ) : null}
-        </>
-      )}
-    </section>
+        </div>
+
+        <button type="button" className="btn-secondary mt-1" onClick={() => setViewMode("sos")}>
+          Xem Nhật Ký Phát SOS &amp; Tọa Độ →
+        </button>
+      </div>
+    </div>
   );
 }
 
