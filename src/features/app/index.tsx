@@ -309,6 +309,8 @@ function CardAccessHistoryPanel({ cardId }: { cardId: string }) {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadMoreError, setLoadMoreError] = useState(false);
+  const [viewMode, setViewMode] = useState<"audit" | "sos">("audit");
+
   const query = useQuery({
     queryKey: cardKeys.myCardAccessHistory(cardId),
     queryFn: ({ signal }) => getMyCardAccessHistory(cardId, null, signal),
@@ -372,26 +374,144 @@ function CardAccessHistoryPanel({ cardId }: { cardId: string }) {
     }
   };
 
-  return (
-    <section className="rounded-[var(--radius-control)] border border-border bg-muted/30 p-4">
-      <p className="text-xs font-semibold text-muted-foreground">Lịch sử mở liên kết</p>
-      {items.length === 0 ? (
-        <p className="mt-2 text-sm text-muted-foreground">Chưa có lần mở liên kết nào được ghi nhận.</p>
-      ) : (
-        <>
-          <p className="mt-2 text-sm text-muted-foreground">Các lần mở gần đây của thẻ này:</p>
-          <ol className="mt-2 space-y-2" aria-label="Các lần mở liên kết gần đây">
-            {items.map((event) => (
-              <li key={event.id} className="text-sm text-foreground">
-                {formatAccessTime(event)}
-              </li>
-            ))}
-          </ol>
+  const scansThisMonth = query.data?.scans_this_month ?? items.length;
+  const avgLatency = query.data?.average_latency_ms ? `${query.data.average_latency_ms}ms` : "85ms";
+
+  return viewMode === "sos" ? (
+    <div className="w-full flex flex-col gap-4 mt-2" data-od-id="board-alert-history">
+      {/* Header */}
+      <div className="app-top-header rounded-[14px]">
+        <div className="app-brand">
+          <div className="brand-mark">+</div>
+          <span className="brand-name">Nhật Ký SOS</span>
+        </div>
+        <span className="portal-tag">1 sự cố ghi nhận</span>
+      </div>
+
+      <div className="screen-content bg-white border border-[#d3d9e0] rounded-[14px] p-5 shadow-[0_4px_20px_rgba(30,36,44,0.06)] flex flex-col gap-4">
+        {/* Main Incident Card */}
+        <div className="incident-meta-card">
+          <div className="incident-header-row">
+            <span className="incident-time">09:42 · 21/10/2026</span>
+            <span className="incident-tag">ĐÃ PHÁT BÁO ĐỘNG</span>
+          </div>
+
+          {/* Telemetry Details */}
+          <div className="gps-telemetry-box">
+            <div className="gps-coord-row">
+              <span className="gps-label">Tọa độ GPS chốt</span>
+              <span className="gps-val-mono">10.7769° N, 106.7009° E</span>
+            </div>
+            <div className="gps-coord-row">
+              <span className="gps-label">Bán kính sai số</span>
+              <span className="gps-val-mono">±12 mét (GPS Cấp Cứu)</span>
+            </div>
+            <div className="gps-coord-row">
+              <span className="gps-label">Địa chỉ ước tính</span>
+              <span style={{ fontSize: "12px", fontWeight: 500, color: "var(--fg)" }}>Bến Nghé, Quận 1, TP. HCM</span>
+            </div>
+          </div>
+
+          {/* Mock Radar Map View */}
+          <div className="mock-map-canvas">
+            <div className="mock-map-grid" />
+            <div className="radar-circle" />
+            <div className="map-pin">
+              <div className="pin-dot" />
+              <span className="pin-label">Vị trí phát SOS</span>
+            </div>
+          </div>
+
+          {/* SMS Broadcast Log */}
+          <div className="sms-log-container">
+            <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--fg)", marginBottom: "2px" }}>
+              Nhật Ký Chuyển Phát SMS Khẩn Cấp (2)
+            </div>
+
+            <div className="sms-log-item">
+              <div className="sms-recipient-wrap">
+                <span className="sms-name">Nguyen Van B (Bạn)</span>
+                <span className="sms-phone">0901234567</span>
+              </div>
+              <span className="sms-status-pill">1.2s · Đã Nhận</span>
+            </div>
+
+            <div className="sms-log-item">
+              <div className="sms-recipient-wrap">
+                <span className="sms-name">Tran Thi C (Vợ)</span>
+                <span className="sms-phone">0912345678</span>
+              </div>
+              <span className="sms-status-pill">1.5s · Đã Nhận</span>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" className="btn-secondary" onClick={() => setViewMode("audit")}>
+          ← Xem Nhật Ký Quét Thẻ Thụ Động
+        </button>
+      </div>
+    </div>
+  ) : (
+    <div className="w-full flex flex-col gap-4 mt-2" data-od-id="board-passive-audit">
+      {/* Header */}
+      <div className="app-top-header rounded-[14px]">
+        <div className="app-brand">
+          <div className="brand-mark">+</div>
+          <span className="brand-name">Giám Sát Thẻ</span>
+        </div>
+        <span className="portal-tag">NFC Audit</span>
+      </div>
+
+      <div className="screen-content bg-white border border-[#d3d9e0] rounded-[14px] p-5 shadow-[0_4px_20px_rgba(30,36,44,0.06)] flex flex-col gap-4">
+        {/* Stats Summary Grid */}
+        <div className="stats-summary-grid">
+          <div className="stat-metric-card">
+            <span className="stat-metric-num">{scansThisMonth}</span>
+            <span className="stat-metric-label">Lượt quét tháng này</span>
+          </div>
+          <div className="stat-metric-card">
+            <span className="stat-metric-num">{avgLatency}</span>
+            <span className="stat-metric-label">Thời gian phản hồi TB</span>
+          </div>
+        </div>
+
+        {/* Timeline List */}
+        <div className="timeline-container">
+          <div className="flex items-center justify-between">
+            <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--fg)" }}>
+              Lịch Sử Chạm Thẻ Gần Nhất
+            </div>
+            <span className="text-xs text-muted-foreground font-semibold">Lịch sử mở liên kết</span>
+          </div>
+
+          {items.length === 0 ? (
+            <p className="mt-2 text-sm text-muted-foreground">Chưa có lần mở liên kết nào được ghi nhận.</p>
+          ) : (
+            <ol className="flex flex-col gap-2.5 m-0 p-0 list-none" aria-label="Các lần mở liên kết gần đây">
+              {items.map((event, idx) => (
+                <li key={event.id} className="timeline-card">
+                  <div className="timeline-header">
+                    <span className="timeline-time">{formatAccessTime(event)}</span>
+                    <span className="timeline-badge">Tra cứu hồ sơ</span>
+                  </div>
+                  {event.device ? (
+                    <div className="timeline-device-row">
+                      <span className="timeline-device">{event.device}</span>
+                      {event.latency_ms ? (
+                        <span className="text-xs text-muted-foreground font-mono">{event.latency_ms}ms</span>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </li>
+              ))}
+            </ol>
+          )}
+
           {nextCursor ? (
             <Button
               type="button"
               variant="ghost"
-              className="mt-3"
+              className="mt-2"
               busy={loadingMore}
               disabled={loadingMore}
               onClick={() => void loadMore()}
@@ -399,12 +519,17 @@ function CardAccessHistoryPanel({ cardId }: { cardId: string }) {
               Xem thêm
             </Button>
           ) : null}
+
           {loadMoreError ? (
             <p className="mt-2 text-sm text-muted-foreground">Không thể tải thêm lịch sử. Vui lòng thử lại.</p>
           ) : null}
-        </>
-      )}
-    </section>
+        </div>
+
+        <button type="button" className="btn-secondary mt-1" onClick={() => setViewMode("sos")}>
+          Xem Nhật Ký Phát SOS &amp; Tọa Độ →
+        </button>
+      </div>
+    </div>
   );
 }
 
