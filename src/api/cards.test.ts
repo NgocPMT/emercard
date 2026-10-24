@@ -163,4 +163,51 @@ describe("cards api helpers", () => {
       ),
     ).toBe(false);
   });
+
+  it("fetches admin inventory stats and batch provisions cards", async () => {
+    requestJsonMock.mockResolvedValueOnce({
+      total: 10,
+      active: 5,
+      available: 3,
+      suspended: 1,
+      lost: 1,
+      void: 0,
+    });
+    const { getAdminInventoryStats, batchProvisionCards, getAdminCards } = await import("./cards");
+    const stats = await getAdminInventoryStats();
+    expect(stats.total).toBe(10);
+    expect(requestJsonMock).toHaveBeenCalledWith(
+      expect.objectContaining({ path: "/admin/cards/stats" }),
+    );
+
+    requestJsonMock.mockResolvedValueOnce({
+      batch_id: "BATCH-1",
+      chip_type: "ntag215",
+      quantity: 1,
+      serial_start: "EMC-1",
+      serial_end: "EMC-1",
+      cards: [],
+    });
+    const batch = await batchProvisionCards({
+      batch_id: "BATCH-1",
+      chip_type: "ntag215",
+      quantity: 1,
+    });
+    expect(batch.batch_id).toBe("BATCH-1");
+    expect(requestJsonMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: "/admin/cards/batch",
+        method: "POST",
+      }),
+    );
+
+    requestJsonMock.mockResolvedValueOnce({ items: [], next_cursor: null });
+    await getAdminCards({ search: "EMC-08", status: "active" });
+    expect(requestJsonMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: "/admin/cards?search=EMC-08&status=active",
+      }),
+    );
+  });
 });
+
