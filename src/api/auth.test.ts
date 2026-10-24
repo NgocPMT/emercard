@@ -38,6 +38,21 @@ describe("auth adapter", () => {
     await expect(login({ email: user.email, password: "password123" })).resolves.toEqual(user);
   });
 
+  it("forwards phone number in registerAccount payload when provided", async () => {
+    vi.mocked(registerApiV1AuthRegisterPost).mockResolvedValueOnce({ data: user, error: undefined } as never);
+
+    await registerAccount({ email: user.email, phone: "0901234567", password: "password123" });
+
+    expect(registerApiV1AuthRegisterPost).toHaveBeenCalledWith({
+      body: {
+        email: user.email,
+        phone: "0901234567",
+        password: "password123",
+      },
+      signal: undefined,
+    });
+  });
+
   it("maps registration errors to ApiError instances", async () => {
     vi.mocked(registerApiV1AuthRegisterPost).mockResolvedValueOnce({
       data: undefined,
