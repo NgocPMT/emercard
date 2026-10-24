@@ -160,6 +160,128 @@
         </p>
       </div>
     </article>
+
+    <!-- ─── BOARD 2: SOS Confirmation Modal (UC-ALT-01 Step 1) ─────────── -->
+    <div id="sos-modal-overlay" class="modal-overlay-preview hidden" role="dialog" aria-modal="true" aria-labelledby="sos-confirm-title">
+      <div class="modal-card">
+        <div class="modal-icon-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        </div>
+        <h3 id="sos-confirm-title" class="modal-title">Xác nhận gửi báo động SOS</h3>
+        <p class="modal-body-text">
+          Hệ thống sẽ tự động đọc tọa độ GPS từ thiết bị của bạn và phát tin nhắn khẩn cấp (SMS) đến 1 người liên hệ khẩn cấp (<strong id="sos-recipient-name">Nguyen Van B</strong>) để yêu cầu trợ giúp cứu hộ.
+        </p>
+        <div class="modal-info-box">
+          Chỉ kích hoạt tính năng này khi xảy ra tình huống nguy cấp hoặc cần cấp cứu y tế khẩn cấp.
+        </div>
+        <div class="modal-btn-row">
+          <button id="btn-sos-confirm" class="btn-modal-confirm" type="button">
+            Xác Nhận &amp; Gửi Ngay
+          </button>
+          <button id="btn-sos-cancel" class="btn-modal-cancel" type="button">
+            Hủy Bỏ
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── BOARD 3: SOS Sending Progress (UC-ALT-01 Step 2) ───────────── -->
+    <div id="sos-progress-view" class="progress-screen-wrap hidden" aria-live="assertive">
+      <div>
+        <div class="progress-hero-icon radar-pulsing">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9v-2h2v2zm0-4H9V7h2v5zm4 4h-2v-2h2v2zm0-4h-2V7h2v5z"/></svg>
+        </div>
+        <h3 class="progress-heading" style="margin-top: 14px;">Đang phát tín hiệu SOS...</h3>
+        <p class="progress-subtext">Vui lòng không tắt hoặc rời khỏi màn hình</p>
+      </div>
+
+      <!-- Progress Widget -->
+      <div class="progress-widget">
+        <div class="progress-meta-row">
+          <span id="sos-step-status-text">Đang kết nối vệ tinh GPS</span>
+          <span id="sos-progress-percent" class="progress-pct">35%</span>
+        </div>
+        <div class="progress-track">
+          <div id="sos-progress-bar" class="progress-fill" style="width: 35%;"></div>
+        </div>
+      </div>
+
+      <!-- Steps Trace -->
+      <div class="steps-container">
+        <div class="step-item" id="sos-trace-step1">
+          <div class="step-badge-done">✓</div>
+          <div class="step-info">
+            <span class="step-title">Khởi động cảm biến định vị</span>
+            <span class="step-detail">Đã cấp quyền truy cập phần cứng GPS</span>
+          </div>
+        </div>
+
+        <div class="step-item" id="sos-trace-step2">
+          <div id="sos-badge-step2" class="step-badge-active">⟳</div>
+          <div class="step-info">
+            <span class="step-title">Khóa tọa độ vệ tinh GPS</span>
+            <span id="sos-coords-text" class="step-detail">Đang định vị vệ tinh...</span>
+          </div>
+        </div>
+
+        <div class="step-item" id="sos-trace-step3">
+          <div id="sos-badge-step3" class="step-badge-wait">⋯</div>
+          <div class="step-info">
+            <span class="step-title">Phát tin nhắn SMS khẩn cấp</span>
+            <span id="sos-sms-trace-detail" class="step-detail">Cổng viễn thông sẵn sàng gửi</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── BOARD 4: SOS Completed Screen (UC-ALT-01 Step 3) ───────────── -->
+    <div id="sos-completed-view" class="completed-screen-wrap hidden" aria-live="polite">
+      <div>
+        <div class="completed-icon-badge">
+          <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        </div>
+        <h3 class="completed-heading" style="margin-top: 14px;">Đã phát báo động SOS!</h3>
+        <p class="completed-subtext">Tin nhắn cứu trợ kèm tọa độ bản đồ thời gian thực đã được phát đi thành công.</p>
+      </div>
+
+      <!-- Summary Card -->
+      <div class="completed-summary-card">
+        <div class="summary-item-row">
+          <span class="summary-key">Thời gian gửi:</span>
+          <span id="sos-summary-time" class="summary-value">Vừa xong (10:25)</span>
+        </div>
+        <div class="summary-item-row">
+          <span class="summary-key">Tọa độ GPS chốt:</span>
+          <span id="sos-summary-coords" class="summary-value summary-value-mono">10.7769° N, 106.7009° E</span>
+        </div>
+        <div class="summary-item-row">
+          <span class="summary-key">Sai số vị trí:</span>
+          <span id="sos-summary-accuracy" class="summary-value">&lt; 5 mét</span>
+        </div>
+        <div class="summary-item-row">
+          <span class="summary-key">Người nhận SMS:</span>
+          <span id="sos-summary-recipient" class="summary-value">Nguyen Van B (Bạn)</span>
+        </div>
+        <div class="summary-item-row">
+          <span class="summary-key">Kênh truyền tin:</span>
+          <span class="summary-value">Mạng viễn thông SMS</span>
+        </div>
+        <div class="summary-item-row">
+          <span class="summary-key">Trạng thái phát tin:</span>
+          <span class="status-pill status-pill-success">Đã phát thành công (1/1)</span>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <a href="tel:115" class="btn-call-115">
+          <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+          Gọi Cấp Cứu 115
+        </a>
+        <button id="btn-return-profile" class="btn-return-profile" type="button">
+          Xem Lại Hồ Sơ Y Tế
+        </button>
+      </div>
+    </div>
   </div>
 </main>
 
@@ -320,65 +442,176 @@
       });
     });
 
-  const handleLocationAlert = async () => {
-    if (locationAlertBusy) return;
+  const sosModalOverlay = document.querySelector("#sos-modal-overlay");
+  const sosProgressView = document.querySelector("#sos-progress-view");
+  const sosCompletedView = document.querySelector("#sos-completed-view");
+  const sosRecipientName = document.querySelector("#sos-recipient-name");
+  const btnSosConfirm = document.querySelector("#btn-sos-confirm");
+  const btnSosCancel = document.querySelector("#btn-sos-cancel");
+  const btnReturnProfile = document.querySelector("#btn-return-profile");
+
+  const sosStepStatusText = document.querySelector("#sos-step-status-text");
+  const sosProgressPercent = document.querySelector("#sos-progress-percent");
+  const sosProgressBar = document.querySelector("#sos-progress-bar");
+  const sosBadgeStep2 = document.querySelector("#sos-badge-step2");
+  const sosCoordsText = document.querySelector("#sos-coords-text");
+  const sosBadgeStep3 = document.querySelector("#sos-badge-step3");
+  const sosSmsTraceDetail = document.querySelector("#sos-sms-trace-detail");
+
+  const sosSummaryTime = document.querySelector("#sos-summary-time");
+  const sosSummaryCoords = document.querySelector("#sos-summary-coords");
+  const sosSummaryAccuracy = document.querySelector("#sos-summary-accuracy");
+  const sosSummaryRecipient = document.querySelector("#sos-summary-recipient");
+
+  let currentLoadedProfile = null;
+
+  const showSosModal = () => {
+    hide(profileElement);
+    hide(sosProgressView);
+    hide(sosCompletedView);
+    const firstContact = currentLoadedProfile?.emergency_contacts?.[0];
+    const recipientStr = firstContact
+      ? `${firstContact.name}${firstContact.relationship ? ` (${firstContact.relationship})` : ""}`
+      : "Người liên hệ khẩn cấp";
+    if (sosRecipientName) sosRecipientName.textContent = recipientStr;
+    show(sosModalOverlay);
+  };
+
+  const closeSosModal = () => {
+    hide(sosModalOverlay);
+    hide(sosProgressView);
+    hide(sosCompletedView);
+    show(profileElement);
+  };
+
+  const updateProgress = (pct, label) => {
+    if (sosProgressPercent) sosProgressPercent.textContent = `${pct}%`;
+    if (sosProgressBar) (sosProgressBar as HTMLElement).style.width = `${pct}%`;
+    if (sosStepStatusText) sosStepStatusText.textContent = label;
+  };
+
+  const triggerSosFlow = async () => {
+    hide(sosModalOverlay);
+    show(sosProgressView);
+
+    // Initial state
+    updateProgress(35, "Đang kết nối vệ tinh GPS");
+    if (sosBadgeStep2) {
+      sosBadgeStep2.className = "step-badge-active";
+      sosBadgeStep2.textContent = "⟳";
+    }
+    if (sosCoordsText) sosCoordsText.textContent = "Đang định vị vệ tinh...";
+    if (sosBadgeStep3) {
+      sosBadgeStep3.className = "step-badge-wait";
+      sosBadgeStep3.textContent = "⋯";
+    }
+
+    const searchParams = new URLSearchParams(window.location.search);
+    const isDemo = searchParams.has("demo") || window.location.pathname.endsWith("/demo");
+
+    if (isDemo) {
+      await new Promise((r) => setTimeout(r, 600));
+      updateProgress(65, "Khóa tọa độ vệ tinh GPS");
+      if (sosBadgeStep2) {
+        sosBadgeStep2.className = "step-badge-done";
+        sosBadgeStep2.textContent = "✓";
+      }
+      if (sosCoordsText) {
+        sosCoordsText.textContent = "10.7769° N, 106.7009° E (Sai số < 5m)";
+      }
+      if (sosBadgeStep3) {
+        sosBadgeStep3.className = "step-badge-active";
+        sosBadgeStep3.textContent = "⟳";
+      }
+      if (sosSmsTraceDetail) {
+        sosSmsTraceDetail.textContent = "Đang gửi SMS đến Nguyen Van B...";
+      }
+
+      await new Promise((r) => setTimeout(r, 700));
+      updateProgress(100, "Đã gửi SMS thành công");
+      if (sosBadgeStep3) {
+        sosBadgeStep3.className = "step-badge-done";
+        sosBadgeStep3.textContent = "✓";
+      }
+
+      const now = new Date();
+      const timeStr = `Vừa xong (${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")})`;
+      if (sosSummaryTime) sosSummaryTime.textContent = timeStr;
+      if (sosSummaryCoords) sosSummaryCoords.textContent = "10.7769° N, 106.7009° E";
+      if (sosSummaryAccuracy) sosSummaryAccuracy.textContent = "< 5 mét";
+      if (sosSummaryRecipient) sosSummaryRecipient.textContent = "Nguyen Van B (Bạn)";
+
+      hide(sosProgressView);
+      show(sosCompletedView);
+      return;
+    }
+
     const token = extractEmergencyToken(window.location.pathname);
     if (!token) {
-      setLocationAlertState("link_unavailable");
+      alert("Liên kết khẩn cấp không hợp lệ");
+      closeSosModal();
       return;
     }
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      setLocationAlertState("unsupported");
-      return;
-    }
-    setLocationAlertBusy(true, "Đang xác định vị trí…");
-    setLocationAlertState("locating");
+
     try {
       const position = await readScannerPosition();
-      const { latitude, longitude, accuracy } = position.coords;
-      if (
-        !Number.isFinite(latitude) ||
-        !Number.isFinite(longitude) ||
-        !Number.isFinite(accuracy) ||
-        accuracy <= 0 ||
-        latitude < -90 ||
-        latitude > 90 ||
-        longitude < -180 ||
-        longitude > 180
-      ) {
-        setLocationAlertState("invalid_request");
-        return;
+      const { latitude, longitude, accuracy } = (position as GeolocationPosition).coords;
+      updateProgress(65, "Khóa tọa độ vệ tinh GPS");
+      if (sosBadgeStep2) {
+        sosBadgeStep2.className = "step-badge-done";
+        sosBadgeStep2.textContent = "✓";
       }
-      setLocationAlertBusy(true, "Đang gửi cảnh báo…");
-      setLocationAlertState("sending");
+      if (sosCoordsText) {
+        sosCoordsText.textContent = `${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° E (Sai số < ${Math.round(accuracy)}m)`;
+      }
+      if (sosBadgeStep3) {
+        sosBadgeStep3.className = "step-badge-active";
+        sosBadgeStep3.textContent = "⟳";
+      }
+
+      updateProgress(85, "Phát tin nhắn SMS khẩn cấp");
       const result = await sendPublicEmergencyLocationAlert(token, {
         latitude,
         longitude,
         accuracy_meters: accuracy,
         occurred_at: new Date().toISOString(),
       });
-      setLocationAlertState(result.kind);
-    } catch (error) {
-      if (error && typeof error === "object" && "code" in error) {
-        const code = error.code;
-        setLocationAlertState(
-          code === 1
-            ? "permission_denied"
-            : code === 2
-              ? "unavailable_position"
-              : code === 3
-                ? "timeout"
-                : "service_unavailable",
-        );
+
+      if (result.kind === "sent") {
+        updateProgress(100, "Đã gửi SMS thành công");
+        if (sosBadgeStep3) {
+          sosBadgeStep3.className = "step-badge-done";
+          sosBadgeStep3.textContent = "✓";
+        }
+        const now = new Date();
+        const timeStr = `Vừa xong (${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")})`;
+        if (sosSummaryTime) sosSummaryTime.textContent = timeStr;
+        if (sosSummaryCoords) sosSummaryCoords.textContent = `${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° E`;
+        if (sosSummaryAccuracy) sosSummaryAccuracy.textContent = `< ${Math.round(accuracy)} mét`;
+        const firstContact = currentLoadedProfile?.emergency_contacts?.[0];
+        if (sosSummaryRecipient) {
+          sosSummaryRecipient.textContent = firstContact
+            ? `${firstContact.name}${firstContact.relationship ? ` (${firstContact.relationship})` : ""}`
+            : "Người liên hệ khẩn cấp";
+        }
+
+        hide(sosProgressView);
+        show(sosCompletedView);
       } else {
-        setLocationAlertState("invalid_request");
+        alert("Không thể gửi cảnh báo vị trí: " + (locationAlertMessages[result.kind] || result.kind));
+        closeSosModal();
       }
-    } finally {
-      setLocationAlertBusy(false, "Gửi Báo Động SOS");
+    } catch (err) {
+      const error = err as Error;
+      alert("Lỗi khi đọc vị trí hoặc gửi SOS: " + (error?.message || "Vui lòng thử lại"));
+      closeSosModal();
     }
   };
 
-  sosTriggerButton?.addEventListener("click", () => void handleLocationAlert());
+  sosTriggerButton?.addEventListener("click", () => showSosModal());
+  btnSosCancel?.addEventListener("click", () => closeSosModal());
+  btnSosConfirm?.addEventListener("click", () => void triggerSosFlow());
+  btnReturnProfile?.addEventListener("click", () => closeSosModal());
 
   const clearPrivateDetails = () => {
     hide(privateDetailsUnlocked);
@@ -526,6 +759,7 @@
 
   const renderProfile = (profile) => {
     hideAll();
+    currentLoadedProfile = profile;
     setText(
       "#display-name",
       typeof profile.display_name === "string" && profile.display_name.trim()
