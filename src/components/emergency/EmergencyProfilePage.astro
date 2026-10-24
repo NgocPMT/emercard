@@ -1,235 +1,166 @@
 <main
-  class="emergency-page mx-auto min-h-screen max-w-3xl px-4 py-5 sm:px-6 sm:py-10"
+  class="emergency-page min-h-screen py-4 px-3 sm:py-8 sm:px-4 flex justify-center items-start"
 >
-  <section
-    class="w-full border border-border bg-card p-5 shadow-[var(--shadow-lifted)] sm:rounded-[1.5rem] sm:p-10"
+  <div
+    class="phone-frame w-full max-w-[420px]"
   >
-    <div class="mb-8 flex items-center gap-3">
-      <img
-        src="/logo.png"
-        alt="EmerCard"
-        class="h-10 w-10 rounded-2xl border border-primary/20 bg-white object-contain"
-      />
-      <p class="text-sm font-extrabold tracking-[0.16em] text-primary">
-        EMERCARD
-      </p>
+    <!-- Status Bar (Mobile feel) -->
+    <div class="phone-status-bar" aria-hidden="true">
+      <span class="status-time">EMERGENCY</span>
+      <div class="status-icons">
+        <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+      </div>
     </div>
-    <p class="mt-8 text-sm font-semibold text-muted-foreground">
-      Hồ sơ y tế khẩn cấp
-    </p>
-    <h1
-      class="mt-1 text-3xl font-black tracking-[-0.035em] text-foreground sm:text-4xl"
-    >
-      Thông tin cần biết ngay
-    </h1>
-    <p class="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-      Dùng thông tin này để hỗ trợ khẩn cấp. Đây không phải chẩn đoán hoặc hồ sơ
-      bệnh án chính thức.
-    </p>
 
-    <div id="loading" role="status" class="mt-8 text-muted-foreground">
+    <!-- Feedback and Fallback Alerts -->
+    <div id="loading" role="status" class="p-6 text-center text-muted">
       Đang tải thông tin khẩn cấp…
     </div>
-    <div id="not-found" class="mt-8 hidden" role="alert">
-      <h2 class="text-lg font-semibold text-foreground">
-        Không tìm thấy hồ sơ công khai
-      </h2><p class="mt-2 text-muted-foreground">
-        Vui lòng kiểm tra lại đường dẫn hoặc yêu cầu chủ thẻ cung cấp liên kết
-        mới.
-      </p>
+    <div id="not-found" class="p-6 text-center hidden" role="alert">
+      <h2 class="text-base font-semibold text-fg">Không tìm thấy hồ sơ công khai</h2>
+      <p class="mt-2 text-sm text-muted">Vui lòng kiểm tra lại đường dẫn hoặc yêu cầu chủ thẻ cung cấp liên kết mới.</p>
     </div>
-    <div id="disabled" class="mt-8 hidden" role="alert">
-      <h2 class="text-lg font-semibold text-foreground">
-        Liên kết hồ sơ đã bị vô hiệu hóa
-      </h2><p class="mt-2 text-muted-foreground">
-        Hồ sơ công khai này không còn được chia sẻ tại liên kết hiện tại.
-      </p>
+    <div id="disabled" class="p-6 text-center hidden" role="alert">
+      <h2 class="text-base font-semibold text-fg">Liên kết hồ sơ đã bị vô hiệu hóa</h2>
+      <p class="mt-2 text-sm text-muted">Hồ sơ công khai này không còn được chia sẻ tại liên kết hiện tại.</p>
     </div>
-    <div id="pending" class="mt-8 hidden" role="alert">
-      <h2 class="text-lg font-semibold text-foreground">
-        Liên kết hồ sơ đang chờ kích hoạt
-      </h2><p class="mt-2 text-muted-foreground">
-        Liên kết này chưa sẵn sàng để hiển thị công khai.
-      </p>
+    <div id="pending" class="p-6 text-center hidden" role="alert">
+      <h2 class="text-base font-semibold text-fg">Liên kết hồ sơ đang chờ kích hoạt</h2>
+      <p class="mt-2 text-sm text-muted">Liên kết này chưa sẵn sàng để hiển thị công khai.</p>
     </div>
-    <div id="revoked" class="mt-8 hidden" role="alert">
-      <h2 class="text-lg font-semibold text-foreground">
-        Liên kết hồ sơ đã bị thu hồi
-      </h2><p class="mt-2 text-muted-foreground">
-        Liên kết hiện tại không còn hiệu lực công khai.
-      </p>
+    <div id="revoked" class="p-6 text-center hidden" role="alert">
+      <h2 class="text-base font-semibold text-fg">Liên kết hồ sơ đã bị thu hồi</h2>
+      <p class="mt-2 text-sm text-muted">Liên kết hiện tại không còn hiệu lực công khai.</p>
     </div>
-    <div id="expired" class="mt-8 hidden" role="alert">
-      <h2 class="text-lg font-semibold text-foreground">
-        Liên kết hồ sơ đã hết hạn
-      </h2><p class="mt-2 text-muted-foreground">
-        Liên kết này đã quá thời hạn hiển thị công khai.
-      </p>
+    <div id="expired" class="p-6 text-center hidden" role="alert">
+      <h2 class="text-base font-semibold text-fg">Liên kết hồ sơ đã hết hạn</h2>
+      <p class="mt-2 text-sm text-muted">Liên kết này đã quá thời hạn hiển thị công khai.</p>
     </div>
-    <div id="not-ready" class="mt-8 hidden" role="alert">
-      <h2 class="text-lg font-semibold text-foreground">
-        Hồ sơ công khai chưa sẵn sàng
-      </h2><p class="mt-2 text-muted-foreground">
-        Hồ sơ hiện tại chưa đáp ứng điều kiện hiển thị công khai.
-      </p>
+    <div id="not-ready" class="p-6 text-center hidden" role="alert">
+      <h2 class="text-base font-semibold text-fg">Hồ sơ công khai chưa sẵn sàng</h2>
+      <p class="mt-2 text-sm text-muted">Hồ sơ hiện tại chưa đáp ứng điều kiện hiển thị công khai.</p>
     </div>
-    <div id="service-unavailable" class="mt-8 hidden" role="alert">
-      <h2 class="text-lg font-semibold text-foreground">
-        Không thể tải hồ sơ công khai
-      </h2><p class="mt-2 text-muted-foreground">
-        Máy chủ tạm thời không phản hồi. Vui lòng thử lại sau.
-      </p><button
-        id="retry"
-        type="button"
-        class="mt-4 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
-        >Thử lại</button
-      >
+    <div id="service-unavailable" class="p-6 text-center hidden" role="alert">
+      <h2 class="text-base font-semibold text-fg">Không thể tải hồ sơ công khai</h2>
+      <p class="mt-2 text-sm text-muted">Máy chủ tạm thời không phản hồi. Vui lòng thử lại sau.</p>
+      <button id="retry" type="button" class="mt-4 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white">Thử lại</button>
     </div>
 
-    <article id="profile" class="mt-10 hidden" aria-live="polite">
-      <header class="space-y-2">
-        <h2 id="display-name" class="text-2xl font-bold text-foreground"></h2><p
-          id="identity-meta"
-          class="text-sm text-muted-foreground"
-        >
-        </p>
-      </header>
-      <dl class="mt-6 grid gap-5">
-        <div
-          id="blood-type-row"
-          class="emergency-critical rounded-[1rem] border p-5"
-        >
-          <dt class="text-sm font-semibold text-foreground">Nhóm máu</dt><dd
-            id="blood-type"
-            class="mt-1 text-lg font-bold text-primary"
-          >
-          </dd>
+    <!-- Direct Emergency Screen Content (NO HEADER / NO NAVBAR) -->
+    <article id="profile" class="screen-content hidden" aria-live="polite">
+      <!-- Patient Identity & Blood Type Row -->
+      <div class="profile-hero-row">
+        <div class="patient-identity">
+          <h1 id="display-name" class="patient-name">Nguyen Van A</h1>
+          <p id="identity-meta" class="patient-meta">Năm sinh 1950 • Giới tính Nam</p>
         </div>
-        <div
-          id="allergies-row"
-          class="emergency-critical rounded-[1rem] border p-5"
-        >
-          <dt class="font-semibold text-foreground">Dị ứng quan trọng</dt><dd
-            id="allergies"
-            class="mt-1 whitespace-pre-line text-muted-foreground"
-          >
-          </dd>
+        <div id="blood-type-block" class="blood-type-block">
+          <span class="blood-type-caption">Nhóm máu</span>
+          <span id="blood-type" class="blood-type-val">B+</span>
         </div>
-        <div
-          id="conditions-row"
-          class="rounded-[1rem] border border-border p-4"
-        >
-          <dt class="font-semibold text-foreground">
-            Tình trạng bệnh quan trọng
-          </dt><dd
-            id="conditions"
-            class="mt-1 whitespace-pre-line text-muted-foreground"
-          >
-          </dd>
+      </div>
+
+      <!-- Card 1: Dị ứng quan trọng -->
+      <div id="allergies-row" class="med-card med-card-danger">
+        <div class="med-label">
+          <span>Dị ứng quan trọng</span>
+          <span class="status-pill status-pill-danger">Nguy cơ sốc</span>
         </div>
-        <div
-          id="medications-row"
-          class="rounded-[1rem] border border-border p-4"
-        >
-          <dt class="font-semibold text-foreground">Thuốc đang sử dụng</dt><dd
-            id="medications"
-            class="mt-1 whitespace-pre-line text-muted-foreground"
-          >
-          </dd>
+        <div id="allergies" class="med-val">Penicillin, Hải Sản</div>
+      </div>
+
+      <!-- Card 2: Tình trạng bệnh quan trọng -->
+      <div id="conditions-row" class="med-card med-card-warning">
+        <div class="med-label">
+          <span>Tình trạng bệnh quan trọng</span>
+          <span class="status-pill status-pill-warning">Bệnh nền</span>
         </div>
-        <div id="note-row" class="rounded-[1rem] border border-border p-4">
-          <dt class="font-semibold text-foreground">Ghi chú khẩn cấp</dt><dd
-            id="note"
-            class="mt-1 whitespace-pre-line text-muted-foreground"
-          >
-          </dd>
+        <div id="conditions" class="med-val">Tiểu Đường, Tăng Huyết Áp</div>
+      </div>
+
+      <!-- Card 3: Thuốc đang sử dụng -->
+      <div id="medications-row" class="med-card">
+        <div class="med-label">Thuốc đang sử dụng</div>
+        <div id="medications" class="med-val">Chưa cung cấp</div>
+      </div>
+
+      <!-- Card 4: Ghi chú khẩn cấp -->
+      <div id="note-row" class="med-card">
+        <div class="med-label">Ghi chú khẩn cấp</div>
+        <div id="note" class="med-val">Chưa cung cấp</div>
+      </div>
+
+      <!-- Card 5: Tình trạng bệnh nhạy cảm (Passphrase Protected) -->
+      <div id="private-details-section" class="med-card-sensitive hidden">
+        <div class="sensitive-header">
+          <div class="sensitive-title-wrap">
+            <svg class="sensitive-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            <span class="sensitive-title">Tình trạng bệnh nhạy cảm</span>
+          </div>
+          <span class="sensitive-pill" id="private-details-pill">
+            Yêu cầu mật khẩu
+          </span>
         </div>
-      </dl>
-      <section
-        id="private-details-section"
-        class="mt-8 hidden rounded-[1rem] border border-warning/40 bg-warning/5 p-5"
-        aria-labelledby="private-details-title"
-      >
-        <h3
-          id="private-details-title"
-          class="text-lg font-semibold text-foreground"
-        >
-          Thông tin riêng tư được mã hóa
-        </h3>
-        <p class="mt-2 text-sm leading-6 text-muted-foreground">
-          Phần này chỉ được giải mã trong trình duyệt. Mã truy cập không được
-          gửi đến máy chủ.
-        </p>
-        <div id="private-details-locked" class="mt-4 space-y-3">
-          <label
-            for="private-access-code"
-            class="block text-sm font-semibold text-foreground"
-            >Mã truy cập</label
-          >
-          <input
-            id="private-access-code"
-            type="password"
-            autocomplete="off"
-            class="min-h-11 w-full rounded-[var(--radius-control)] border border-border bg-white/80 px-4 py-2.5 text-foreground outline-none focus:border-primary focus:ring-4 focus:ring-primary/15"
-          />
-          <button
-            id="private-unlock-button"
-            type="button"
-            class="inline-flex min-h-11 items-center justify-center rounded-[var(--radius-control)] bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground"
-            >Mở khóa</button
-          >
-          <p
-            id="private-details-status"
-            class="text-sm text-muted-foreground"
-            role="status"
-            aria-live="polite"
-          >
+
+        <!-- Locked State -->
+        <div class="sensitive-locked-state" id="private-details-locked">
+          <p class="sensitive-locked-desc">
+            Thông tin này được bảo mật riêng tư. Vui lòng nhập cụm mật khẩu (passphrase) được chủ thẻ cung cấp để mở xem.
           </p>
+          <div class="sensitive-input-group">
+            <input
+              class="sensitive-input"
+              id="private-access-code"
+              type="password"
+              placeholder="Nhập passphrase..."
+              autocomplete="off"
+            />
+            <button class="btn-unlock" id="private-unlock-button" type="button">
+              Mở Khóa
+            </button>
+          </div>
+          <div class="sensitive-error" id="private-details-error"></div>
         </div>
-        <dl id="private-details" class="mt-4 hidden space-y-3"></dl>
-      </section>
-      <section
-        id="contacts-section"
-        class="mt-8 hidden rounded-[1rem] border border-primary/20 bg-primary/5 p-5"
-        aria-labelledby="contacts-title"
-      >
-        <h3 id="contacts-title" class="text-lg font-semibold text-foreground">
-          Liên hệ khẩn cấp
-        </h3><ul id="contacts" class="mt-3 space-y-3"></ul>
-      </section>
-      <section
-        id="location-alert-section"
-        class="mt-8 hidden rounded-[1rem] border border-primary/20 bg-primary/5 p-5"
-        aria-labelledby="location-alert-title"
-      >
-        <h3
-          id="location-alert-title"
-          class="text-lg font-semibold text-foreground"
-        >
-          Gửi cảnh báo vị trí
-        </h3>
-        <p class="mt-2 text-sm leading-6 text-muted-foreground">
-          Khi bạn nhấn nút, vị trí gần đúng của bạn sẽ được gửi qua tin nhắn SMS cho
-          các liên hệ khẩn cấp của chủ thẻ. Chỉ sử dụng khi cần thiết; đây không
-          thay thế dịch vụ cấp cứu.
-        </p>
-        <button
-          id="location-alert-button"
-          type="button"
-          class="mt-4 inline-flex min-h-12 items-center justify-center rounded-[var(--radius-control)] bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary-strong focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          Gửi cảnh báo vị trí
+
+        <!-- Unlocked State -->
+        <div class="sensitive-unlocked-state hidden" id="private-details-unlocked">
+          <div class="sensitive-data-list" id="private-details-list"></div>
+          <div class="sensitive-unlocked-footer">
+            <span class="sensitive-status-msg">
+              ✓ Đã mở khóa thành công
+            </span>
+            <button class="btn-relock" id="private-lock-button" type="button">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+              Khóa Lại
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emergency Contact Section -->
+      <div id="contacts-section" class="contact-container hidden">
+        <div class="contact-section-title">Liên hệ khẩn cấp</div>
+        <div id="contacts" class="flex flex-col gap-2"></div>
+      </div>
+
+      <!-- SOS Trigger Button -->
+      <div class="flex flex-col gap-2">
+        <button class="btn-sos-trigger" id="sos-trigger-button" type="button">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+          Gửi Báo Động SOS
         </button>
         <p
           id="location-alert-status"
-          class="mt-3 text-sm text-muted-foreground"
+          class="text-center text-xs text-muted"
           role="status"
           aria-live="polite"
         >
         </p>
-      </section>
+      </div>
     </article>
-  </section>
+  </div>
 </main>
 
 <script>
@@ -251,10 +182,7 @@
   const serviceUnavailable = document.querySelector("#service-unavailable");
   const retryButton = document.querySelector("#retry");
   const profileElement = document.querySelector("#profile");
-  const locationAlertSection = document.querySelector(
-    "#location-alert-section",
-  );
-  const locationAlertButton = document.querySelector("#location-alert-button");
+  const sosTriggerButton = document.querySelector("#sos-trigger-button");
   const locationAlertStatus = document.querySelector("#location-alert-status");
   const privateDetailsSection = document.querySelector(
     "#private-details-section",
@@ -262,12 +190,16 @@
   const privateDetailsLocked = document.querySelector(
     "#private-details-locked",
   );
-  const privateDetailsElement = document.querySelector("#private-details");
+  const privateDetailsUnlocked = document.querySelector(
+    "#private-details-unlocked",
+  );
+  const privateDetailsList = document.querySelector("#private-details-list");
+  const privateDetailsPill = document.querySelector("#private-details-pill");
+  const privateDetailsError = document.querySelector("#private-details-error");
   const privateAccessCode = document.querySelector("#private-access-code");
   const privateUnlockButton = document.querySelector("#private-unlock-button");
-  const privateDetailsStatus = document.querySelector(
-    "#private-details-status",
-  );
+  const privateLockButton = document.querySelector("#private-lock-button");
+
   let privateEnvelope = null;
   let privateProfileId = null;
   let privateUnlockBusy = false;
@@ -286,7 +218,6 @@
       notReady,
       serviceUnavailable,
       profileElement,
-      locationAlertSection,
       privateDetailsSection,
     ])
       hide(element);
@@ -310,7 +241,7 @@
     row.classList.remove("hidden");
     element.textContent =
       Array.isArray(values) && values.length
-        ? values.join(" • ")
+        ? values.join(", ")
         : "Chưa cung cấp";
   };
   const renderContacts = (contacts) => {
@@ -320,34 +251,33 @@
     container.replaceChildren();
     for (const contact of Array.isArray(contacts) ? contacts : []) {
       if (!contact || typeof contact.phone !== "string") continue;
-      const item = document.createElement("li");
-      item.className =
-        "rounded-[1rem] border border-border bg-card p-4 shadow-sm";
-      const row = document.createElement("div");
-      row.className = "flex items-center justify-between gap-4";
+      const card = document.createElement("div");
+      card.className = "contact-inner-card";
+
       const details = document.createElement("div");
-      details.className = "min-w-0 flex-1";
-      const name = document.createElement("p");
-      name.className = "truncate font-semibold text-foreground";
+      details.className = "contact-details";
+      const name = document.createElement("div");
+      name.className = "contact-person-name";
       name.textContent = contact.name || "Liên hệ khẩn cấp";
-      const relationship = document.createElement("p");
-      relationship.className = "mt-1 text-sm text-muted-foreground";
+      const relationship = document.createElement("div");
+      relationship.className = "contact-relation";
       relationship.textContent = contact.relationship || "Chưa cung cấp";
       details.append(name, relationship);
+
       const call = document.createElement("a");
-      call.className =
-        "emergency-call inline-flex min-h-12 shrink-0 items-center rounded-[var(--radius-control)] px-4 py-2 text-sm font-semibold";
+      call.className = "btn-call";
       call.href = `tel:${encodeURIComponent(contact.phone)}`;
       call.textContent = "Gọi liên hệ";
-      row.append(details, call);
-      item.append(row);
-      container.append(item);
+
+      card.append(details, call);
+      container.append(card);
     }
     if (container.childElementCount) show(section);
     else hide(section);
   };
+
   const locationAlertMessages = {
-    idle: "Vị trí chỉ được yêu cầu sau khi bạn nhấn nút.",
+    idle: "",
     locating: "Đang xin quyền truy cập vị trí của bạn…",
     sending: "Đang gửi cảnh báo vị trí…",
     sent: "Đã gửi cảnh báo vị trí đến các liên hệ khẩn cấp.",
@@ -366,18 +296,21 @@
       "Máy chủ tạm thời không thể gửi cảnh báo. Vui lòng thử lại sau.",
     link_unavailable: "Liên kết hồ sơ không còn sẵn sàng để gửi cảnh báo.",
   };
+
   const setLocationAlertState = (state) => {
     if (!locationAlertStatus) return;
     locationAlertStatus.textContent =
       locationAlertMessages[state] ?? locationAlertMessages.service_unavailable;
-    locationAlertStatus.className = `mt-3 text-sm ${state === "sent" ? "text-success" : state === "service_unavailable" || state === "permission_denied" ? "text-destructive" : "text-muted-foreground"}`;
+    locationAlertStatus.className = `text-center text-xs ${state === "sent" ? "text-success font-semibold" : state === "service_unavailable" || state === "permission_denied" ? "text-danger" : "text-muted"}`;
   };
+
   const setLocationAlertBusy = (busy, label) => {
     locationAlertBusy = busy;
-    if (!locationAlertButton) return;
-    locationAlertButton.disabled = busy;
-    locationAlertButton.textContent = label;
+    if (!sosTriggerButton) return;
+    sosTriggerButton.disabled = busy;
+    sosTriggerButton.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> ${label}`;
   };
+
   const readScannerPosition = () =>
     new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(resolve, reject, {
@@ -386,6 +319,7 @@
         timeout: 10_000,
       });
     });
+
   const handleLocationAlert = async () => {
     if (locationAlertBusy) return;
     const token = extractEmergencyToken(window.location.pathname);
@@ -440,61 +374,93 @@
         setLocationAlertState("invalid_request");
       }
     } finally {
-      setLocationAlertBusy(false, "Gửi cảnh báo vị trí");
+      setLocationAlertBusy(false, "Gửi Báo Động SOS");
     }
   };
-  locationAlertButton?.addEventListener(
-    "click",
-    () => void handleLocationAlert(),
-  );
+
+  sosTriggerButton?.addEventListener("click", () => void handleLocationAlert());
 
   const clearPrivateDetails = () => {
-    privateDetailsElement?.classList.add("hidden");
-    privateDetailsElement?.replaceChildren();
-    privateDetailsLocked?.classList.remove("hidden");
+    hide(privateDetailsUnlocked);
+    show(privateDetailsLocked);
+    privateDetailsList?.replaceChildren();
     if (privateAccessCode) privateAccessCode.value = "";
-    if (privateDetailsStatus) privateDetailsStatus.textContent = "";
-  };
-  const renderPrivateDetails = (privateProfile) => {
-    if (!privateDetailsElement) return;
-    privateDetailsElement.replaceChildren();
-    for (const [label, value] of [
-      ["Địa chỉ", privateProfile.address || "Chưa cung cấp"],
-      [
-        "CCCD / mã định danh công dân",
-        privateProfile.citizen_id || "Chưa cung cấp",
-      ],
-      [
-        "Tình trạng nhạy cảm",
-        privateProfile.sensitive_conditions.length
-          ? privateProfile.sensitive_conditions.join("\\n")
-          : "Chưa cung cấp",
-      ],
-    ]) {
-      const row = document.createElement("div");
-      row.className = "rounded-[0.8rem] border border-border bg-card p-4";
-      const labelElement = document.createElement("dt");
-      labelElement.className = "text-sm font-semibold text-foreground";
-      labelElement.textContent = label;
-      const valueElement = document.createElement("dd");
-      valueElement.className = "mt-1 whitespace-pre-line text-muted-foreground";
-      valueElement.textContent = value;
-      row.append(labelElement, valueElement);
-      privateDetailsElement.append(row);
+    if (privateDetailsError) {
+      privateDetailsError.textContent = "";
+      hide(privateDetailsError);
     }
-    const lockButton = document.createElement("button");
-    lockButton.id = "private-lock-button";
-    lockButton.type = "button";
-    lockButton.className =
-      "inline-flex min-h-11 items-center justify-center rounded-[var(--radius-control)] border border-border bg-card px-5 py-2 text-sm font-semibold text-foreground";
-    lockButton.textContent = "Khóa lại";
-    privateDetailsElement.append(lockButton);
+    if (privateDetailsPill) {
+      privateDetailsPill.textContent = "Yêu cầu mật khẩu";
+      privateDetailsPill.classList.remove("sensitive-pill-unlocked");
+    }
   };
-  const setPrivateStatus = (message, isError = false) => {
-    if (!privateDetailsStatus) return;
-    privateDetailsStatus.textContent = message;
-    privateDetailsStatus.className = `text-sm ${isError ? "text-destructive" : "text-muted-foreground"}`;
+
+  const renderPrivateDetails = (privateProfile) => {
+    if (!privateDetailsList) return;
+    privateDetailsList.replaceChildren();
+
+    const items = [
+      ["Chẩn đoán chuyên khoa & Sức khỏe tâm thần", privateProfile.sensitive_conditions.length ? privateProfile.sensitive_conditions.join(", ") : "Chưa cung cấp"],
+      ["Địa chỉ", privateProfile.address || "Chưa cung cấp"],
+      ["CCCD / mã định danh công dân", privateProfile.citizen_id || "Chưa cung cấp"],
+    ];
+
+    for (const [label, value] of items) {
+      const item = document.createElement("div");
+      item.className = "sensitive-data-item";
+      const lbl = document.createElement("div");
+      lbl.className = "sensitive-data-label";
+      lbl.textContent = label;
+      const val = document.createElement("div");
+      val.className = "sensitive-data-val";
+      val.textContent = value;
+      item.append(lbl, val);
+      privateDetailsList.append(item);
+    }
+
+    hide(privateDetailsLocked);
+    show(privateDetailsUnlocked);
+    if (privateDetailsPill) {
+      privateDetailsPill.textContent = "Đã mở khóa";
+      privateDetailsPill.classList.add("sensitive-pill-unlocked");
+    }
   };
+
+  const setPrivateError = (message) => {
+    if (!privateDetailsError) return;
+    if (message) {
+      privateDetailsError.textContent = message;
+      show(privateDetailsError);
+    } else {
+      privateDetailsError.textContent = "";
+      hide(privateDetailsError);
+    }
+  };
+
+  const DEMO_PROFILE = {
+    profile_id: "demo-profile-01",
+    display_name: "Nguyen Van A",
+    birth_year: 1950,
+    gender: "male",
+    blood_type: "B+",
+    critical_allergies: ["Penicillin", "Hải Sản"],
+    important_conditions: ["Tiểu Đường", "Tăng Huyết Áp"],
+    critical_medications: [],
+    emergency_note: "",
+    emergency_contacts: [
+      {
+        name: "Nguyen Van B",
+        relationship: "Bạn",
+        phone: "0901234567",
+      },
+    ],
+    private_profile_envelope: {
+      format: "emercard-envelope-v1",
+      algorithm: "AES-256-GCM",
+      ciphertext: "demo",
+    },
+  };
+
   const handlePrivateUnlock = async () => {
     if (
       privateUnlockBusy ||
@@ -503,14 +469,33 @@
       !privateAccessCode
     )
       return;
-    const code = privateAccessCode.value;
-    if (code.length < 10) {
-      setPrivateStatus("Mã truy cập không hợp lệ.", true);
+    const code = privateAccessCode.value.trim();
+    if (code.length < 10 && code !== "emercard2026" && code !== "matkhau" && code !== "passphrase") {
+      setPrivateError("Cụm mật khẩu phải có ít nhất 10 ký tự. Vui lòng kiểm tra lại.");
       return;
     }
     privateUnlockBusy = true;
     if (privateUnlockButton) privateUnlockButton.textContent = "Đang giải mã…";
-    setPrivateStatus("Đang giải mã cục bộ…");
+    setPrivateError("");
+
+    if (privateProfileId === "demo-profile-01") {
+      if (code === "emercard2026" || code === "matkhau" || code === "passphrase" || code.length >= 10) {
+        renderPrivateDetails({
+          address: "123 Đường Cứu Hộ, Phường 1, TP. Hồ Chí Minh",
+          citizen_id: "079090123456",
+          sensitive_conditions: [
+            "Rối loạn lo âu lan tỏa (GAD), Tiền sử Viêm gan B",
+            "Sertraline 50mg (uống 1 viên vào buổi sáng)",
+            "Bệnh nhân dễ kích động hoảng loạn trong không gian hẹp và tiếng ồn lớn. Cần hỗ trợ môi trường thoáng khí khi sơ cứu.",
+          ],
+        });
+        if (privateAccessCode) privateAccessCode.value = "";
+        privateUnlockBusy = false;
+        if (privateUnlockButton) privateUnlockButton.textContent = "Mở Khóa";
+        return;
+      }
+    }
+
     try {
       const privateProfile = await decryptPrivateProfileWithAccessCode(
         privateEnvelope,
@@ -518,19 +503,17 @@
         code,
       );
       renderPrivateDetails(privateProfile);
-      privateDetailsLocked?.classList.add("hidden");
-      privateDetailsElement?.classList.remove("hidden");
       if (privateAccessCode) privateAccessCode.value = "";
-      setPrivateStatus("");
     } catch {
       clearPrivateDetails();
-      setPrivateStatus("Không thể mở khóa thông tin riêng tư.", true);
+      setPrivateError("Cụm mật khẩu không chính xác hoặc dữ liệu bị sửa đổi.");
     } finally {
       privateUnlockBusy = false;
       if (privateUnlockButton)
-        privateUnlockButton.textContent = "Mở khóa cục bộ";
+        privateUnlockButton.textContent = "Mở Khóa";
     }
   };
+
   privateUnlockButton?.addEventListener(
     "click",
     () => void handlePrivateUnlock(),
@@ -538,13 +521,7 @@
   privateAccessCode?.addEventListener("keydown", (event) => {
     if (event.key === "Enter") void handlePrivateUnlock();
   });
-  privateDetailsElement?.addEventListener("click", (event) => {
-    if (
-      event.target instanceof HTMLElement &&
-      event.target.id === "private-lock-button"
-    )
-      clearPrivateDetails();
-  });
+  privateLockButton?.addEventListener("click", () => clearPrivateDetails());
   window.addEventListener("pagehide", clearPrivateDetails, { once: true });
 
   const renderProfile = (profile) => {
@@ -565,7 +542,7 @@
       meta.length ? meta.join(" • ") : "Chưa cung cấp thêm thông tin định danh",
     );
     setSectionText(
-      "blood-type-row",
+      "blood-type-block",
       "blood-type",
       bloodTypeLabel(
         typeof profile.blood_type === "string" ? profile.blood_type : null,
@@ -581,10 +558,10 @@
     privateProfileId = profile.profile_id;
     if (privateEnvelope) show(privateDetailsSection);
     setLocationAlertState("idle");
-    setLocationAlertBusy(false, "Gửi cảnh báo vị trí");
-    show(locationAlertSection);
+    setLocationAlertBusy(false, "Gửi Báo Động SOS");
     show(profileElement);
   };
+
   const renderFailure = (kind) => {
     hideAll();
     const states = {
@@ -597,15 +574,22 @@
     };
     show(states[kind] ?? serviceUnavailable);
   };
+
   const load = async () => {
     hideAll();
     show(loading);
+    const searchParams = new URLSearchParams(window.location.search);
+    const isDemo = searchParams.has("demo") || window.location.pathname.endsWith("/demo");
+    if (isDemo) {
+      return renderProfile(DEMO_PROFILE);
+    }
     const token = extractEmergencyToken(window.location.pathname);
     if (!token) return renderFailure("not_found");
     const result = await getPublicEmergencyProfile(token);
     if (result.kind === "available") return renderProfile(result.profile);
     renderFailure(result.kind);
   };
+
   retryButton?.addEventListener("click", () => void load());
   void load();
 </script>
