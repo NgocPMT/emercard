@@ -29,6 +29,18 @@ export type AdminCardOutput = {
     link?: PublicLinkSummaryOutput | null;
     assignment?: CardAssignmentSummaryOutput | null;
     /**
+     * Batch Id
+     */
+    batch_id?: string | null;
+    /**
+     * Chip Type
+     */
+    chip_type?: string | null;
+    /**
+     * Hardware Uid
+     */
+    hardware_uid?: string | null;
+    /**
      * Provisioned At
      */
     provisioned_at?: string | null;
@@ -110,6 +122,54 @@ export type AuthenticatedProfileOutput = {
 };
 
 /**
+ * BatchCardProvisionInput
+ */
+export type BatchCardProvisionInput = {
+    /**
+     * Batch Id
+     */
+    batch_id: string;
+    /**
+     * Chip Type
+     */
+    chip_type?: string;
+    /**
+     * Quantity
+     */
+    quantity: number;
+};
+
+/**
+ * BatchCardProvisionOutput
+ */
+export type BatchCardProvisionOutput = {
+    /**
+     * Batch Id
+     */
+    batch_id: string;
+    /**
+     * Chip Type
+     */
+    chip_type: string;
+    /**
+     * Quantity
+     */
+    quantity: number;
+    /**
+     * Serial Start
+     */
+    serial_start: string;
+    /**
+     * Serial End
+     */
+    serial_end: string;
+    /**
+     * Cards
+     */
+    cards: Array<AdminCardOutput>;
+};
+
+/**
  * BloodType
  */
 export type BloodType = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-' | 'unknown';
@@ -139,6 +199,36 @@ export type CardAssignmentSummaryOutput = {
      * Detach Reason
      */
     detach_reason?: string | null;
+};
+
+/**
+ * CardInventoryStatsOutput
+ */
+export type CardInventoryStatsOutput = {
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Active
+     */
+    active: number;
+    /**
+     * Available
+     */
+    available: number;
+    /**
+     * Suspended
+     */
+    suspended: number;
+    /**
+     * Lost
+     */
+    lost: number;
+    /**
+     * Void
+     */
+    void: number;
 };
 
 /**
@@ -190,6 +280,20 @@ export type CardProvisioningOutput = {
 export type CardStatus = 'unassigned' | 'assigned' | 'active' | 'disabled' | 'lost' | 'replaced' | 'void';
 
 /**
+ * CardStatusUpdateInput
+ */
+export type CardStatusUpdateInput = {
+    /**
+     * Target Status
+     */
+    target_status: 'active' | 'suspended' | 'lost' | 'void';
+    /**
+     * Reason
+     */
+    reason?: string | null;
+};
+
+/**
  * ConfirmEncodingInput
  */
 export type ConfirmEncodingInput = {
@@ -218,6 +322,10 @@ export type CurrentUserOutput = {
      */
     role: 'user' | 'admin';
     /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
      * Created At
      */
     created_at: string;
@@ -225,6 +333,58 @@ export type CurrentUserOutput = {
      * Updated At
      */
     updated_at: string;
+};
+
+/**
+ * CustodyEventListOutput
+ */
+export type CustodyEventListOutput = {
+    /**
+     * Items
+     */
+    items: Array<CustodyEventOutput>;
+};
+
+/**
+ * CustodyEventOutput
+ */
+export type CustodyEventOutput = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Card Id
+     */
+    card_id: string;
+    /**
+     * Card Serial
+     */
+    card_serial?: string | null;
+    /**
+     * Event Type
+     */
+    event_type: string;
+    /**
+     * Previous Owner Id
+     */
+    previous_owner_id?: string | null;
+    /**
+     * New Owner Id
+     */
+    new_owner_id?: string | null;
+    /**
+     * Performed By Admin Id
+     */
+    performed_by_admin_id: string;
+    /**
+     * Reason
+     */
+    reason?: string | null;
+    /**
+     * Created At
+     */
+    created_at: string;
 };
 
 /**
@@ -345,7 +505,7 @@ export type HttpValidationError = {
 /**
  * LinkAccessEventOutput
  *
- * Minimal event projection exposed to the authenticated profile owner.
+ * Event projection exposed to the authenticated profile owner.
  */
 export type LinkAccessEventOutput = {
     /**
@@ -356,6 +516,14 @@ export type LinkAccessEventOutput = {
      * Accessed At
      */
     accessed_at: string;
+    /**
+     * Device
+     */
+    device?: string;
+    /**
+     * Latency Ms
+     */
+    latency_ms?: number | null;
 };
 
 /**
@@ -370,6 +538,14 @@ export type LinkAccessHistoryOutput = {
      * Next Cursor
      */
     next_cursor?: string | null;
+    /**
+     * Scans This Month
+     */
+    scans_this_month?: number;
+    /**
+     * Average Latency Ms
+     */
+    average_latency_ms?: number | null;
 };
 
 /**
@@ -416,6 +592,62 @@ export type LinkProvisioningOutput = {
      * Public Url
      */
     public_url: string;
+};
+
+/**
+ * LocationAlertHistoryOutput
+ */
+export type LocationAlertHistoryOutput = {
+    /**
+     * Items
+     */
+    items: Array<LocationAlertIncidentOutput>;
+    /**
+     * Next Cursor
+     */
+    next_cursor?: string | null;
+};
+
+/**
+ * LocationAlertIncidentOutput
+ */
+export type LocationAlertIncidentOutput = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Status
+     */
+    status: 'sent' | 'provider_error' | 'unavailable' | 'cooldown';
+    /**
+     * Latitude
+     */
+    latitude?: number | null;
+    /**
+     * Longitude
+     */
+    longitude?: number | null;
+    /**
+     * Accuracy Meters
+     */
+    accuracy_meters?: number | null;
+    /**
+     * Nearby Place
+     */
+    nearby_place?: string | null;
+    /**
+     * Map Url
+     */
+    map_url?: string | null;
+    /**
+     * Recipients
+     */
+    recipients?: Array<SmsDeliveryReceiptOutput>;
 };
 
 /**
@@ -750,6 +982,30 @@ export type PublicProfileResponse = {
 };
 
 /**
+ * QuickLinkCardInput
+ */
+export type QuickLinkCardInput = {
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Reason
+     */
+    reason?: string | null;
+};
+
+/**
+ * QuickUnlinkCardInput
+ */
+export type QuickUnlinkCardInput = {
+    /**
+     * Reason
+     */
+    reason?: string | null;
+};
+
+/**
  * SafeUserListOutput
  */
 export type SafeUserListOutput = {
@@ -783,6 +1039,32 @@ export type SafeUserOutput = {
      * Updated At
      */
     updated_at: string;
+};
+
+/**
+ * SmsDeliveryReceiptOutput
+ */
+export type SmsDeliveryReceiptOutput = {
+    /**
+     * Recipient Name
+     */
+    recipient_name: string;
+    /**
+     * Recipient Phone
+     */
+    recipient_phone: string;
+    /**
+     * Recipient Relationship
+     */
+    recipient_relationship?: string | null;
+    /**
+     * Status
+     */
+    status: 'sent' | 'failed';
+    /**
+     * Provider Id
+     */
+    provider_id?: string | null;
 };
 
 /**
@@ -886,6 +1168,10 @@ export type UserRegistrationInput = {
      * Email
      */
     email: string;
+    /**
+     * Phone
+     */
+    phone?: string | null;
     /**
      * Password
      */
@@ -1329,6 +1615,116 @@ export type ReportMyCardLostApiV1MeCardsCardIdLostPostResponses = {
 
 export type ReportMyCardLostApiV1MeCardsCardIdLostPostResponse = ReportMyCardLostApiV1MeCardsCardIdLostPostResponses[keyof ReportMyCardLostApiV1MeCardsCardIdLostPostResponses];
 
+export type ListMyCardAlertsApiV1MeCardsCardIdAlertsGetData = {
+    body?: never;
+    path: {
+        /**
+         * Card Id
+         */
+        card_id: string;
+    };
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+        /**
+         * Cursor
+         */
+        cursor?: string | null;
+    };
+    url: '/api/v1/me/cards/{card_id}/alerts';
+};
+
+export type ListMyCardAlertsApiV1MeCardsCardIdAlertsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListMyCardAlertsApiV1MeCardsCardIdAlertsGetError = ListMyCardAlertsApiV1MeCardsCardIdAlertsGetErrors[keyof ListMyCardAlertsApiV1MeCardsCardIdAlertsGetErrors];
+
+export type ListMyCardAlertsApiV1MeCardsCardIdAlertsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: LocationAlertHistoryOutput;
+};
+
+export type ListMyCardAlertsApiV1MeCardsCardIdAlertsGetResponse = ListMyCardAlertsApiV1MeCardsCardIdAlertsGetResponses[keyof ListMyCardAlertsApiV1MeCardsCardIdAlertsGetResponses];
+
+export type GetCardStatsApiV1AdminCardsStatsGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/cards/stats';
+};
+
+export type GetCardStatsApiV1AdminCardsStatsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: CardInventoryStatsOutput;
+};
+
+export type GetCardStatsApiV1AdminCardsStatsGetResponse = GetCardStatsApiV1AdminCardsStatsGetResponses[keyof GetCardStatsApiV1AdminCardsStatsGetResponses];
+
+export type ProvisionCardBatchApiV1AdminCardsBatchPostData = {
+    body: BatchCardProvisionInput;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/cards/batch';
+};
+
+export type ProvisionCardBatchApiV1AdminCardsBatchPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ProvisionCardBatchApiV1AdminCardsBatchPostError = ProvisionCardBatchApiV1AdminCardsBatchPostErrors[keyof ProvisionCardBatchApiV1AdminCardsBatchPostErrors];
+
+export type ProvisionCardBatchApiV1AdminCardsBatchPostResponses = {
+    /**
+     * Successful Response
+     */
+    201: BatchCardProvisionOutput;
+};
+
+export type ProvisionCardBatchApiV1AdminCardsBatchPostResponse = ProvisionCardBatchApiV1AdminCardsBatchPostResponses[keyof ProvisionCardBatchApiV1AdminCardsBatchPostResponses];
+
+export type ListCardAuditLogApiV1AdminCardsAuditLogGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/admin/cards/audit-log';
+};
+
+export type ListCardAuditLogApiV1AdminCardsAuditLogGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListCardAuditLogApiV1AdminCardsAuditLogGetError = ListCardAuditLogApiV1AdminCardsAuditLogGetErrors[keyof ListCardAuditLogApiV1AdminCardsAuditLogGetErrors];
+
+export type ListCardAuditLogApiV1AdminCardsAuditLogGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: CustodyEventListOutput;
+};
+
+export type ListCardAuditLogApiV1AdminCardsAuditLogGetResponse = ListCardAuditLogApiV1AdminCardsAuditLogGetResponses[keyof ListCardAuditLogApiV1AdminCardsAuditLogGetResponses];
+
 export type ListCardsApiV1AdminCardsGetData = {
     body?: never;
     path?: never;
@@ -1345,6 +1741,14 @@ export type ListCardsApiV1AdminCardsGetData = {
          * Serial
          */
         serial?: string | null;
+        /**
+         * Search
+         */
+        search?: string | null;
+        /**
+         * Batch Id
+         */
+        batch_id?: string | null;
         /**
          * Is Current
          */
@@ -1447,6 +1851,96 @@ export type ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponses = {
 };
 
 export type ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponse = ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponses[keyof ConfirmEncodingApiV1AdminCardsCardIdConfirmEncodingPostResponses];
+
+export type UpdateCardStatusApiV1AdminCardsCardIdStatusPostData = {
+    body: CardStatusUpdateInput;
+    path: {
+        /**
+         * Card Id
+         */
+        card_id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/cards/{card_id}/status';
+};
+
+export type UpdateCardStatusApiV1AdminCardsCardIdStatusPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateCardStatusApiV1AdminCardsCardIdStatusPostError = UpdateCardStatusApiV1AdminCardsCardIdStatusPostErrors[keyof UpdateCardStatusApiV1AdminCardsCardIdStatusPostErrors];
+
+export type UpdateCardStatusApiV1AdminCardsCardIdStatusPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AdminCardOutput;
+};
+
+export type UpdateCardStatusApiV1AdminCardsCardIdStatusPostResponse = UpdateCardStatusApiV1AdminCardsCardIdStatusPostResponses[keyof UpdateCardStatusApiV1AdminCardsCardIdStatusPostResponses];
+
+export type QuickLinkCardApiV1AdminCardsCardIdQuickLinkPostData = {
+    body: QuickLinkCardInput;
+    path: {
+        /**
+         * Card Id
+         */
+        card_id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/cards/{card_id}/quick-link';
+};
+
+export type QuickLinkCardApiV1AdminCardsCardIdQuickLinkPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type QuickLinkCardApiV1AdminCardsCardIdQuickLinkPostError = QuickLinkCardApiV1AdminCardsCardIdQuickLinkPostErrors[keyof QuickLinkCardApiV1AdminCardsCardIdQuickLinkPostErrors];
+
+export type QuickLinkCardApiV1AdminCardsCardIdQuickLinkPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AdminCardOutput;
+};
+
+export type QuickLinkCardApiV1AdminCardsCardIdQuickLinkPostResponse = QuickLinkCardApiV1AdminCardsCardIdQuickLinkPostResponses[keyof QuickLinkCardApiV1AdminCardsCardIdQuickLinkPostResponses];
+
+export type QuickUnlinkCardApiV1AdminCardsCardIdQuickUnlinkPostData = {
+    body: QuickUnlinkCardInput;
+    path: {
+        /**
+         * Card Id
+         */
+        card_id: string;
+    };
+    query?: never;
+    url: '/api/v1/admin/cards/{card_id}/quick-unlink';
+};
+
+export type QuickUnlinkCardApiV1AdminCardsCardIdQuickUnlinkPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type QuickUnlinkCardApiV1AdminCardsCardIdQuickUnlinkPostError = QuickUnlinkCardApiV1AdminCardsCardIdQuickUnlinkPostErrors[keyof QuickUnlinkCardApiV1AdminCardsCardIdQuickUnlinkPostErrors];
+
+export type QuickUnlinkCardApiV1AdminCardsCardIdQuickUnlinkPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: AdminCardOutput;
+};
+
+export type QuickUnlinkCardApiV1AdminCardsCardIdQuickUnlinkPostResponse = QuickUnlinkCardApiV1AdminCardsCardIdQuickUnlinkPostResponses[keyof QuickUnlinkCardApiV1AdminCardsCardIdQuickUnlinkPostResponses];
 
 export type ListUsersApiV1AdminUsersGetData = {
     body?: never;
