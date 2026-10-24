@@ -205,87 +205,124 @@ function PreviewContactList({ contacts }: { contacts: ProfilePreviewContact[] })
   );
 }
 
-function ProfileReadinessPanel({ profileView }: { profileView: ProfileView }) {
-  const { profile, readiness } = profileView;
+function ProfileViewCard({ profileView, onEdit }: { profileView: ProfileView; onEdit: () => void }) {
+  const profile = profileView.profile;
+  const contacts = profile?.emergency_contacts ?? [];
+  const allergies = profile?.critical_allergies ?? [];
+  const conditions = profile?.important_conditions ?? [];
+  const medications = profile?.critical_medications ?? [];
 
   return (
-    <Panel className="space-y-4">
-      <div className="space-y-2">
-        <h2 className="text-xl font-semibold text-foreground">Xem trước trang khẩn cấp</h2>
-        <div className="flex flex-wrap items-center gap-3">
-          <StatusBadge variant={readiness.status === "ready" ? "success" : readiness.status === "not_started" ? "warning" : "primary"}>
-            {profileReadinessLabel(readiness.status)}
-          </StatusBadge>
-          <span className="text-sm text-muted-foreground">Chỉ xem trong ứng dụng, không tạo liên kết.</span>
+    <div className="w-full max-w-[420px] mx-auto py-6" data-od-id="board-profile-view">
+      {/* Top Bar with Mode Indicator */}
+      <div className="app-top-header rounded-t-[18px]">
+        <div className="app-brand">
+          <div className="brand-mark">+</div>
+          <span className="brand-name">Hồ Sơ Cứu Sinh</span>
         </div>
+        <span className="portal-tag">Chế độ xem trước</span>
       </div>
 
-      <article className="space-y-4 rounded-[1.5rem] border border-border bg-card p-4 shadow-sm">
-        <header className="space-y-2">
-          <p className="text-sm font-semibold tracking-wide text-primary">EMERCARD</p>
-          <h2 className="text-2xl font-bold text-foreground">{previewValue(profile?.display_name, "Chưa đặt tên hiển thị")}</h2>
-          <p className="text-sm text-muted-foreground">
-            {profile?.birth_year ? `Năm sinh: ${profile.birth_year}` : "Năm sinh: chưa cung cấp"}
-            {" • "}
-            {genderLabel(profile?.gender)}
-            {" • "}
-            {bloodTypeLabel(profile?.blood_type)}
-          </p>
-        </header>
-
-        {profile ? (
-          <dl className="grid gap-4">
-            <PreviewRow label="Nhóm máu" value={bloodTypeLabel(profile.blood_type)} />
-            <PreviewRow label="Dị ứng quan trọng" value={<div className="whitespace-pre-line">{previewList(profile.critical_allergies, "Chưa ghi nhận")}</div>} />
-            <PreviewRow label="Tình trạng bệnh quan trọng" value={<div className="whitespace-pre-line">{previewList(profile.important_conditions, "Chưa ghi nhận")}</div>} />
-            <PreviewRow label="Thuốc đang sử dụng" value={<div className="whitespace-pre-line">{previewList(profile.critical_medications, "Chưa ghi nhận")}</div>} />
-            <PreviewRow label="Ghi chú khẩn cấp" value={<div className="whitespace-pre-line">{previewValue(profile.emergency_note, "Chưa có ghi chú")}</div>} />
-            <PreviewRow
-              label="Liên hệ khẩn cấp"
-              value={<PreviewContactList contacts={profile.emergency_contacts} />}
-            />
-            <PreviewRow
-              label="Cảnh báo vị trí"
-              value={profile.location_alerts_enabled ? "Đang bật" : "Đang tắt"}
-            />
-          </dl>
-        ) : (
-          <EmptyState title="Chưa có hồ sơ" description="Lưu hồ sơ lần đầu để xem trước dữ liệu khẩn cấp." />
-        )}
-
-        <section className="rounded-[1rem] border border-border bg-muted/30 p-4">
-          <p className="text-sm font-semibold text-foreground">Cập nhật gần nhất</p>
-          <p className="mt-1 text-sm text-muted-foreground">{profile?.updated_at ? new Date(profile.updated_at).toLocaleString("vi-VN") : "chưa có"}</p>
-        </section>
-      </article>
-
-      {readiness.missing_fields.length > 0 ? (
-        <div className="rounded-[var(--radius-panel)] border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
-          <p className="font-semibold text-foreground">Cần bổ sung</p>
-          <ul className="mt-2 space-y-1">
-            {readiness.missing_fields.map((field) => (
-              <li key={field}>• {profileMissingFieldLabel(field)}</li>
-            ))}
-          </ul>
+      <div className="screen-content bg-white border border-[#d3d9e0] border-t-0 rounded-b-[18px] p-5 sm:p-6 shadow-[0_4px_20px_rgba(30,36,44,0.06)] flex flex-col gap-4">
+        <div className="flex items-center justify-between text-xs text-[#64748b] border-b border-[#e2e8f0] pb-2">
+          <h3 className="font-semibold text-[#1e242c] text-sm">Xem trước trang khẩn cấp</h3>
+          <span>Chỉ xem trong ứng dụng, không tạo liên kết.</span>
         </div>
-      ) : null}
 
-      <div className="text-sm text-muted-foreground">
-        <p>Liên hệ bắt buộc: {readiness.required_contact_count}</p>
-        <p className="mt-1">
-          Trường bắt buộc: {readiness.completed_required_field_count}/{readiness.total_required_field_count}
-        </p>
+        {/* Hero Identity with Right-Aligned 2-Line Blood Type */}
+        <div className="profile-hero-row">
+          <div className="patient-identity">
+            <h2 className="patient-name">{previewValue(profile?.display_name, "Nguyen Van A")}</h2>
+            <span className="patient-meta">
+              {profile?.birth_year ? `Năm sinh ${profile.birth_year}` : "Năm sinh chưa rõ"}
+              {" • Giới tính "}
+              {genderLabel(profile?.gender)}
+            </span>
+          </div>
+
+          {/* Blood Type Block: 2 lines right aligned */}
+          <div className="blood-type-block">
+            <span className="blood-type-caption">Nhóm máu</span>
+            <span className="blood-type-val">{bloodTypeLabel(profile?.blood_type)}</span>
+          </div>
+        </div>
+
+        {/* Medical Cards */}
+        <dl className="flex flex-col gap-3 m-0">
+          <div className="med-card med-card-danger">
+            <div className="med-label">
+              <dt className="inline">Dị ứng quan trọng</dt>
+              <span className="status-pill status-pill-danger">Nguy cơ sốc</span>
+            </div>
+            <dd className="med-val m-0">{allergies.length > 0 ? allergies.join(", ") : "Chưa ghi nhận"}</dd>
+          </div>
+
+          <div className="med-card med-card-warning">
+            <div className="med-label">
+              <dt className="inline">Tình trạng bệnh quan trọng</dt>
+              <span className="status-pill status-pill-warning">Bệnh nền</span>
+            </div>
+            <dd className="med-val m-0">{conditions.length > 0 ? conditions.join(", ") : "Chưa ghi nhận"}</dd>
+          </div>
+
+          <div className="med-card">
+            <div className="med-label">
+              <dt className="inline">Thuốc đang sử dụng</dt>
+            </div>
+            <dd className="med-val m-0">{medications.length > 0 ? medications.join(", ") : "Chưa ghi nhận"}</dd>
+          </div>
+
+          <div className="med-card">
+            <div className="med-label">
+              <dt className="inline">Ghi chú khẩn cấp &amp; Chỉ thị</dt>
+            </div>
+            <dd className="med-val m-0">{previewValue(profile?.emergency_note, "Chưa có ghi chú")}</dd>
+          </div>
+        </dl>
+
+        {/* Emergency Contacts Section */}
+        <div className="contact-container">
+          <div className="contact-section-title">
+            <span>Người Liên Hệ Khẩn Cấp ({contacts.length})</span>
+            <span style={{ fontSize: "11px", color: "var(--muted)", fontWeight: "normal" }}>Ưu tiên gọi tự động</span>
+          </div>
+
+          {contacts.length > 0 ? (
+            contacts.map((contact, idx) => (
+              <div key={idx} className="contact-inner-card">
+                <div className="contact-details">
+                  <div className="contact-name">{contact.name}</div>
+                  <span className="contact-relation">Mối quan hệ: {contact.relationship}</span>
+                </div>
+                <span className="contact-phone-mono">{contact.phone}</span>
+              </div>
+            ))
+          ) : (
+            <p className="text-xs text-[#64748b]">Chưa có người liên hệ khẩn cấp.</p>
+          )}
+        </div>
+
+        {/* Primary CTA Button */}
+        <button type="button" className="btn-primary mt-1" onClick={onEdit}>
+          Chỉnh Sửa Hồ Sơ Y Tế
+        </button>
       </div>
-    </Panel>
+    </div>
   );
 }
 
-function ProfileEditor({ profileView }: { profileView: ProfileView }) {
+function ProfileEditorCard({ profileView, onCancel }: { profileView: ProfileView; onCancel: () => void }) {
   const { clearSessionCache } = useSession();
   const queryClient = useQueryClient();
   const [rootMessage, setRootMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [privatePendingChange, setPrivatePendingChange] = useState<PendingChange | null>(null);
+
+  const [newAllergy, setNewAllergy] = useState("");
+  const [newCondition, setNewCondition] = useState("");
+  const [newMedName, setNewMedName] = useState("");
+  const [newMedDosage, setNewMedDosage] = useState("");
+
   const formDefaults = useMemo(() => profileViewToFormValues(profileView.profile), [profileView.profile]);
   const form = useForm<ProfileFormValues>({
     defaultValues: formDefaults,
@@ -303,6 +340,49 @@ function ProfileEditor({ profileView }: { profileView: ProfileView }) {
     setSuccessMessage(null);
     setPrivatePendingChange(null);
   }, [form, formDefaults, replace]);
+
+  const selectedBloodType = form.watch("blood_type");
+  const allergiesList = splitLines(form.watch("critical_allergies") || "");
+  const conditionsList = splitLines(form.watch("important_conditions") || "");
+  const medicationsList = splitLines(form.watch("critical_medications") || "");
+
+  const handleAddAllergy = () => {
+    if (!newAllergy.trim()) return;
+    const updated = [...allergiesList, newAllergy.trim()];
+    form.setValue("critical_allergies", updated.join("\n"), { shouldDirty: true });
+    setNewAllergy("");
+  };
+
+  const handleRemoveAllergy = (index: number) => {
+    const updated = allergiesList.filter((_, idx) => idx !== index);
+    form.setValue("critical_allergies", updated.join("\n"), { shouldDirty: true });
+  };
+
+  const handleAddCondition = () => {
+    if (!newCondition.trim()) return;
+    const updated = [...conditionsList, newCondition.trim()];
+    form.setValue("important_conditions", updated.join("\n"), { shouldDirty: true });
+    setNewCondition("");
+  };
+
+  const handleRemoveCondition = (index: number) => {
+    const updated = conditionsList.filter((_, idx) => idx !== index);
+    form.setValue("important_conditions", updated.join("\n"), { shouldDirty: true });
+  };
+
+  const handleAddMedication = () => {
+    if (!newMedName.trim()) return;
+    const entry = newMedDosage.trim() ? `${newMedName.trim()} (${newMedDosage.trim()})` : newMedName.trim();
+    const updated = [...medicationsList, entry];
+    form.setValue("critical_medications", updated.join("\n"), { shouldDirty: true });
+    setNewMedName("");
+    setNewMedDosage("");
+  };
+
+  const handleRemoveMedication = (index: number) => {
+    const updated = medicationsList.filter((_, idx) => idx !== index);
+    form.setValue("critical_medications", updated.join("\n"), { shouldDirty: true });
+  };
 
   const submit = form.handleSubmit(async (values) => {
     setRootMessage(null);
@@ -330,7 +410,7 @@ function ProfileEditor({ profileView }: { profileView: ProfileView }) {
       form.reset(nextValues);
       replace(nextValues.emergency_contacts);
       setPrivatePendingChange(null);
-      setSuccessMessage(saved.readiness.status === "ready" ? "Hồ sơ đã sẵn sàng để sử dụng." : "Hồ sơ đã được lưu.");
+      setSuccessMessage("Lưu hồ sơ thành công! Dữ liệu đã đồng bộ lập tức lên thẻ NFC.");
     } catch (error) {
       if (isApiError(error) && error.status === 401) {
         clearSessionCache();
@@ -352,204 +432,275 @@ function ProfileEditor({ profileView }: { profileView: ProfileView }) {
     }
   });
 
+  const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
+
   return (
-    <form className="space-y-6" onSubmit={(event) => void submit(event)} noValidate>
-      {rootMessage ? (
-        <Alert variant="danger" title="Không thể lưu hồ sơ">
-          {rootMessage}
-        </Alert>
-      ) : null}
-      {successMessage ? (
-        <Alert variant="success" title="Đã lưu hồ sơ">
-          {successMessage}
-        </Alert>
-      ) : null}
-
-      <section className="space-y-4">
-        <div>
-          <h3 className="text-lg font-semibold text-foreground">Thông tin nhận diện</h3>
-          <p className="text-sm text-muted-foreground">Giúp người hỗ trợ xác định đúng người. Các trường bắt buộc được đánh dấu bằng dấu sao.</p>
+    <div className="w-full max-w-[420px] mx-auto py-6" data-od-id="board-profile-edit">
+      {/* Top Header */}
+      <div className="app-top-header rounded-t-[18px]">
+        <div className="app-brand">
+          <div className="brand-mark">+</div>
+          <span className="brand-name">Chỉnh Sửa Hồ Sơ</span>
         </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          <TextInput
-            label="Tên hiển thị"
-            hint="Tên này sẽ xuất hiện trên trang thông tin khẩn cấp."
-            placeholder="Alex Example"
-            error={form.formState.errors.display_name?.message}
-            {...form.register("display_name")}
-          />
-          <TextInput
-            label="Năm sinh"
-            placeholder="1995"
-            inputMode="numeric"
-            error={form.formState.errors.birth_year?.message}
-            {...form.register("birth_year")}
-          />
-          <Select label="Giới tính" error={form.formState.errors.gender?.message} {...form.register("gender")}>
-            <option value="">Chọn giới tính</option>
-            {genderOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </Select>
-          <Select label="Nhóm máu" hint="Chỉ chọn khi bạn chắc chắn thông tin là chính xác." error={form.formState.errors.blood_type?.message} {...form.register("blood_type")}>
-            <option value="">Chọn nhóm máu</option>
-            {bloodTypeOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </Select>
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <div>
-          <h3 className="text-lg font-semibold text-foreground">Thông tin y tế</h3>
-          <p className="text-sm text-muted-foreground">Mỗi dòng là một mục riêng. Hệ thống sẽ tự làm sạch khoảng trắng đầu cuối.</p>
-        </div>
-        <Textarea
-          label="Dị ứng quan trọng"
-          rows={4}
-          placeholder="Penicillin\nLatex"
-          error={form.formState.errors.critical_allergies?.message}
-          {...form.register("critical_allergies")}
-        />
-        <Textarea
-          label="Bệnh nền / tình trạng quan trọng"
-          rows={4}
-          placeholder="Asthma\nHypertension"
-          error={form.formState.errors.important_conditions?.message}
-          {...form.register("important_conditions")}
-        />
-        <Textarea
-          label="Thuốc quan trọng"
-          rows={4}
-          placeholder="Metformin\nIbuprofen"
-          error={form.formState.errors.critical_medications?.message}
-          {...form.register("critical_medications")}
-        />
-        <Textarea
-          label="Ghi chú khẩn cấp"
-          rows={4}
-          placeholder="Thông tin khẩn cấp cần biết..."
-          error={form.formState.errors.emergency_note?.message}
-          {...form.register("emergency_note")}
-        />
-      </section>
-
-      <section className="space-y-4">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h3 className="text-lg font-semibold text-foreground">Người liên hệ khẩn cấp</h3>
-            <p className="text-sm text-muted-foreground">Cần ít nhất một liên hệ để hồ sơ đạt trạng thái sẵn sàng.</p>
-          </div>
-          <Button type="button" variant="secondary" size="sm" onClick={() => append(emptyContact())}>
-            Thêm liên hệ
-          </Button>
-        </div>
-
-        <div className="space-y-4">
-          {fields.map((field, index) => (
-            <div key={field.id} className="rounded-[var(--radius-panel)] border border-border bg-muted/20 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-foreground">Liên hệ {index + 1}</p>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    if (fields.length === 1) {
-                      replace([emptyContact()]);
-                      return;
-                    }
-                    remove(index);
-                  }}
-                >
-                  Xóa
-                </Button>
-              </div>
-              <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <TextInput
-                  label="Tên"
-                  placeholder="Sam Example"
-                  error={form.formState.errors.emergency_contacts?.[index]?.name?.message}
-                  {...form.register(`emergency_contacts.${index}.name` as const)}
-                />
-                <TextInput
-                  label="Mối quan hệ"
-                  placeholder="Bạn bè"
-                  error={form.formState.errors.emergency_contacts?.[index]?.relationship?.message}
-                  {...form.register(`emergency_contacts.${index}.relationship` as const)}
-                />
-                <TextInput
-                  label="Số điện thoại"
-                  placeholder="0901234567"
-                  error={form.formState.errors.emergency_contacts?.[index]?.phone?.message}
-                  {...form.register(`emergency_contacts.${index}.phone` as const)}
-                />
-                <TextInput
-                  label="Email nhận cảnh báo"
-                  type="email"
-                  inputMode="email"
-                  autoComplete="email"
-                  placeholder="lienhe@example.com"
-                  hint="Không bắt buộc. Email này chỉ dùng để gửi cảnh báo vị trí khi chủ thẻ bật tính năng."
-                  error={form.formState.errors.emergency_contacts?.[index]?.email?.message}
-                  {...form.register(`emergency_contacts.${index}.email` as const, {
-                    validate: (value) => !value?.trim() || EMAIL_PATTERN.test(value.trim()) || "Email không hợp lệ",
-                  })}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <div>
-          <h3 className="text-lg font-semibold text-foreground">Cảnh báo vị trí</h3>
-          <p className="text-sm text-muted-foreground">Cho phép người quét thẻ gửi vị trí gần đúng đến các liên hệ có email ở trên. Người quét phải tự cấp quyền vị trí trong trình duyệt.</p>
-        </div>
-        <Checkbox
-          label="Bật cảnh báo vị trí cho hồ sơ này"
-          hint="Bạn có thể tắt tính năng này bất cứ lúc nào. Email liên hệ không xuất hiện trên trang công khai."
-          {...form.register("location_alerts_enabled")}
-        />
-      </section>
-
-      <PrivateProfilePanel
-        profileId={profileView.profile?.profile_id ?? ""}
-        envelope={profileView.profile?.private_profile_envelope}
-        onPendingChange={setPrivatePendingChange}
-      />
-
-      <div className="sticky bottom-3 z-10 -mx-2 flex flex-wrap gap-3 rounded-[var(--radius-panel)] border border-border bg-card/95 p-3 shadow-[var(--shadow-soft)] backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
-        <Button type="submit" size="lg" busy={saveMutation.isPending}>
-          {saveMutation.isPending ? "Đang lưu..." : "Lưu hồ sơ"}
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          size="lg"
-          onClick={() => {
-            const nextValues = profileViewToFormValues(profileView.profile);
-            form.reset(nextValues);
-            replace(nextValues.emergency_contacts);
-            setRootMessage(null);
-            setSuccessMessage(null);
-          }}
-        >
-          Khôi phục
-        </Button>
+        <button type="button" className="link-subtle" onClick={onCancel}>
+          Hủy
+        </button>
       </div>
-    </form>
+
+      <div className="screen-content bg-white border border-[#d3d9e0] border-t-0 rounded-b-[18px] p-5 sm:p-6 shadow-[0_4px_20px_rgba(30,36,44,0.06)] flex flex-col gap-4">
+        {rootMessage ? (
+          <Alert variant="danger" title="Không thể lưu hồ sơ">
+            {rootMessage}
+          </Alert>
+        ) : null}
+
+        <form onSubmit={(e) => void submit(e)} className="flex flex-col gap-4" noValidate>
+          {/* Identity Fields */}
+          <div className="field-group">
+            <label className="field-label" htmlFor="edit-name">Họ và tên</label>
+            <input
+              id="edit-name"
+              type="text"
+              className="input-text"
+              placeholder="Nguyen Van A"
+              {...form.register("display_name")}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="field-group">
+              <label className="field-label" htmlFor="edit-year">Năm sinh</label>
+              <input
+                id="edit-year"
+                type="text"
+                inputMode="numeric"
+                className="input-text"
+                placeholder="1995"
+                {...form.register("birth_year")}
+              />
+            </div>
+            <div className="field-group">
+              <label className="field-label" htmlFor="edit-gender">Giới tính</label>
+              <select id="edit-gender" className="input-text" {...form.register("gender")}>
+                <option value="">Chọn giới tính</option>
+                {genderOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Blood Type Selector Grid */}
+          <div className="field-group">
+            <label className="field-label">Chọn Nhóm Máu</label>
+            <div className="blood-selector-grid">
+              {bloodTypes.map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  className={`blood-option-btn ${selectedBloodType === type ? "active" : ""}`}
+                  onClick={() => form.setValue("blood_type", type, { shouldDirty: true, shouldValidate: true })}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Allergies Tag Management */}
+          <div className="field-group">
+            <label className="field-label">Dị Ứng Quan Trọng</label>
+            <div className="tag-cloud-wrap">
+              {allergiesList.map((tag, idx) => (
+                <span key={idx} className="removable-tag">
+                  {tag}{" "}
+                  <button type="button" className="removable-tag-btn" onClick={() => handleRemoveAllergy(idx)}>
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="add-tag-row">
+              <input
+                type="text"
+                className="input-text"
+                placeholder="Thêm dị ứng mới (VD: Đậu phộng)..."
+                value={newAllergy}
+                onChange={(e) => setNewAllergy(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddAllergy();
+                  }
+                }}
+              />
+              <button type="button" className="btn-add-tag" onClick={handleAddAllergy}>
+                + Thêm
+              </button>
+            </div>
+          </div>
+
+          {/* Chronic Conditions Tag Management */}
+          <div className="field-group">
+            <label className="field-label">Bệnh Lý Mãn Tính</label>
+            <div className="tag-cloud-wrap">
+              {conditionsList.map((tag, idx) => (
+                <span key={idx} className="removable-tag">
+                  {tag}{" "}
+                  <button type="button" className="removable-tag-btn" onClick={() => handleRemoveCondition(idx)}>
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="add-tag-row">
+              <input
+                type="text"
+                className="input-text"
+                placeholder="Thêm bệnh lý mới (VD: Hen suyễn)..."
+                value={newCondition}
+                onChange={(e) => setNewCondition(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddCondition();
+                  }
+                }}
+              />
+              <button type="button" className="btn-add-tag" onClick={handleAddCondition}>
+                + Thêm
+              </button>
+            </div>
+          </div>
+
+          {/* Active Medications Cards */}
+          <div className="field-group">
+            <label className="field-label">Thuốc Đang Sử Dụng</label>
+            <div className="flex flex-col gap-2">
+              {medicationsList.map((med, idx) => (
+                <div key={idx} className="med-edit-card">
+                  <div className="med-edit-header">
+                    <span className="med-edit-title">{med}</span>
+                    <button type="button" className="btn-remove-item" onClick={() => handleRemoveMedication(idx)}>
+                      Xóa
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="add-tag-row mt-1">
+              <input
+                type="text"
+                className="input-text"
+                placeholder="Tên thuốc..."
+                value={newMedName}
+                onChange={(e) => setNewMedName(e.target.value)}
+              />
+              <input
+                type="text"
+                className="input-text"
+                placeholder="Liều lượng (VD: 5mg/ngày)..."
+                value={newMedDosage}
+                onChange={(e) => setNewMedDosage(e.target.value)}
+              />
+              <button type="button" className="btn-add-tag" onClick={handleAddMedication}>
+                + Thêm
+              </button>
+            </div>
+          </div>
+
+          {/* Emergency Contacts Edit */}
+          <div className="field-group">
+            <div className="flex items-center justify-between mb-1">
+              <label className="field-label m-0">Người Liên Hệ Khẩn Cấp</label>
+              <button
+                type="button"
+                className="link-subtle text-xs"
+                onClick={() => append(emptyContact())}
+              >
+                + Thêm người thân
+              </button>
+            </div>
+            <div className="flex flex-col gap-2.5">
+              {fields.map((field, index) => (
+                <div key={field.id} className="med-edit-card">
+                  <div className="med-edit-header">
+                    <span className="med-edit-title">Người liên hệ {index + 1} {index === 0 ? "(Ưu tiên chính)" : ""}</span>
+                    {fields.length > 1 ? (
+                      <button type="button" className="btn-remove-item" onClick={() => remove(index)}>
+                        Xóa
+                      </button>
+                    ) : null}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      className="input-text"
+                      placeholder="Họ tên"
+                      {...form.register(`emergency_contacts.${index}.name` as const)}
+                    />
+                    <input
+                      type="text"
+                      className="input-text"
+                      placeholder="Mối quan hệ"
+                      {...form.register(`emergency_contacts.${index}.relationship` as const)}
+                    />
+                  </div>
+                  <input
+                    type="tel"
+                    className="input-text input-mono"
+                    placeholder="Số điện thoại"
+                    {...form.register(`emergency_contacts.${index}.phone` as const)}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Success Notification Toast */}
+          <div className={`toast-success-banner ${successMessage ? "show" : ""}`} id="saveSuccessToast">
+            <svg style={{ width: "18px", height: "18px", fill: "var(--accent)", flexShrink: 0 }} viewBox="0 0 24 24">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+            </svg>
+            <div>
+              <div style={{ fontWeight: 600 }}>Lưu hồ sơ thành công!</div>
+              <div style={{ fontSize: "11px", color: "var(--muted)" }}>Dữ liệu đã đồng bộ lập tức lên thẻ NFC.</div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-2 mt-2">
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={saveMutation.isPending}
+            >
+              {saveMutation.isPending ? "Đang lưu..." : "Lưu Thay Đổi"}
+            </button>
+            <button
+              type="button"
+              className="btn-secondary"
+              style={{ width: "auto", padding: "11px 18px" }}
+              onClick={onCancel}
+            >
+              Hủy Bỏ
+            </button>
+          </div>
+
+          <PrivateProfilePanel
+            profileId={profileView.profile?.profile_id ?? ""}
+            envelope={profileView.profile?.private_profile_envelope}
+            onPendingChange={setPrivatePendingChange}
+          />
+        </form>
+      </div>
+    </div>
   );
 }
 
 function ProfilePageBody() {
   const { clearSessionCache } = useSession();
+  const [isEditing, setIsEditing] = useState(false);
   const query = useQuery({
     queryKey: profileKeys.current,
     queryFn: ({ signal }) => getCurrentProfile(signal),
@@ -586,13 +737,10 @@ function ProfilePageBody() {
     return <RetryState title="Không thể tải hồ sơ" description="Đã xảy ra lỗi khi đọc hồ sơ y tế." />;
   }
 
-  return (
-    <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-      <Panel className="space-y-4">
-        <ProfileEditor profileView={query.data} />
-      </Panel>
-      <ProfileReadinessPanel profileView={query.data} />
-    </div>
+  return isEditing ? (
+    <ProfileEditorCard profileView={query.data} onCancel={() => setIsEditing(false)} />
+  ) : (
+    <ProfileViewCard profileView={query.data} onEdit={() => setIsEditing(true)} />
   );
 }
 
