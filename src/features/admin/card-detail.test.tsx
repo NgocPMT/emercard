@@ -63,12 +63,15 @@ describe("AdminCardDetailPanel", () => {
     render(<AdminCardDetailPanel cardId="card-1" />);
 
     expect(screen.getByText("EMERCARD TAG")).toBeInTheDocument();
-    expect(screen.getByText("EMC-0000-0000-0000-0")).toBeInTheDocument();
+    expect(screen.getAllByText("EMC-0000-0000-0000-0")).toHaveLength(2);
     expect(screen.getByText("OPAQUE ID")).toBeInTheDocument();
     expect(screen.getByText("nur***@example.com")).toBeInTheDocument();
     expect(
       screen.getByText(/Cam kết Zero-Knowledge: Hệ thống quản trị thẻ vật lý/i),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "← Quay lại Kho Thẻ" }),
+    ).toHaveAttribute("href", "/admin/cards");
     expect(
       screen.getByRole("button", { name: "Quản Lý Trạng Thái Thẻ Này →" }),
     ).toBeInTheDocument();

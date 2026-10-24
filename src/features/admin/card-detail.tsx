@@ -117,6 +117,15 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
       data-od-id="board-card-details-privacy"
     >
       <div className="phone-frame">
+        <div className="p-4 pb-0 flex items-center justify-between">
+          <a
+            href="/admin/cards"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)] hover:underline no-underline"
+          >
+            ← Quay lại Kho Thẻ
+          </a>
+          <span className="portal-tag font-mono text-xs">{card.serial}</span>
+        </div>
         <div className="screen-content">
           {/* NFC Hardware Tag Mockup */}
           <div className="nfc-hardware-card">
