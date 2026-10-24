@@ -168,57 +168,24 @@
     animation: radar-pulse 2s infinite;
   }
 
-  /* Phone Frame & Status Bar */
+  /* Canvas Container & Content */
   .phone-frame {
     width: 100%;
-    background: var(--bg);
-    border: var(--border-width) solid var(--border);
-    border-radius: 20px;
-    box-shadow: 0 4px 20px rgba(30, 36, 44, 0.06);
-    overflow: hidden;
     display: flex;
     flex-direction: column;
     position: relative;
   }
 
   .phone-status-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 18px 6px;
-    background: var(--bg);
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--fg);
-    border-bottom: var(--border-width) solid var(--surface);
-    user-select: none;
-  }
-
-  .status-time {
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: 13px;
-  }
-
-  .status-icons {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--fg);
-  }
-
-  .status-icons svg {
-    width: 14px;
-    height: 14px;
-    fill: currentColor;
+    display: none;
   }
 
   /* Screen Content */
   .screen-content {
-    padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
+    width: 100%;
   }
 
   .profile-hero-row {
@@ -585,23 +552,32 @@
 
   /* ─── Screen 2: SOS Confirmation Modal ───────────────────────────── */
   .modal-overlay-preview {
-    position: relative;
-    background: var(--surface);
-    padding: 24px 20px;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(4px);
+    padding: 20px;
     display: flex;
-    flex-direction: column;
-    gap: 16px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay-preview.hidden {
+    display: none;
   }
 
   .modal-card {
     background: var(--bg);
     border: var(--border-width) solid var(--border);
     border-radius: 20px;
-    padding: 20px;
+    padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    box-shadow: 0 8px 30px rgba(30, 36, 44, 0.08);
+    gap: 16px;
+    box-shadow: 0 16px 48px rgba(15, 23, 42, 0.16);
+    width: 100%;
+    max-width: 440px;
   }
 
   .modal-icon-badge {
@@ -698,11 +674,12 @@
 
   /* ─── Screen 3: SOS Sending Progress ─────────────────────────────── */
   .progress-screen-wrap {
-    padding: 24px 20px;
+    padding: 10px 0;
     display: flex;
     flex-direction: column;
     gap: 20px;
-    background: var(--bg);
+    background: transparent;
+    width: 100%;
   }
 
   .progress-hero-icon {
@@ -877,11 +854,12 @@
 
   /* ─── Screen 4: SOS Completed Screen ─────────────────────────────── */
   .completed-screen-wrap {
-    padding: 24px 20px;
+    padding: 10px 0;
     display: flex;
     flex-direction: column;
-    gap: 18px;
-    background: var(--bg);
+    gap: 20px;
+    background: transparent;
+    width: 100%;
   }
 
   .completed-icon-badge {
@@ -1007,11 +985,12 @@
 
   /* ─── Screen 5: Registration Form (4 Fields Only) ───────────────── */
   .register-screen-wrap {
-    padding: 24px 20px;
+    padding: 0;
     display: flex;
     flex-direction: column;
     gap: 18px;
-    background: var(--bg);
+    background: transparent;
+    width: 100%;
   }
 
   .register-header {
@@ -1119,12 +1098,13 @@
 
   /* ─── Screen 6: Registration Success ────────────────────────────── */
   .reg-success-wrap {
-    padding: 48px 20px 24px;
+    padding: 32px 0 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    background: var(--bg);
+    background: transparent;
+    width: 100%;
     min-height: 420px;
   }
 
