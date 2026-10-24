@@ -196,7 +196,7 @@ describe("auth page root", () => {
 
     await user.type(screen.getByLabelText(/Email/), "user@example.com");
     await user.type(screen.getByLabelText(/Mật khẩu/), "password123");
-    await user.click(screen.getByRole("button", { name: "Đăng nhập" }));
+    await user.click(screen.getByRole("button", { name: /đăng nhập/i }));
 
     await waitFor(() => expect(loginMock).toHaveBeenCalledWith({ email: "user@example.com", password: "password123" }));
     expect(setQueryDataSpy).toHaveBeenCalledWith(sessionKeys.current, session);
@@ -213,7 +213,7 @@ describe("auth page root", () => {
 
     await user.type(screen.getByLabelText(/Email/), "user@example.com");
     await user.type(screen.getByLabelText(/Mật khẩu/), "password123");
-    await user.click(screen.getByRole("button", { name: "Đăng nhập" }));
+    await user.click(screen.getByRole("button", { name: /đăng nhập/i }));
 
     expect(await screen.findByText("Email hoặc mật khẩu không đúng.")).toBeInTheDocument();
     expect(navigateMock).not.toHaveBeenCalled();
@@ -227,7 +227,7 @@ describe("auth page root", () => {
 
     await user.type(screen.getByLabelText(/Email/), "user@example.com");
     await user.type(screen.getByLabelText(/Mật khẩu/), "password123");
-    await user.click(screen.getByRole("button", { name: "Đăng nhập" }));
+    await user.click(screen.getByRole("button", { name: /đăng nhập/i }));
 
     expect(await screen.findByText("Không thể kết nối tới máy chủ.")).toBeInTheDocument();
   });

@@ -31,8 +31,14 @@ const emailSchema = z
 
 const passwordSchema = z.string().min(8, "Mật khẩu phải có ít nhất 8 ký tự").max(128, "Mật khẩu quá dài");
 
+const identifierSchema = z
+  .string()
+  .trim()
+  .min(1, "Vui lòng nhập Email hoặc Số điện thoại")
+  .max(254, "Thông tin đăng nhập quá dài");
+
 const loginSchema = z.object({
-  email: emailSchema,
+  email: identifierSchema,
   password: passwordSchema,
 });
 
@@ -131,34 +137,39 @@ function AuthLayout({
   }
 
   return (
-    <section className="mx-auto grid w-full max-w-6xl gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-stretch">
-      <div className="brand-surface flex min-h-[28rem] flex-col justify-between rounded-[2rem] border border-primary/15 p-7 shadow-[var(--shadow-lifted)] sm:p-10">
-        <div className="space-y-10">
-          <BrandMark />
-          <PageTitle
-            eyebrow="Tài khoản an toàn"
-            title="Thông tin quan trọng, luôn sẵn sàng."
-            description="Đăng nhập để quản lý hồ sơ và liên kết khẩn cấp của bạn."
-          />
+    <div className="w-full max-w-[420px] mx-auto py-6" data-od-id="board-auth-login">
+      {/* App Top Header */}
+      <div className="app-top-header rounded-t-[18px]">
+        <div className="app-brand">
+          <div className="brand-mark">+</div>
+          <span className="brand-name">EmerCard</span>
         </div>
-        <p className="max-w-sm text-sm leading-6 text-muted-foreground">EmerCard giúp thông tin y tế quan trọng đi cùng bạn, nhưng chỉ hiển thị khi được cấp quyền.</p>
+        <span className="portal-tag">Cổng Chủ Thẻ</span>
+      </div>
+
+      <div className="screen-content bg-white border border-[#d3d9e0] border-t-0 rounded-b-[18px] p-5 sm:p-6 shadow-[0_4px_20px_rgba(30,36,44,0.06)]">
+        <div>
+          <h2 className="text-xl font-bold text-[#1e242c] mb-1 font-display">Đăng Nhập</h2>
+          <p className="text-[13px] text-[#64748b]">Nhập tài khoản để quản lý hồ sơ y tế khẩn cấp và thẻ NFC vật lý của bạn.</p>
+        </div>
+
         {flash ? (
           <Alert variant={flash.variant} title={flash.title}>
             {flash.message}
           </Alert>
         ) : null}
-      </div>
 
-      <Panel className="flex items-center justify-center p-6 sm:p-10">
         <LoginForm initialEmail={initialEmail} returnTo={returnTo} />
-      </Panel>
-    </section>
+      </div>
+    </div>
   );
 }
 
 function LoginForm({ initialEmail, returnTo }: { initialEmail?: string | null; returnTo?: string | null }) {
   const queryClient = useQueryClient();
   const [rootMessage, setRootMessage] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -188,41 +199,104 @@ function LoginForm({ initialEmail, returnTo }: { initialEmail?: string | null; r
   });
 
   return (
-    <form className="w-full max-w-md space-y-5" onSubmit={(event) => void onSubmit(event)} noValidate>
+    <form className="flex flex-col gap-3.5 w-full" onSubmit={(event) => void onSubmit(event)} noValidate>
       {rootMessage ? (
         <Alert variant="danger" title="Không thể đăng nhập">
           {rootMessage}
         </Alert>
       ) : null}
 
-      <TextInput
-        label="Email"
-        type="email"
-        autoComplete="email"
-        placeholder="ten@domain.com"
-        required
-        error={form.formState.errors.email?.message}
-        {...form.register("email")}
-      />
-      <TextInput
-        label="Mật khẩu"
-        type="password"
-        autoComplete="current-password"
-        placeholder="••••••••"
-        required
-        error={form.formState.errors.password?.message}
-        {...form.register("password")}
-      />
+      <div className="field-group">
+        <label className="field-label" htmlFor="login-email">
+          Email hoặc Số điện thoại
+        </label>
+        <div className="field-input-wrap">
+          <input
+            className={`input-text input-mono ${form.formState.errors.email ? "border-[#cc3336]" : ""}`}
+            id="login-email"
+            type="text"
+            autoComplete="username"
+            placeholder="ten@domain.com hoặc 0901234567"
+            required
+            {...form.register("email")}
+          />
+        </div>
+        {form.formState.errors.email ? (
+          <span className="text-[12px] text-[#991b1b] mt-0.5 font-medium">{form.formState.errors.email.message}</span>
+        ) : null}
+      </div>
 
-      <Button type="submit" size="lg" className="w-full" busy={form.formState.isSubmitting}>
-        {form.formState.isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
-      </Button>
+      <div className="field-group">
+        <div className="field-label-row">
+          <label className="field-label" htmlFor="login-pwd">
+            Mật khẩu
+          </label>
+          <button
+            type="button"
+            className="link-subtle"
+            onClick={() => alert("Tính năng khôi phục mật khẩu qua SMS OTP đang được nâng cấp.")}
+          >
+            Quên mật khẩu?
+          </button>
+        </div>
+        <div className="field-input-wrap relative flex items-center">
+          <input
+            className={`input-text input-mono ${form.formState.errors.password ? "border-[#cc3336]" : ""}`}
+            id="login-pwd"
+            type={showPassword ? "text" : "password"}
+            autoComplete="current-password"
+            placeholder="••••••••"
+            required
+            {...form.register("password")}
+          />
+          <button
+            type="button"
+            className="input-icon-btn"
+            aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+            onClick={() => setShowPassword((prev) => !prev)}
+          >
+            {showPassword ? (
+              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+              </svg>
+            )}
+          </button>
+        </div>
+        {form.formState.errors.password ? (
+          <span className="text-[12px] text-[#991b1b] mt-0.5 font-medium">{form.formState.errors.password.message}</span>
+        ) : null}
+      </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
-        <span>Chưa có tài khoản?</span>
-        <LinkButton href="/register" variant="ghost" size="sm">
-          Đăng ký
-        </LinkButton>
+      <div className="flex items-center gap-2 text-[13px] text-[#1e242c] select-none py-1">
+        <input
+          type="checkbox"
+          id="remember-me"
+          checked={rememberMe}
+          onChange={(e) => setRememberMe(e.target.checked)}
+          className="w-4 h-4 rounded text-[#327bb0] focus:ring-[#327bb0] accent-[#327bb0]"
+        />
+        <label htmlFor="remember-me" className="cursor-pointer">
+          Ghi nhớ đăng nhập trên thiết bị này
+        </label>
+      </div>
+
+      <button
+        type="submit"
+        className="btn-primary mt-1"
+        disabled={form.formState.isSubmitting}
+      >
+        {form.formState.isSubmitting ? "Đang đăng nhập..." : "Đăng Nhập"}
+      </button>
+
+      <div className="text-center text-[13px] text-[#64748b] pt-2">
+        Chưa có tài khoản?{" "}
+        <a href="/register" className="link-subtle font-semibold">
+          Đăng ký hồ sơ mới
+        </a>
       </div>
     </form>
   );
