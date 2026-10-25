@@ -34,6 +34,11 @@ describe("profile form helpers", () => {
     });
   });
 
+  it("defaults location_alerts_enabled to true for empty or unconfigured profile", () => {
+    const defaults = profileViewToFormValues(null);
+    expect(defaults.location_alerts_enabled).toBe(true);
+  });
+
   it("builds a profile payload from editable form values", () => {
     const values: ProfileFormValues = {
       display_name: "  Alex Example  ",
