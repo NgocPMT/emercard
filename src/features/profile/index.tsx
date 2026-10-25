@@ -94,7 +94,7 @@ export function profileViewToFormValues(profile: ProfileView["profile"]): Profil
     important_conditions: joinLines(profile?.important_conditions ?? []),
     critical_medications: joinLines(profile?.critical_medications ?? []),
     emergency_note: profile?.emergency_note ?? "",
-    location_alerts_enabled: profile?.location_alerts_enabled ?? false,
+    location_alerts_enabled: profile?.location_alerts_enabled ?? true,
     emergency_contacts:
       profile?.emergency_contacts.length && profile.emergency_contacts.length > 0
         ? profile.emergency_contacts.map((contact) => ({
@@ -299,8 +299,29 @@ function ProfileViewCard({ profileView, onEdit }: { profileView: ProfileView; on
           </dl>
         </div>
 
-        {/* Right Column (5 cols): Emergency Contacts */}
+        {/* Right Column (5 cols): Emergency Contacts & Location Alerts */}
         <div className="space-y-4 lg:col-span-5">
+          {/* Location Alerts SOS status */}
+          <div className="rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-sm space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-foreground text-sm flex items-center gap-2">
+                <svg className="w-4 h-4 text-primary shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                Cảnh Báo Vị Trí Khẩn Cấp (GPS &amp; SMS)
+              </span>
+              <span className={`status-pill ${profile?.location_alerts_enabled ? "status-pill-success" : "status-pill-warning"}`}>
+                {profile?.location_alerts_enabled ? "Đang bật" : "Đang tắt"}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground m-0 leading-relaxed">
+              {profile?.location_alerts_enabled
+                ? "Khi quét thẻ, người ứng cứu có thể bấm nút SOS để định vị và tự động gửi tin nhắn SMS tới số điện thoại người thân."
+                : "Tính năng đang tắt. Người quét thẻ sẽ không thể phát cảnh báo vị trí khẩn cấp qua SMS."}
+            </p>
+          </div>
+
           <div className="rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <span className="font-semibold text-foreground text-sm">
@@ -736,6 +757,33 @@ function ProfileEditorCard({ profileView, onCancel }: { profileView: ProfileView
                     + Thêm
                   </button>
                 </div>
+              </div>
+            </div>
+
+            {/* Location Alerts SOS Toggle */}
+            <div className="rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-sm space-y-3" id="field-location-alerts">
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <label htmlFor="edit-location-alerts" className="font-semibold text-sm text-foreground flex items-center gap-2 cursor-pointer">
+                    <svg className="w-4 h-4 text-primary shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    Cảnh Báo Vị Trí Khẩn Cấp (GPS &amp; SMS)
+                  </label>
+                  <p className="text-xs text-muted-foreground m-0 leading-relaxed">
+                    Cho phép người quét thẻ gửi tọa độ GPS và địa chỉ hiện tại qua SMS đến các số điện thoại liên hệ khẩn cấp khi gặp sự cố.
+                  </p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0" htmlFor="edit-location-alerts">
+                  <input
+                    id="edit-location-alerts"
+                    type="checkbox"
+                    className="sr-only peer"
+                    {...form.register("location_alerts_enabled")}
+                  />
+                  <div className="w-11 h-6 bg-muted-foreground/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                </label>
               </div>
             </div>
 
