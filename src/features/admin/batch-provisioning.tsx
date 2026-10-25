@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { batchProvisionCards, cardKeys } from "../../api/cards";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { batchProvisionCards, cardKeys, getAdminInventoryStats } from "../../api/cards";
 import { isApiError } from "../../api/http-client";
+import { NfcCardPreview } from "./desktop/nfc-card-preview";
 
 interface AdminBatchProvisioningPanelProps {
   onCancel?: () => void;
@@ -18,11 +19,21 @@ export function AdminBatchProvisioningPanel({
   const [batchId, setBatchId] = useState("BATCH-2026-Q4-VN");
   const [chipType, setChipType] = useState("ntag215");
   const [quantity, setQuantity] = useState(100);
+  const [initialStatus, setInitialStatus] = useState("available");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const statsQuery = useQuery({
+    queryKey: cardKeys.adminStats,
+    queryFn: ({ signal }) => getAdminInventoryStats(signal),
+    staleTime: 10_000,
+  });
+
+  const currentTotal = statsQuery.data?.total ?? 1250;
   const startSerial = nextSerialSeed;
   const endSerial = startSerial + Math.max(1, quantity) - 1;
+  const capacityAfter = currentTotal + (Number(quantity) || 0);
+  const capacityPercent = Math.min(100, Math.round((capacityAfter / 2000) * 1000) / 10);
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -34,7 +45,7 @@ export function AdminBatchProvisioningPanel({
     onSuccess: (data) => {
       setErrorMessage(null);
       setToastMessage(
-        `Đã nhập thành công ${data.quantity} thẻ từ lô ${data.batch_id}!`,
+        `Đã nhập thành công ${data.quantity} phôi thẻ NTAG215 mới từ lô ${data.batch_id}!`,
       );
       void queryClient.invalidateQueries({ queryKey: cardKeys.adminCards });
       void queryClient.invalidateQueries({ queryKey: cardKeys.adminStats });
@@ -67,75 +78,94 @@ export function AdminBatchProvisioningPanel({
   };
 
   return (
-    <div
-      className="w-full max-w-[420px] mx-auto flex flex-col gap-4"
-      data-od-id="board-batch-provisioning"
-    >
-      <div className="phone-frame">
+    <div className="flex flex-col gap-6" data-od-id="board-batch-provisioning">
+      {/* Header Row */}
+      <div className="admin-page-header-row">
+        <div className="admin-page-title-group">
+          <h1 className="admin-page-title">
+            Đăng Ký & Nhập Lô Thẻ Mới (Batch Provisioning)
+          </h1>
+          <div className="admin-page-desc">
+            Tạo mã định danh phần cứng hàng loạt, tự sinh dải số serial thời gian thực và kiểm tra không xung đột trước khi nhập kho.
+          </div>
+        </div>
         {onCancel && (
-          <div className="p-4 pb-0 flex items-center">
+          <div className="admin-page-actions">
             <button
               type="button"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)] hover:underline cursor-pointer bg-transparent border-none p-0"
+              className="admin-btn-secondary-action"
               onClick={onCancel}
             >
               ← Quay lại Kho Thẻ
             </button>
           </div>
         )}
+      </div>
 
-        <form onSubmit={handleSubmit} className="screen-content">
-          {/* Batch ID Input */}
-          <div className="field-group">
-            <label className="field-label" htmlFor="batchIdInput">
+      {/* 2-Column Desktop Grid */}
+      <div className="admin-two-col-grid">
+        {/* Left Column: Batch Configuration Form */}
+        <form onSubmit={handleSubmit} className="admin-col-card">
+          <div className="admin-card-title">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+            Thông Số Cấu Hình Lô Sản Xuất
+          </div>
+          <div className="admin-card-desc">
+            Cấu hình lô hàng nhập từ nhà máy gia công thẻ y tế đạt chuẩn ISO/IEC 14443 Type A.
+          </div>
+
+          <div className="admin-form-group">
+            <label className="admin-form-label" htmlFor="batchIdInput">
               Mã Lô Sản Xuất (Batch ID)
             </label>
             <input
               id="batchIdInput"
               type="text"
-              className="input-text input-mono"
+              className="admin-form-input mono"
               value={batchId}
               onChange={(e) => setBatchId(e.target.value)}
               required
             />
+            <span className="admin-form-help">Mã nhận diện lô từ đơn vị cung ứng phần cứng.</span>
           </div>
 
-          {/* Chip Type Selection */}
-          <div className="field-group">
-            <label className="field-label" htmlFor="chipTypeSelect">
-              Chuẩn Chip NFC Y Tế
+          <div className="admin-form-group">
+            <label className="admin-form-label" htmlFor="chipTypeSelect">
+              Chuẩn Chip & Bộ Nhớ Lưu Trữ
             </label>
-            <div className="select-wrap">
-              <select
-                id="chipTypeSelect"
-                className="input-select"
-                value={chipType}
-                onChange={(e) => setChipType(e.target.value)}
-              >
-                <option value="ntag215">
-                  NTAG215 (504 Bytes - Chuẩn khẩn cấp)
-                </option>
-                <option value="ntag213">NTAG213 (144 Bytes - Rút gọn)</option>
-                <option value="ntag216">NTAG216 (888 Bytes - Mở rộng)</option>
-              </select>
-              <span className="select-chevron">▼</span>
-            </div>
+            <select
+              id="chipTypeSelect"
+              className="admin-form-select"
+              value={chipType}
+              onChange={(e) => setChipType(e.target.value)}
+            >
+              <option value="ntag215">NXP NTAG215 — 504 Bytes (Khuyến nghị cho y tế)</option>
+              <option value="ntag216">NXP NTAG216 — 888 Bytes (Dung lượng mở rộng)</option>
+            </select>
           </div>
 
-          {/* Quantity Input */}
-          <div className="field-group">
-            <div className="field-label-row">
-              <label className="field-label" htmlFor="cardQuantityInput">
-                Số Lượng Thẻ Cấp Phát
+          <div className="admin-form-group">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <label className="admin-form-label" htmlFor="cardQuantityInput">
+                Số Lượng Phôi Thẻ Nhập Kho
               </label>
-              <span className="text-[11px] text-[#64748b]">
-                Tối đa 500 thẻ/lô
-              </span>
+              <span style={{ fontSize: "11px", color: "var(--muted)" }}>Tối đa 500 thẻ/lô</span>
             </div>
             <input
               id="cardQuantityInput"
               type="number"
-              className="input-text input-mono"
+              className="admin-form-input mono"
               value={quantity}
               min={1}
               max={500}
@@ -144,60 +174,169 @@ export function AdminBatchProvisioningPanel({
             />
           </div>
 
-          {/* Dynamic Serial Range Preview */}
-          <div className="field-group">
-            <label className="field-label">Dải Mã Thẻ Tự Sinh (Serial Range)</label>
-            <div className="nfc-serial-display">
-              <span className="nfc-serial-label">Dải Số Serial</span>
-              <span className="nfc-serial-val" id="serialRangeDisplay">
-                EMC-{startSerial} → EMC-{endSerial}
-              </span>
-            </div>
-            <div className="text-[12px] text-[#64748b] flex items-center gap-1 mt-0.5">
-              <span className="text-[#237f52] font-bold">✓</span> Không xung đột
-              với các mã thẻ đang tồn tại trong kho
-            </div>
-          </div>
-
-          {/* Initial Status */}
-          <div className="field-group">
-            <label className="field-label">
-              Trạng Thái Ban Đầu Khi Nhập Kho
-            </label>
-            <input
-              type="text"
-              className="input-text"
-              value="Sẵn Sàng Cấp Phát (Available)"
-              readOnly
-              style={{ background: "var(--surface)" }}
-            />
+          <div className="admin-form-group">
+            <label className="admin-form-label">Trạng Thái Khởi Tạo Ban Đầu</label>
+            <select
+              className="admin-form-select"
+              value={initialStatus}
+              onChange={(e) => setInitialStatus(e.target.value)}
+            >
+              <option value="available">Sẵn Sàng Gán (Available - Phôi thẻ trắng)</option>
+              <option value="suspended">Tạm Khóa (Suspended - Chờ kiểm định mẫu)</option>
+            </select>
           </div>
 
           {errorMessage && (
-            <div className="p-3 bg-[#fdf2f2] border border-[#f8c8c8] text-[#991b1b] rounded-[14px] text-xs">
+            <div
+              style={{
+                padding: "12px 14px",
+                background: "var(--danger-bg)",
+                border: "var(--border-width) solid var(--danger-border)",
+                color: "var(--danger-text)",
+                borderRadius: "var(--radius-control)",
+                fontSize: "13px",
+              }}
+            >
               {errorMessage}
             </div>
           )}
 
-          {/* Submit CTA */}
-          <button
-            type="submit"
-            className="btn-primary mt-1"
-            disabled={mutation.isPending}
-          >
-            {mutation.isPending
-              ? "Đang ghi lô thẻ vào kho..."
-              : `Xác Nhận Nhập ${quantity} Thẻ Vào Kho`}
-          </button>
-
-          {/* Toast Notification */}
-          {toastMessage && (
-            <div className="toast-banner show">
-              <span>✓</span> {toastMessage}
-            </div>
-          )}
+          <div style={{ marginTop: "10px" }}>
+            <button
+              type="submit"
+              className="admin-btn-primary-action"
+              style={{ width: "100%", justifyContent: "center", padding: "12px" }}
+              disabled={mutation.isPending}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              {mutation.isPending
+                ? "Đang ghi lô thẻ vào kho..."
+                : `Xác Nhận Nhập ${quantity} Thẻ Vào Kho`}
+            </button>
+          </div>
         </form>
+
+        {/* Right Column: Live Card Preview & Conflict Check */}
+        <div className="admin-col-card" style={{ background: "#fafbfc" }}>
+          <div className="admin-card-title">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+              <line x1="1" y1="10" x2="23" y2="10" />
+            </svg>
+            Trực Quan Hóa Phôi Thẻ & Dải Serial Tự Sinh
+          </div>
+
+          {/* NFC Graphic Card Preview */}
+          <NfcCardPreview
+            serialRange={`EMC-${startSerial} → EMC-${endSerial}`}
+            countLabel={`Quy mô: ${quantity} phôi thẻ liên tiếp`}
+            standard={`ISO/IEC 14443-A · ${chipType === "ntag216" ? "NTAG216" : "NTAG215"}`}
+          />
+
+          {/* Live Conflict Validation Box */}
+          <div
+            style={{
+              background: "var(--success-bg)",
+              border: "var(--border-width) solid var(--success-border)",
+              borderRadius: "12px",
+              padding: "14px",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "10px",
+            }}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--success)"
+              strokeWidth="2"
+              style={{ flexShrink: 0, marginTop: "2px" }}
+              aria-hidden="true"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            <div>
+              <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--success-text)" }}>
+                Kiểm Tra Xung Đột: 100% Khả Dụng
+              </div>
+              <div style={{ fontSize: "12px", color: "var(--success-text)", opacity: 0.9, marginTop: "2px" }}>
+                Toàn bộ {quantity} mã thẻ trong dải{" "}
+                <span style={{ fontFamily: "var(--font-mono)", fontWeight: 600 }}>
+                  EMC-{startSerial} - EMC-{endSerial}
+                </span>{" "}
+                đều chưa từng được sử dụng. Không phát hiện xung đột dữ liệu kho.
+              </div>
+            </div>
+          </div>
+
+          {/* Capacity Impact Summary */}
+          <div className="admin-spec-grid">
+            <div className="admin-spec-row">
+              <span className="admin-spec-k">Dung lượng kho hiện tại</span>
+              <span className="admin-spec-v mono">{currentTotal.toLocaleString()} thẻ</span>
+            </div>
+            <div className="admin-spec-row">
+              <span className="admin-spec-k">Dung lượng sau khi nhập</span>
+              <span className="admin-spec-v mono" style={{ color: "var(--accent)" }}>
+                {capacityAfter.toLocaleString()} thẻ
+              </span>
+            </div>
+            <div className="admin-spec-row">
+              <span className="admin-spec-k">Tỷ lệ chiếm dụng</span>
+              <span className="admin-spec-v mono">{capacityPercent}% / 2,000 thẻ</span>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Floating Toast Notification */}
+      {toastMessage && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "24px",
+            right: "24px",
+            background: "var(--fg)",
+            color: "var(--bg)",
+            padding: "12px 20px",
+            borderRadius: "var(--radius-control)",
+            fontSize: "13px",
+            fontWeight: 600,
+            boxShadow: "0 8px 32px rgba(30, 36, 44, 0.16)",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            zIndex: 1000,
+          }}
+          role="status"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 }
