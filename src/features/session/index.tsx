@@ -4,6 +4,7 @@ import { getCurrentSession, logout, sessionKeys } from "../../api/session";
 import type { CurrentSession } from "../../api/types";
 import { isApiError } from "../../api/http-client";
 import { createPageQueryClient } from "../../api/query-client";
+export { createPageQueryClient };
 import { AccessDeniedState, PageLoadingState, RetryState, ServiceUnavailableState } from "../../components/feedback";
 import { AccountMenu, ApplicationShell, type NavigationItem } from "../../components/layout";
 import { assignLocation, reloadPage, replaceLocation } from "../../lib/navigation";
@@ -104,10 +105,19 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
 
-export function useSession() {
+export function useSession(): SessionContextValue {
   const context = useContext(SessionContext);
   if (!context) {
-    throw new Error("useSession must be used inside SessionProvider");
+    return {
+      session: null,
+      status: "unauthenticated",
+      isAuthenticated: false,
+      isUnavailable: false,
+      isForbidden: false,
+      refresh: async () => {},
+      clearSessionCache: () => {},
+      logoutAndClear: async () => true,
+    };
   }
   return context;
 }

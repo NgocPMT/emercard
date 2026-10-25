@@ -30,7 +30,22 @@ vi.mock("../session", () => ({
       {children}
     </div>
   ),
-  useSession: () => ({ clearSessionCache: vi.fn() }),
+  useSession: () => ({ clearSessionCache: vi.fn(), logoutAndClear: vi.fn(), session: { email: "admin@example.com", role: "admin" } }),
+  SessionProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  RouteAccessGate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  PageErrorBoundary: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  createPageQueryClient: () => ({
+    mount: vi.fn(),
+    unmount: vi.fn(),
+    clear: vi.fn(),
+    getQueryData: vi.fn(),
+    setQueryData: vi.fn(),
+    invalidateQueries: vi.fn(),
+    getQueryCache: () => ({ subscribe: vi.fn(() => vi.fn()) }),
+    getMutationCache: () => ({ subscribe: vi.fn(() => vi.fn()) }),
+    defaultQueryOptions: vi.fn(() => ({})),
+    defaultMutationOptions: vi.fn(() => ({})),
+  }),
 }));
 
 afterEach(() => {
