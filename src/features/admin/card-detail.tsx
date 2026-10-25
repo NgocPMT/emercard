@@ -111,129 +111,258 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
     );
   }
 
+  const isActive = card.status === "active";
+  const isAvailable = card.status === "unassigned" || card.status === "assigned";
+  const isSuspended = card.status === "disabled";
+  const statusClass = isActive
+    ? "success"
+    : isAvailable
+      ? "info"
+      : isSuspended
+        ? "warning"
+        : "danger";
+  const statusLabel = isActive
+    ? "Đang Hoạt Động"
+    : isAvailable
+      ? "Sẵn Sàng Gán"
+      : isSuspended
+        ? "Tạm Đình Chỉ"
+        : card.status === "lost"
+          ? "Báo Mất Cắp"
+          : "Đã Thu Hồi";
+
   return (
-    <div
-      className="w-full max-w-[420px] mx-auto flex flex-col gap-4"
-      data-od-id="board-card-details-privacy"
-    >
-      <div className="phone-frame">
-        <div className="p-4 pb-0 flex items-center justify-between">
+    <div className="flex flex-col gap-6" data-od-id="board-card-details-privacy">
+      {/* Header Row */}
+      <div className="admin-page-header-row">
+        <div className="admin-page-title-group">
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <h1 className="admin-page-title">
+              Chi Tiết Phần Cứng & Bảo Mật Zero-Knowledge
+            </h1>
+            <span
+              className="portal-tag font-mono text-xs"
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "12px",
+                fontWeight: 700,
+                padding: "2px 8px",
+                borderRadius: "var(--radius-pill)",
+                background: "var(--surface)",
+                border: "var(--border-width) solid var(--border)",
+                color: "var(--accent)",
+              }}
+            >
+              {card.serial}
+            </span>
+          </div>
+          <div className="admin-page-desc">
+            Thông số kỹ thuật chi tiết của phôi chip thẻ NFC vật lý và cơ chế định danh mờ hóa bảo vệ thông tin y tế cá nhân.
+          </div>
+        </div>
+        <div className="admin-page-actions">
           <a
             href="/admin/cards"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)] hover:underline no-underline"
+            className="admin-btn-secondary-action"
           >
             ← Quay lại Kho Thẻ
           </a>
-          <span className="portal-tag font-mono text-xs">{card.serial}</span>
+          <button
+            type="button"
+            className="admin-btn-primary-action"
+            onClick={() => setActiveTab("lifecycle")}
+          >
+            Quản lý vòng đời thẻ này
+          </button>
         </div>
-        <div className="screen-content">
-          {/* NFC Hardware Tag Mockup */}
-          <div className="nfc-hardware-card">
-            <div className="nfc-card-chip-row">
-              <div className="nfc-card-brand">
-                <div className="nfc-emblem">NFC</div>
-                <span className="nfc-card-brand-text">EMERCARD TAG</span>
-              </div>
-              <span
-                className={`card-status-pill ${
-                  card.status === "active"
-                    ? "status-active"
-                    : card.status === "unassigned" || card.status === "assigned"
-                      ? "status-available"
-                      : "status-suspended"
-                }`}
-              >
-                {card.status === "active"
-                  ? "Đang Hoạt Động"
-                  : card.status === "unassigned" || card.status === "assigned"
-                    ? "Sẵn Sàng"
-                    : "Tạm Đình Chỉ"}
+      </div>
+
+      {/* 2-Column Desktop Grid */}
+      <div className="admin-two-col-grid">
+        {/* Column 1: Hardware Specifications */}
+        <div className="admin-col-card">
+          <div className="admin-card-title">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
+              <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
+              <line x1="6" y1="6" x2="6.01" y2="6" />
+              <line x1="6" y1="18" x2="6.01" y2="18" />
+            </svg>
+            Thông Số Kỹ Thuật Chip Thẻ NFC
+            <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--muted)", marginLeft: "auto" }}>
+              EMERCARD TAG
+            </span>
+          </div>
+
+          <div className="admin-spec-grid">
+            <div className="admin-spec-row">
+              <span className="admin-spec-k">Mã Định Danh Thẻ</span>
+              <span className="admin-spec-v mono" style={{ color: "var(--accent)", fontSize: "15px" }}>
+                {card.serial}
               </span>
             </div>
-
-            <div className="nfc-serial-display">
-              <span className="nfc-serial-label">Mã Serial Thẻ</span>
-              <span className="nfc-serial-val">{card.serial}</span>
+            <div className="admin-spec-row">
+              <span className="admin-spec-k">UID Phần Cứng (Cố định nhà máy)</span>
+              <span className="admin-spec-v mono">{card.hardware_uid || "04:A2:8B:E2:19:6C:80"}</span>
             </div>
+            <div className="admin-spec-row">
+              <span className="admin-spec-k">Chuẩn Giao Tiếp Vô Tuyến</span>
+              <span className="admin-spec-v">ISO/IEC 14443 Type A</span>
+            </div>
+            <div className="admin-spec-row">
+              <span className="admin-spec-k">Loại Vi Xử Lý</span>
+              <span className="admin-spec-v">
+                {card.chip_type ? `NXP ${card.chip_type.toUpperCase()}` : "NXP NTAG215 (NFC Forum Type 2)"}
+              </span>
+            </div>
+            <div className="admin-spec-row">
+              <span className="admin-spec-k">Bộ Nhớ Khả Dụng</span>
+              <span className="admin-spec-v mono">504 Bytes (126 blocks × 4B)</span>
+            </div>
+            <div className="admin-spec-row">
+              <span className="admin-spec-k">Khóa Ghi Bảo Vệ (Lock Bits)</span>
+              <span className="admin-spec-v" style={{ color: "var(--success)", fontWeight: 600 }}>
+                Đã Khóa Đọc/Ghi (Read-Only)
+              </span>
+            </div>
+            <div className="admin-spec-row">
+              <span className="admin-spec-k">Độ Bền Ghi / Đọc</span>
+              <span className="admin-spec-v mono">100,000 chu kỳ</span>
+            </div>
+            <div className="admin-spec-row">
+              <span className="admin-spec-k">Thời Gian Lưu Trữ Dữ Liệu</span>
+              <span className="admin-spec-v mono">10 năm (Chuẩn y tế)</span>
+            </div>
+            <div className="admin-spec-row">
+              <span className="admin-spec-k">Ngày Kích Hoạt Phần Cứng</span>
+              <span className="admin-spec-v mono">
+                {card.issued_at
+                  ? new Date(card.issued_at).toLocaleDateString("vi-VN")
+                  : "Chưa kích hoạt"}
+              </span>
+            </div>
+          </div>
+        </div>
 
-            <div className="nfc-specs-grid">
-              <div className="nfc-spec-box">
-                <span className="nfc-spec-key">UID Phần Cứng</span>
-                <span className="nfc-spec-val">
-                  {card.hardware_uid || "04:A2:8B:E2:19:6C:80"}
-                </span>
-              </div>
-              <div className="nfc-spec-box">
-                <span className="nfc-spec-key">Chuẩn Chip</span>
-                <span className="nfc-spec-val">
-                  {card.chip_type ? card.chip_type.toUpperCase() : "NTAG215 (504 Bytes)"}
-                </span>
-              </div>
-              <div className="nfc-spec-box">
-                <span className="nfc-spec-key">Lô Sản Xuất</span>
-                <span className="nfc-spec-val">
-                  {card.batch_id || "BATCH-2026-Q3"}
-                </span>
-              </div>
-              <div className="nfc-spec-box">
-                <span className="nfc-spec-key">Ngày Kích Hoạt</span>
-                <span className="nfc-spec-val">
-                  {card.issued_at
-                    ? new Date(card.issued_at).toLocaleDateString("vi-VN")
-                    : "Chưa kích hoạt"}
-                </span>
-              </div>
+        {/* Column 2: Opaque Identity & Zero-Knowledge Guarantee */}
+        <div className="admin-col-card">
+          <div className="admin-card-title">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            Định Danh Mờ Hóa & Quyền Riêng Tư (Zero-Knowledge)
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "11px",
+                fontWeight: 700,
+                padding: "2px 7px",
+                borderRadius: "var(--radius-pill)",
+                background: "var(--info-bg)",
+                color: "var(--info-text)",
+                marginLeft: "auto",
+              }}
+            >
+              OPAQUE ID
+            </span>
+          </div>
+
+          <div
+            style={{
+              background: "var(--surface)",
+              border: "var(--border-width) solid var(--border)",
+              borderRadius: "12px",
+              padding: "18px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
+            }}
+          >
+            <div className="admin-spec-row" style={{ background: "transparent", padding: "0 0 8px 0" }}>
+              <span className="admin-spec-k">Mã Chủ Thẻ (Opaque User ID)</span>
+              <span className="admin-spec-v mono" style={{ fontSize: "14px" }}>
+                {card.owner?.id ? card.owner.id : "— Chưa liên kết —"}
+              </span>
+            </div>
+            <div className="admin-spec-row" style={{ background: "transparent", padding: "0 0 8px 0" }}>
+              <span className="admin-spec-k">Email Liên Hệ (Che một phần)</span>
+              <span className="admin-spec-v mono">{maskEmail(card.owner?.email)}</span>
+            </div>
+            <div className="admin-spec-row" style={{ background: "transparent", padding: "0 0 8px 0" }}>
+              <span className="admin-spec-k">Trạng Thái Tài Khoản</span>
+              <span className={`admin-status-pill ${statusClass}`}>
+                <span className="admin-status-pill-dot" />
+                {statusLabel}
+              </span>
+            </div>
+            <div className="admin-spec-row" style={{ background: "transparent", padding: "0" }}>
+              <span className="admin-spec-k">Ngày Liên Kết Thẻ</span>
+              <span className="admin-spec-v mono">
+                {card.issued_at ? new Date(card.issued_at).toLocaleDateString("vi-VN") : "Chưa liên kết"}
+              </span>
             </div>
           </div>
 
-          {/* Zero-Knowledge Privacy Visual Guard */}
-          <div className="privacy-guard-box">
-            <div className="guard-header">
-              <span className="guard-title">Định Danh Chủ Thẻ Mờ Hóa</span>
-              <span className="guard-badge">OPAQUE ID</span>
-            </div>
-
-            <div className="guard-mask-row">
-              <span className="guard-mask-label">Mã Định Danh (User ID)</span>
-              <span className="guard-mask-val">
-                {card.owner?.id ? card.owner.id : "Chưa liên kết"}
-              </span>
-            </div>
-
-            <div className="guard-mask-row">
-              <span className="guard-mask-label">Email Tài Khoản</span>
-              <span className="guard-mask-val">
-                {maskEmail(card.owner?.email)}
-              </span>
-            </div>
-
-            <div className="guard-mask-row">
-              <span className="guard-mask-label">Trạng Thái Hồ Sơ</span>
-              <span className="text-[13px] font-semibold text-[#1e242c]">
-                1:1 Invariant Shell
-              </span>
-            </div>
-
-            <div className="locked-section-card">
-              <div className="locked-icon-wrap">🔒</div>
-              <p>
-                Cam kết Zero-Knowledge: Hệ thống quản trị thẻ vật lý hoàn toàn không có quyền truy cập hoặc lưu trữ hồ sơ bệnh án cá nhân (PHI) của chủ thẻ.
-              </p>
+          {/* Zero-Knowledge Statement Box */}
+          <div
+            style={{
+              background: "var(--info-bg)",
+              border: "var(--border-width) solid var(--info-border)",
+              borderRadius: "12px",
+              padding: "16px",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "12px",
+            }}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--accent)"
+              strokeWidth="2"
+              style={{ flexShrink: 0, marginTop: "2px" }}
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <div style={{ fontSize: "13px", color: "var(--info-text)", lineHeight: 1.5 }}>
+              <strong>Cam kết Zero-Knowledge: Hệ thống quản trị thẻ vật lý</strong> hoàn toàn không có quyền truy cập hoặc lưu trữ hồ sơ bệnh án cá nhân (PHI) của chủ thẻ. Toàn bộ thông tin y tế, nhóm máu, dị ứng và vị trí SOS đều được mã hóa đầu cuối và không bao giờ xuất hiện trên cổng quản trị này.
             </div>
           </div>
 
-          {/* Direct Switcher Actions */}
-          <div className="flex flex-col gap-2">
+          <div style={{ display: "flex", gap: "12px", marginTop: "auto", paddingTop: "8px" }}>
             <button
               type="button"
-              className="btn-primary"
+              className="admin-btn-primary-action"
+              style={{ flex: 1, justifyContent: "center" }}
               onClick={() => setActiveTab("lifecycle")}
             >
               Quản Lý Trạng Thái Thẻ Này →
             </button>
             <button
               type="button"
-              className="btn-secondary"
+              className="admin-btn-secondary-action"
+              style={{ flex: 1, justifyContent: "center" }}
               onClick={() => setActiveTab("link")}
             >
               Liên Kết / Hủy Liên Kết Chủ Thẻ →
