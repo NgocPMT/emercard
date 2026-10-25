@@ -117,8 +117,11 @@ function getCardStatusBadge(card: AdminCard) {
   if (card.status === "active") {
     return { className: "card-status-pill status-active", label: "Hoạt Động" };
   }
-  if (card.status === "unassigned" || card.status === "assigned") {
-    return { className: "card-status-pill status-available", label: "Sẵn Sàng" };
+  if (card.status === "unassigned") {
+    return { className: "card-status-pill status-available", label: "Phôi Trắng" };
+  }
+  if (card.status === "assigned") {
+    return { className: "card-status-pill status-suspended", label: "Đã Gán" };
   }
   if (card.status === "disabled") {
     return { className: "card-status-pill status-suspended", label: "Tạm Đình Chỉ" };
@@ -431,24 +434,29 @@ function AdminCardsPanel({ searchQuery = "" }: { searchQuery?: string }) {
             <tbody>
               {items.map((card) => {
                 const isActive = card.status === "active";
-                const isAvailable = card.status === "unassigned" || card.status === "assigned";
+                const isUnassigned = card.status === "unassigned";
+                const isAssigned = card.status === "assigned";
                 const isSuspended = card.status === "disabled";
                 const statusClass = isActive
                   ? "success"
-                  : isAvailable
+                  : isUnassigned
                     ? "info"
-                    : isSuspended
+                    : isAssigned
                       ? "warning"
-                      : "danger";
+                      : isSuspended
+                        ? "warning"
+                        : "danger";
                 const statusLabel = isActive
                   ? "Đang Hoạt Động"
-                  : isAvailable
-                    ? "Sẵn Sàng Gán"
-                    : isSuspended
-                      ? "Tạm Đình Chỉ"
-                      : card.status === "lost"
-                        ? "Báo Mất Cắp"
-                        : "Đã Thu Hồi";
+                  : isUnassigned
+                    ? "Phôi Trắng (Chưa Cấp)"
+                    : isAssigned
+                      ? "Đã Gán Hồ Sơ"
+                      : isSuspended
+                        ? "Tạm Đình Chỉ"
+                        : card.status === "lost"
+                          ? "Báo Mất Cắp"
+                          : "Đã Thu Hồi";
 
                 return (
                   <tr

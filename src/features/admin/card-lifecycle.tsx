@@ -59,24 +59,29 @@ export function AdminCardLifecyclePanel({
   };
 
   const isActive = card.status === "active";
-  const isAvailable = card.status === "unassigned" || card.status === "assigned";
+  const isUnassigned = card.status === "unassigned";
+  const isAssigned = card.status === "assigned";
   const isSuspended = card.status === "disabled";
   const statusClass = isActive
     ? "success"
-    : isAvailable
+    : isUnassigned
       ? "info"
-      : isSuspended
+      : isAssigned
         ? "warning"
-        : "danger";
+        : isSuspended
+          ? "warning"
+          : "danger";
   const statusLabel = isActive
     ? "Đang Hoạt Động"
-    : isAvailable
-      ? "Sẵn Sàng Gán"
-      : isSuspended
-        ? "Tạm Đình Chỉ"
-        : card.status === "lost"
-          ? "Báo Mất Cắp"
-          : "Đã Thu Hồi";
+    : isUnassigned
+      ? "Phôi Trắng (Chưa Cấp)"
+      : isAssigned
+        ? "Đã Gán Hồ Sơ"
+        : isSuspended
+          ? "Tạm Đình Chỉ"
+          : card.status === "lost"
+            ? "Báo Mất Cắp"
+            : "Đã Thu Hồi";
 
   return (
     <div className="flex flex-col gap-6" data-od-id="board-card-lifecycle">

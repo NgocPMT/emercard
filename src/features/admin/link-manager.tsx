@@ -28,6 +28,7 @@ import { assignLocation } from "../../lib/navigation";
 import { useSession } from "../session";
 import { ProfileLinkQrLabel } from "./profile-link-qr";
 import { NfcCardPreview } from "./desktop/nfc-card-preview";
+import { AdminAttachCardModal } from "./attach-card-modal";
 
 const linkStatusLabels: Record<PublicLinkSummary["status"], string> = {
   pending: "Chờ gắn thẻ",
@@ -73,7 +74,13 @@ function LinkWorkflow({ selectedUser }: { selectedUser: SafeUser | null }) {
   );
 }
 
-function LinkSummaryRow({ link }: { link: PublicLinkSummary }) {
+function LinkSummaryRow({
+  link,
+  onAttach,
+}: {
+  link: PublicLinkSummary;
+  onAttach?: () => void;
+}) {
   const variant =
     link.status === "active"
       ? "success"
@@ -93,9 +100,21 @@ function LinkSummaryRow({ link }: { link: PublicLinkSummary }) {
             Liên kết thuộc hồ sơ, không chứa token
           </p>
         </div>
-        <StatusBadge variant={variant}>
-          {linkStatusLabels[link.status]}
-        </StatusBadge>
+        <div className="flex items-center gap-2">
+          {link.status === "pending" && onAttach ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={onAttach}
+            >
+              Gắn vào phôi thẻ →
+            </Button>
+          ) : null}
+          <StatusBadge variant={variant}>
+            {linkStatusLabels[link.status]}
+          </StatusBadge>
+        </div>
       </div>
       <div className="mt-3 text-sm text-muted-foreground">
         <p>ID: {link.id}</p>
@@ -119,6 +138,8 @@ export function AdminLinkManagerPanel() {
   const [label, setLabel] = useState("");
   const [lastUrl, setLastUrl] = useState<string | null>(null);
   const [lastLinkLabel, setLastLinkLabel] = useState<string | null>(null);
+  const [lastCreatedLink, setLastCreatedLink] = useState<PublicLinkSummary | null>(null);
+  const [attachingLink, setAttachingLink] = useState<PublicLinkSummary | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [unlinkReason, setUnlinkReason] = useState("broken");
 
@@ -128,6 +149,7 @@ export function AdminLinkManagerPanel() {
       setSelectedUser(user);
       setLastUrl(null);
       setLastLinkLabel(null);
+      setLastCreatedLink(null);
       setMessage(`Đã chọn hồ sơ ${user.email}.`);
       void queryClient.invalidateQueries({
         queryKey: cardKeys.adminUserLinks(user.id),
@@ -138,7 +160,7 @@ export function AdminLinkManagerPanel() {
   const usersQuery = useQuery({
     queryKey: cardKeys.adminUsers(),
     queryFn: ({ signal }) => listAdminUsers("", signal),
-    staleTime: 30_000,
+    staleTime: 10_000,
     retry: (failureCount, error) =>
       isApiError(error)
         ? error.retryable && failureCount < 1
@@ -156,6 +178,7 @@ export function AdminLinkManagerPanel() {
     onSuccess: (result, variables) => {
       setLastUrl(result.public_url);
       setLastLinkLabel(result.link.label ?? null);
+      setLastCreatedLink(result.link);
       setMessage(
         "Đã tạo liên kết thẻ ở trạng thái chờ gắn. Hãy giữ URL này để xác minh mã trên thẻ.",
       );
@@ -421,6 +444,7 @@ export function AdminLinkManagerPanel() {
                           setSelectedUser(user);
                           setLastUrl(null);
                           setLastLinkLabel(null);
+                          setLastCreatedLink(null);
                           setMessage(`Đã chọn hồ sơ ${user.email}.`);
                           void queryClient.invalidateQueries({
                             queryKey: cardKeys.adminUserLinks(user.id),
@@ -474,6 +498,15 @@ export function AdminLinkManagerPanel() {
                   >
                     Sao chép URL một lần
                   </Button>
+                  {lastCreatedLink ? (
+                    <Button
+                      type="button"
+                      variant="primary"
+                      onClick={() => setAttachingLink(lastCreatedLink)}
+                    >
+                      Gắn ngay vào phôi thẻ →
+                    </Button>
+                  ) : null}
                 </div>
                 {lastUrl ? (
                   <>
@@ -546,7 +579,11 @@ export function AdminLinkManagerPanel() {
                   userLinks.length > 0 ? (
                     <div className="space-y-3">
                       {userLinks.map((link) => (
-                        <LinkSummaryRow key={link.id} link={link} />
+                        <LinkSummaryRow
+                          key={link.id}
+                          link={link}
+                          onAttach={() => setAttachingLink(link)}
+                        />
                       ))}
                     </div>
                   ) : (
@@ -878,6 +915,17 @@ export function AdminLinkManagerPanel() {
           </table>
         </div>
       </div>
+
+      <AdminAttachCardModal
+        isOpen={Boolean(attachingLink)}
+        onClose={() => setAttachingLink(null)}
+        link={attachingLink}
+        userId={selectedUser?.id ?? ""}
+        userEmail={selectedUser?.email ?? ""}
+        onSuccess={() => {
+          setMessage("Đã gắn liên kết vào phôi thẻ thành công.");
+        }}
+      />
     </div>
   );
 }
