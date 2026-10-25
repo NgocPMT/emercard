@@ -122,7 +122,7 @@ describe("session provider and gates", () => {
     );
 
     expect(await screen.findByText("Chuyển hướng đến đăng nhập")).toBeInTheDocument();
-    await waitFor(() => expect(replaceLocationMock).toHaveBeenCalledWith("/login?returnTo=%2Fapp"));
+    await waitFor(() => expect(replaceLocationMock).toHaveBeenCalledWith("/login?returnTo=%2Fapp%2Fprofile"));
   });
 
   it("renders auth children immediately while the session bootstrap is still pending", async () => {

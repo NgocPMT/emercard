@@ -7,12 +7,12 @@ describe("return-to validation", () => {
   });
 
   it("rejects external and emergency routes", () => {
-    expect(validateReturnTo("https://evil.example", "user")).toBe("/app");
+    expect(validateReturnTo("https://evil.example", "user")).toBe("/app/profile");
     expect(validateReturnTo("/e/secret", "admin")).toBe("/admin");
   });
 
   it("falls back to the role home", () => {
-    expect(validateReturnTo("/admin/cards", "user")).toBe("/app");
+    expect(validateReturnTo("/admin/cards", "user")).toBe("/app/profile");
     expect(validateReturnTo(undefined, "admin")).toBe("/admin");
   });
 

@@ -30,7 +30,6 @@ import { PageApplicationRoot, useSession } from "../session";
 export type UserAppSection = "overview" | "profile" | "cards";
 
 const navigation = [
-  { href: "/app", label: "Tổng quan" },
   { href: "/app/profile", label: "Hồ sơ y tế" },
   { href: "/app/cards", label: "Thẻ của tôi" },
 ];
@@ -733,15 +732,13 @@ export function UserApplicationRoot({ section }: { section: UserAppSection }) {
     <PageApplicationRoot
       role="user"
       brand={appBrand}
-      title={copy.title}
-      description={copy.description}
       navigation={navigation.map((item) => ({
         ...item,
-        current:
-          item.href === (section === "overview" ? "/app" : `/app/${section}`),
+        current: item.href === `/app/${section}`,
       }))}
       userLabel={<StatusBadge variant="primary">Người dùng</StatusBadge>}
     >
+      <h1 className="sr-only">{copy.title}</h1>
       {section === "overview" ? (
         <ProfileSummaryCard />
       ) : section === "cards" ? (

@@ -21,7 +21,6 @@ import { PageApplicationRoot, useSession } from "../session";
 import { PrivateProfilePanel, type PendingChange } from "./PrivateProfilePanel";
 
 const userNavigation = [
-  { href: "/app", label: "Tổng quan" },
   { href: "/app/profile", label: "Hồ sơ y tế" },
   { href: "/app/cards", label: "Thẻ của tôi" },
 ];
@@ -735,11 +734,10 @@ export function ProfilePageRoot() {
     <PageApplicationRoot
       role="user"
       brand={appBrand}
-      title="Hồ sơ y tế"
-      description="Cập nhật hồ sơ y tế cá nhân"
       navigation={userNavigation.map((item) => ({ ...item, current: item.href === "/app/profile" }))}
       userLabel={<StatusBadge variant="primary">Người dùng</StatusBadge>}
     >
+      <h1 className="sr-only">Hồ sơ y tế</h1>
       <ProfilePageBody />
     </PageApplicationRoot>
   );
