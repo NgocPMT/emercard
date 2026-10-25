@@ -211,21 +211,19 @@ function ProfileViewCard({ profileView, onEdit }: { profileView: ProfileView; on
   const conditions = profile?.important_conditions ?? [];
   const medications = profile?.critical_medications ?? [];
 
+  const isKnownBloodType = Boolean(profile?.blood_type && profile.blood_type !== "unknown");
+
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6" data-od-id="board-profile-view">
       {/* Top Hero Banner */}
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius-panel)] border border-border bg-card p-6 shadow-sm">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 min-w-0">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xl font-bold text-primary">
             {(profile?.display_name || "N").slice(0, 1).toUpperCase()}
           </div>
-          <div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <h3 className="font-semibold text-foreground text-sm">Xem trước trang khẩn cấp</h3>
-              <span>•</span>
-              <span>Chỉ xem trong ứng dụng, không tạo liên kết.</span>
-            </div>
-            <h2 className="patient-name text-2xl sm:text-3xl font-bold tracking-tight text-foreground mt-1">
+          <div className="min-w-0">
+            <h3 className="font-semibold text-foreground text-sm">Xem trước trang khẩn cấp</h3>
+            <h2 className="patient-name text-2xl sm:text-3xl font-bold tracking-tight text-foreground mt-1 truncate">
               {previewValue(profile?.display_name, "Nguyen Van A")}
             </h2>
             <p className="patient-meta text-sm text-muted-foreground mt-0.5">
@@ -236,12 +234,18 @@ function ProfileViewCard({ profileView, onEdit }: { profileView: ProfileView; on
           </div>
         </div>
 
-        <div className="flex items-center gap-5">
-          <div className="blood-type-block text-right">
+        <div className="flex items-center gap-4 sm:gap-5 shrink-0">
+          <div className="blood-type-block text-right shrink-0">
             <span className="blood-type-caption block text-xs font-medium text-muted-foreground">Nhóm máu</span>
-            <span className="blood-type-val font-mono text-3xl font-extrabold text-primary">
-              {bloodTypeLabel(profile?.blood_type)}
-            </span>
+            {isKnownBloodType ? (
+              <span className="blood-type-val font-mono text-2xl sm:text-3xl font-extrabold text-primary leading-tight">
+                {bloodTypeLabel(profile?.blood_type)}
+              </span>
+            ) : (
+              <span className="text-xs sm:text-sm font-medium text-muted-foreground block mt-0.5 whitespace-nowrap">
+                {bloodTypeLabel(profile?.blood_type)}
+              </span>
+            )}
           </div>
           <Button
             type="button"
