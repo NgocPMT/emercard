@@ -45,7 +45,6 @@ describe("AdminApplicationRoot", () => {
     render(<AdminApplicationRoot section="cards" />);
 
     expect(screen.getByRole("img", { name: "EmerCard" })).toHaveAttribute("src", "/logo.png");
-    expect(screen.getAllByRole("heading", { name: "Kho thẻ" })).toHaveLength(1);
     expect(screen.getByText("Đang tải kho thẻ")).toBeInTheDocument();
     expect(screen.queryByText("Chưa có hành động quản trị ở màn hình này")).not.toBeInTheDocument();
   });
@@ -65,7 +64,65 @@ describe("AdminApplicationRoot", () => {
 
     render(<AdminApplicationRoot section="links" />);
 
-    expect(screen.getByRole("heading", { name: "Liên kết hồ sơ" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Tìm người dùng" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Tìm hồ sơ" })).toBeInTheDocument();
   });
+
+  it("renders Board 02 KPI stats and switches to Board 03 batch provisioning", async () => {
+    useQueryMock.mockImplementation(({ queryKey }) => {
+      if (Array.isArray(queryKey) && queryKey.includes("stats")) {
+        return {
+          isPending: false,
+          error: undefined,
+          data: { total: 100, active: 60, available: 30, suspended: 8, lost: 2, void: 0 },
+        };
+      }
+      return {
+        isPending: false,
+        error: undefined,
+        data: {
+          items: [
+            {
+              id: "card-1",
+              serial: "EMC-08422",
+              status: "active",
+              is_current: true,
+              encoding_state: "verified",
+              hardware_uid: "04:A2:8B:E2:19:6C:80",
+              owner: { id: "usr_8923a1", email: "user@example.com" },
+              created_at: "2026-01-01T00:00:00Z",
+              updated_at: "2026-01-01T00:00:00Z",
+            },
+          ],
+          next_cursor: null,
+        },
+      };
+    });
+
+    const { userEvent } = await import("@testing-library/user-event");
+    const user = userEvent.setup();
+
+    render(<AdminApplicationRoot section="cards" />);
+
+    // Board 02 Verification
+    expect(screen.getByRole("button", { name: "+ Nhập Lô Mới" })).toBeInTheDocument();
+    expect(screen.getByText("Tổng Số Thẻ Trong Hệ Thống")).toBeInTheDocument();
+    expect(screen.getByText("EMC-08422")).toBeInTheDocument();
+    expect(screen.getByText("Chi tiết thẻ →")).toBeInTheDocument();
+
+    // Toggle to Board 03 Batch Provisioning
+    const batchButton = screen.getByRole("button", { name: "+ Nhập Lô Mới" });
+    await user.click(batchButton);
+
+    // Board 03 Verification
+    expect(screen.getByRole("button", { name: "← Quay lại Kho Thẻ" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Mã Lô Sản Xuất (Batch ID)")).toHaveValue("BATCH-2026-Q4-VN");
+    expect(screen.getByRole("button", { name: /Xác Nhận Nhập 100 Thẻ Vào Kho/ })).toBeInTheDocument();
+
+    // Cancel back to Board 02
+    const cancelButton = screen.getByRole("button", { name: "← Quay lại Kho Thẻ" });
+    await user.click(cancelButton);
+    expect(screen.getByRole("button", { name: "+ Nhập Lô Mới" })).toBeInTheDocument();
+  });
 });
+

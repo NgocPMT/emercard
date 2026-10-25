@@ -214,16 +214,7 @@ function ProfileViewCard({ profileView, onEdit }: { profileView: ProfileView; on
 
   return (
     <div className="w-full max-w-[420px] mx-auto py-6" data-od-id="board-profile-view">
-      {/* Top Bar with Mode Indicator */}
-      <div className="app-top-header rounded-t-[18px]">
-        <div className="app-brand">
-          <div className="brand-mark">+</div>
-          <span className="brand-name">Hồ Sơ Cứu Sinh</span>
-        </div>
-        <span className="portal-tag">Chế độ xem trước</span>
-      </div>
-
-      <div className="screen-content bg-white border border-[#d3d9e0] border-t-0 rounded-b-[18px] p-5 sm:p-6 shadow-[0_4px_20px_rgba(30,36,44,0.06)] flex flex-col gap-4">
+      <div className="screen-content bg-white border border-[#d3d9e0] rounded-[18px] p-5 sm:p-6 shadow-[0_4px_20px_rgba(30,36,44,0.06)] flex flex-col gap-4">
         <div className="flex items-center justify-between text-xs text-[#64748b] border-b border-[#e2e8f0] pb-2">
           <h3 className="font-semibold text-[#1e242c] text-sm">Xem trước trang khẩn cấp</h3>
           <span>Chỉ xem trong ứng dụng, không tạo liên kết.</span>
@@ -436,18 +427,13 @@ function ProfileEditorCard({ profileView, onCancel }: { profileView: ProfileView
 
   return (
     <div className="w-full max-w-[420px] mx-auto py-6" data-od-id="board-profile-edit">
-      {/* Top Header */}
-      <div className="app-top-header rounded-t-[18px]">
-        <div className="app-brand">
-          <div className="brand-mark">+</div>
-          <span className="brand-name">Chỉnh Sửa Hồ Sơ</span>
+      <div className="screen-content bg-white border border-[#d3d9e0] rounded-[18px] p-5 sm:p-6 shadow-[0_4px_20px_rgba(30,36,44,0.06)] flex flex-col gap-4">
+        <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-3">
+          <span className="font-semibold text-[#1e242c] text-sm">Chỉnh Sửa Hồ Sơ Y Tế</span>
+          <button type="button" className="text-xs font-semibold text-[var(--accent)] hover:underline bg-transparent border-none cursor-pointer p-0" onClick={onCancel}>
+            ← Hủy bỏ
+          </button>
         </div>
-        <button type="button" className="link-subtle" onClick={onCancel}>
-          Hủy
-        </button>
-      </div>
-
-      <div className="screen-content bg-white border border-[#d3d9e0] border-t-0 rounded-b-[18px] p-5 sm:p-6 shadow-[0_4px_20px_rgba(30,36,44,0.06)] flex flex-col gap-4">
         {rootMessage ? (
           <Alert variant="danger" title="Không thể lưu hồ sơ">
             {rootMessage}

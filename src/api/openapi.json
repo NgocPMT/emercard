@@ -1,15 +1,10 @@
 {
   "openapi": "3.1.0",
-  "info": {
-    "title": "EmerCard API",
-    "version": "0.1.0"
-  },
+  "info": { "title": "EmerCard API", "version": "0.1.0" },
   "paths": {
     "/health": {
       "get": {
-        "tags": [
-          "infrastructure"
-        ],
+        "tags": ["infrastructure"],
         "summary": "Health",
         "description": "Return process liveness without contacting MongoDB.",
         "operationId": "health_health_get",
@@ -19,9 +14,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": {
-                    "type": "string"
-                  },
+                  "additionalProperties": { "type": "string" },
                   "type": "object",
                   "title": "Response Health Health Get"
                 }
@@ -33,37 +26,27 @@
     },
     "/ready": {
       "get": {
-        "tags": [
-          "infrastructure"
-        ],
+        "tags": ["infrastructure"],
         "summary": "Ready",
         "description": "Return readiness only when the managed database answers a ping.",
         "operationId": "ready_ready_get",
         "responses": {
           "200": {
             "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+            "content": { "application/json": { "schema": {} } }
           }
         }
       }
     },
     "/api/v1/auth/register": {
       "post": {
-        "tags": [
-          "authentication"
-        ],
+        "tags": ["authentication"],
         "summary": "Register",
         "operationId": "register_api_v1_auth_register_post",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserRegistrationInput"
-              }
+              "schema": { "$ref": "#/components/schemas/UserRegistrationInput" }
             }
           },
           "required": true
@@ -73,9 +56,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CurrentUserOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/CurrentUserOutput" }
               }
             }
           },
@@ -83,9 +64,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -94,17 +73,13 @@
     },
     "/api/v1/auth/login": {
       "post": {
-        "tags": [
-          "authentication"
-        ],
+        "tags": ["authentication"],
         "summary": "Login",
         "operationId": "login_api_v1_auth_login_post",
         "requestBody": {
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserLoginInput"
-              }
+              "schema": { "$ref": "#/components/schemas/UserLoginInput" }
             }
           },
           "required": true
@@ -114,9 +89,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CurrentUserOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/CurrentUserOutput" }
               }
             }
           },
@@ -124,9 +97,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -135,23 +106,15 @@
     },
     "/api/v1/auth/logout": {
       "post": {
-        "tags": [
-          "authentication"
-        ],
+        "tags": ["authentication"],
         "summary": "Logout",
         "operationId": "logout_api_v1_auth_logout_post",
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          }
-        }
+        "responses": { "204": { "description": "Successful Response" } }
       }
     },
     "/api/v1/me": {
       "get": {
-        "tags": [
-          "authentication"
-        ],
+        "tags": ["authentication"],
         "summary": "Current User",
         "operationId": "current_user_api_v1_me_get",
         "responses": {
@@ -159,9 +122,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CurrentUserOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/CurrentUserOutput" }
               }
             }
           }
@@ -170,10 +131,7 @@
     },
     "/api/v1/me/profile/private/authorize": {
       "post": {
-        "tags": [
-          "medical profile",
-          "authentication"
-        ],
+        "tags": ["medical profile", "authentication"],
         "summary": "Authorize Private Profile Write",
         "operationId": "authorize_private_profile_write_api_v1_me_profile_private_authorize_post",
         "requestBody": {
@@ -201,9 +159,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -212,9 +168,7 @@
     },
     "/api/v1/me/profile": {
       "get": {
-        "tags": [
-          "medical profile"
-        ],
+        "tags": ["medical profile"],
         "summary": "Get Profile",
         "operationId": "get_profile_api_v1_me_profile_get",
         "responses": {
@@ -222,18 +176,14 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProfileView"
-                }
+                "schema": { "$ref": "#/components/schemas/ProfileView" }
               }
             }
           }
         }
       },
       "put": {
-        "tags": [
-          "medical profile"
-        ],
+        "tags": ["medical profile"],
         "summary": "Replace Profile",
         "operationId": "replace_profile_api_v1_me_profile_put",
         "parameters": [
@@ -242,14 +192,7 @@
             "in": "header",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "title": "X-Private-Profile-Authorization"
             }
           }
@@ -258,9 +201,7 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProfileUpsertInput"
-              }
+              "schema": { "$ref": "#/components/schemas/ProfileUpsertInput" }
             }
           }
         },
@@ -269,9 +210,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProfileView"
-                }
+                "schema": { "$ref": "#/components/schemas/ProfileView" }
               }
             }
           },
@@ -279,9 +218,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -290,9 +227,7 @@
     },
     "/api/v1/me/profile/public-preview": {
       "get": {
-        "tags": [
-          "medical profile"
-        ],
+        "tags": ["medical profile"],
         "summary": "Public Preview",
         "operationId": "public_preview_api_v1_me_profile_public_preview_get",
         "responses": {
@@ -300,9 +235,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicProfileOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/PublicProfileOutput" }
               }
             }
           }
@@ -311,9 +244,7 @@
     },
     "/api/v1/me/cards": {
       "get": {
-        "tags": [
-          "user cards"
-        ],
+        "tags": ["user cards"],
         "summary": "List My Cards",
         "operationId": "list_my_cards_api_v1_me_cards_get",
         "responses": {
@@ -321,9 +252,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserCardListOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/UserCardListOutput" }
               }
             }
           }
@@ -332,9 +261,7 @@
     },
     "/api/v1/me/cards/{card_id}": {
       "get": {
-        "tags": [
-          "user cards"
-        ],
+        "tags": ["user cards"],
         "summary": "Get My Card",
         "operationId": "get_my_card_api_v1_me_cards__card_id__get",
         "parameters": [
@@ -342,10 +269,7 @@
             "name": "card_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Card Id"
-            }
+            "schema": { "type": "string", "title": "Card Id" }
           }
         ],
         "responses": {
@@ -353,9 +277,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserCardOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/UserCardOutput" }
               }
             }
           },
@@ -363,9 +285,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -374,9 +294,7 @@
     },
     "/api/v1/me/cards/{card_id}/activate": {
       "post": {
-        "tags": [
-          "user cards"
-        ],
+        "tags": ["user cards"],
         "summary": "Activate My Card",
         "operationId": "activate_my_card_api_v1_me_cards__card_id__activate_post",
         "parameters": [
@@ -384,10 +302,7 @@
             "name": "card_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Card Id"
-            }
+            "schema": { "type": "string", "title": "Card Id" }
           }
         ],
         "responses": {
@@ -395,9 +310,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserCardOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/UserCardOutput" }
               }
             }
           },
@@ -405,9 +318,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -416,9 +327,7 @@
     },
     "/api/v1/me/cards/{card_id}/disable": {
       "post": {
-        "tags": [
-          "user cards"
-        ],
+        "tags": ["user cards"],
         "summary": "Disable My Card",
         "operationId": "disable_my_card_api_v1_me_cards__card_id__disable_post",
         "parameters": [
@@ -426,10 +335,7 @@
             "name": "card_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Card Id"
-            }
+            "schema": { "type": "string", "title": "Card Id" }
           }
         ],
         "responses": {
@@ -437,9 +343,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserCardOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/UserCardOutput" }
               }
             }
           },
@@ -447,9 +351,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -458,9 +360,7 @@
     },
     "/api/v1/me/cards/{card_id}/revoke": {
       "post": {
-        "tags": [
-          "user cards"
-        ],
+        "tags": ["user cards"],
         "summary": "Revoke My Card Link",
         "operationId": "revoke_my_card_link_api_v1_me_cards__card_id__revoke_post",
         "parameters": [
@@ -468,10 +368,7 @@
             "name": "card_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Card Id"
-            }
+            "schema": { "type": "string", "title": "Card Id" }
           }
         ],
         "responses": {
@@ -479,9 +376,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserCardOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/UserCardOutput" }
               }
             }
           },
@@ -489,9 +384,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -500,9 +393,7 @@
     },
     "/api/v1/me/cards/{card_id}/access-history": {
       "get": {
-        "tags": [
-          "user cards"
-        ],
+        "tags": ["user cards"],
         "summary": "List My Card Access History",
         "operationId": "list_my_card_access_history_api_v1_me_cards__card_id__access_history_get",
         "parameters": [
@@ -510,10 +401,7 @@
             "name": "card_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Card Id"
-            }
+            "schema": { "type": "string", "title": "Card Id" }
           },
           {
             "name": "limit",
@@ -533,13 +421,8 @@
             "required": false,
             "schema": {
               "anyOf": [
-                {
-                  "type": "string",
-                  "maxLength": 512
-                },
-                {
-                  "type": "null"
-                }
+                { "type": "string", "maxLength": 512 },
+                { "type": "null" }
               ],
               "title": "Cursor"
             }
@@ -560,9 +443,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -571,9 +452,7 @@
     },
     "/api/v1/me/cards/{card_id}/lost": {
       "post": {
-        "tags": [
-          "user cards"
-        ],
+        "tags": ["user cards"],
         "summary": "Report My Card Lost",
         "operationId": "report_my_card_lost_api_v1_me_cards__card_id__lost_post",
         "parameters": [
@@ -581,9 +460,63 @@
             "name": "card_id",
             "in": "path",
             "required": true,
+            "schema": { "type": "string", "title": "Card Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserCardOutput" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/cards/{card_id}/alerts": {
+      "get": {
+        "tags": ["user cards"],
+        "summary": "List My Card Alerts",
+        "operationId": "list_my_card_alerts_api_v1_me_cards__card_id__alerts_get",
+        "parameters": [
+          {
+            "name": "card_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "title": "Card Id" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
             "schema": {
-              "type": "string",
-              "title": "Card Id"
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                { "type": "string", "maxLength": 512 },
+                { "type": "null" }
+              ],
+              "title": "Cursor"
             }
           }
         ],
@@ -593,7 +526,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserCardOutput"
+                  "$ref": "#/components/schemas/LocationAlertHistoryOutput"
                 }
               }
             }
@@ -602,9 +535,104 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/cards/stats": {
+      "get": {
+        "tags": ["admin cards"],
+        "summary": "Get Card Stats",
+        "operationId": "get_card_stats_api_v1_admin_cards_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/CardInventoryStatsOutput"
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/cards/batch": {
+      "post": {
+        "tags": ["admin cards"],
+        "summary": "Provision Card Batch",
+        "operationId": "provision_card_batch_api_v1_admin_cards_batch_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchCardProvisionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchCardProvisionOutput"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/cards/audit-log": {
+      "get": {
+        "tags": ["admin cards"],
+        "summary": "List Card Audit Log",
+        "operationId": "list_card_audit_log_api_v1_admin_cards_audit_log_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustodyEventListOutput"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -613,9 +641,7 @@
     },
     "/api/v1/admin/cards": {
       "post": {
-        "tags": [
-          "admin cards"
-        ],
+        "tags": ["admin cards"],
         "summary": "Create Blank Card",
         "operationId": "create_blank_card_api_v1_admin_cards_post",
         "parameters": [
@@ -623,10 +649,7 @@
             "name": "Idempotency-Key",
             "in": "header",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Idempotency-Key"
-            }
+            "schema": { "type": "string", "title": "Idempotency-Key" }
           }
         ],
         "responses": {
@@ -634,9 +657,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AdminCardOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/AdminCardOutput" }
               }
             }
           },
@@ -644,18 +665,14 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
         }
       },
       "get": {
-        "tags": [
-          "admin cards"
-        ],
+        "tags": ["admin cards"],
         "summary": "List Cards",
         "operationId": "list_cards_api_v1_admin_cards_get",
         "parameters": [
@@ -665,12 +682,8 @@
             "required": false,
             "schema": {
               "anyOf": [
-                {
-                  "$ref": "#/components/schemas/CardStatus"
-                },
-                {
-                  "type": "null"
-                }
+                { "$ref": "#/components/schemas/CardStatus" },
+                { "type": "null" }
               ],
               "title": "Status"
             }
@@ -680,14 +693,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "title": "Owner Id"
             }
           },
@@ -696,15 +702,26 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
               "title": "Serial"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Search"
+            }
+          },
+          {
+            "name": "batch_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [{ "type": "string" }, { "type": "null" }],
+              "title": "Batch Id"
             }
           },
           {
@@ -712,14 +729,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "boolean"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "boolean" }, { "type": "null" }],
               "title": "Is Current"
             }
           },
@@ -730,16 +740,10 @@
             "schema": {
               "anyOf": [
                 {
-                  "enum": [
-                    "not_provisioned",
-                    "link_generated",
-                    "verified"
-                  ],
+                  "enum": ["not_provisioned", "link_generated", "verified"],
                   "type": "string"
                 },
-                {
-                  "type": "null"
-                }
+                { "type": "null" }
               ],
               "title": "Encoding State"
             }
@@ -749,14 +753,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "anyOf": [
-                {
-                  "type": "boolean"
-                },
-                {
-                  "type": "null"
-                }
-              ],
+              "anyOf": [{ "type": "boolean" }, { "type": "null" }],
               "title": "Issued"
             }
           },
@@ -778,13 +775,8 @@
             "required": false,
             "schema": {
               "anyOf": [
-                {
-                  "type": "string",
-                  "maxLength": 512
-                },
-                {
-                  "type": "null"
-                }
+                { "type": "string", "maxLength": 512 },
+                { "type": "null" }
               ],
               "title": "Cursor"
             }
@@ -795,9 +787,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CardListOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/CardListOutput" }
               }
             }
           },
@@ -805,9 +795,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -816,9 +804,7 @@
     },
     "/api/v1/admin/cards/{card_id}/confirm-encoding": {
       "post": {
-        "tags": [
-          "admin cards"
-        ],
+        "tags": ["admin cards"],
         "summary": "Confirm Encoding",
         "operationId": "confirm_encoding_api_v1_admin_cards__card_id__confirm_encoding_post",
         "parameters": [
@@ -826,19 +812,14 @@
             "name": "card_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Card Id"
-            }
+            "schema": { "type": "string", "title": "Card Id" }
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ConfirmEncodingInput"
-              }
+              "schema": { "$ref": "#/components/schemas/ConfirmEncodingInput" }
             }
           }
         },
@@ -847,9 +828,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AdminCardOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/AdminCardOutput" }
               }
             }
           },
@@ -857,9 +836,130 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/cards/{card_id}/status": {
+      "post": {
+        "tags": ["admin cards"],
+        "summary": "Update Card Status",
+        "operationId": "update_card_status_api_v1_admin_cards__card_id__status_post",
+        "parameters": [
+          {
+            "name": "card_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "title": "Card Id" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CardStatusUpdateInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminCardOutput" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/cards/{card_id}/quick-link": {
+      "post": {
+        "tags": ["admin cards"],
+        "summary": "Quick Link Card",
+        "operationId": "quick_link_card_api_v1_admin_cards__card_id__quick_link_post",
+        "parameters": [
+          {
+            "name": "card_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "title": "Card Id" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/QuickLinkCardInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminCardOutput" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/cards/{card_id}/quick-unlink": {
+      "post": {
+        "tags": ["admin cards"],
+        "summary": "Quick Unlink Card",
+        "operationId": "quick_unlink_card_api_v1_admin_cards__card_id__quick_unlink_post",
+        "parameters": [
+          {
+            "name": "card_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "title": "Card Id" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/QuickUnlinkCardInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminCardOutput" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -868,9 +968,7 @@
     },
     "/api/v1/admin/users": {
       "get": {
-        "tags": [
-          "admin cards"
-        ],
+        "tags": ["admin cards"],
         "summary": "List Users",
         "operationId": "list_users_api_v1_admin_users_get",
         "parameters": [
@@ -892,13 +990,8 @@
             "required": false,
             "schema": {
               "anyOf": [
-                {
-                  "type": "string",
-                  "maxLength": 254
-                },
-                {
-                  "type": "null"
-                }
+                { "type": "string", "maxLength": 254 },
+                { "type": "null" }
               ],
               "title": "Search"
             }
@@ -909,9 +1002,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SafeUserListOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/SafeUserListOutput" }
               }
             }
           },
@@ -919,9 +1010,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -930,9 +1019,7 @@
     },
     "/api/v1/admin/users/lookup": {
       "get": {
-        "tags": [
-          "admin cards"
-        ],
+        "tags": ["admin cards"],
         "summary": "Lookup User",
         "operationId": "lookup_user_api_v1_admin_users_lookup_get",
         "parameters": [
@@ -953,9 +1040,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SafeUserOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/SafeUserOutput" }
               }
             }
           },
@@ -963,9 +1048,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -974,9 +1057,7 @@
     },
     "/api/v1/admin/cards/{card_id}/issue": {
       "post": {
-        "tags": [
-          "admin cards"
-        ],
+        "tags": ["admin cards"],
         "summary": "Issue Card",
         "operationId": "issue_card_api_v1_admin_cards__card_id__issue_post",
         "parameters": [
@@ -984,10 +1065,7 @@
             "name": "card_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Card Id"
-            }
+            "schema": { "type": "string", "title": "Card Id" }
           }
         ],
         "responses": {
@@ -995,9 +1073,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AdminCardOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/AdminCardOutput" }
               }
             }
           },
@@ -1005,9 +1081,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1016,9 +1090,7 @@
     },
     "/api/v1/admin/cards/{card_id}/void": {
       "post": {
-        "tags": [
-          "admin cards"
-        ],
+        "tags": ["admin cards"],
         "summary": "Void Card",
         "operationId": "void_card_api_v1_admin_cards__card_id__void_post",
         "parameters": [
@@ -1026,10 +1098,7 @@
             "name": "card_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Card Id"
-            }
+            "schema": { "type": "string", "title": "Card Id" }
           }
         ],
         "responses": {
@@ -1037,9 +1106,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AdminCardOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/AdminCardOutput" }
               }
             }
           },
@@ -1047,9 +1114,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1058,9 +1123,7 @@
     },
     "/api/v1/admin/cards/{card_id}/lost": {
       "post": {
-        "tags": [
-          "admin cards"
-        ],
+        "tags": ["admin cards"],
         "summary": "Lost Card",
         "operationId": "lost_card_api_v1_admin_cards__card_id__lost_post",
         "parameters": [
@@ -1068,10 +1131,7 @@
             "name": "card_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Card Id"
-            }
+            "schema": { "type": "string", "title": "Card Id" }
           }
         ],
         "responses": {
@@ -1079,9 +1139,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AdminCardOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/AdminCardOutput" }
               }
             }
           },
@@ -1089,9 +1147,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1100,9 +1156,7 @@
     },
     "/api/v1/admin/cards/{card_id}/replace": {
       "post": {
-        "tags": [
-          "admin cards"
-        ],
+        "tags": ["admin cards"],
         "summary": "Replace Card",
         "operationId": "replace_card_api_v1_admin_cards__card_id__replace_post",
         "parameters": [
@@ -1110,10 +1164,7 @@
             "name": "card_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Card Id"
-            }
+            "schema": { "type": "string", "title": "Card Id" }
           }
         ],
         "responses": {
@@ -1131,9 +1182,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1142,9 +1191,7 @@
     },
     "/api/v1/admin/cards/{card_id}": {
       "get": {
-        "tags": [
-          "admin cards"
-        ],
+        "tags": ["admin cards"],
         "summary": "Get Card",
         "operationId": "get_card_api_v1_admin_cards__card_id__get",
         "parameters": [
@@ -1152,10 +1199,7 @@
             "name": "card_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Card Id"
-            }
+            "schema": { "type": "string", "title": "Card Id" }
           }
         ],
         "responses": {
@@ -1163,9 +1207,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AdminCardOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/AdminCardOutput" }
               }
             }
           },
@@ -1173,9 +1215,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1184,9 +1224,7 @@
     },
     "/api/v1/admin/users/{user_id}/links": {
       "get": {
-        "tags": [
-          "admin cards"
-        ],
+        "tags": ["admin cards"],
         "summary": "List User Links",
         "operationId": "list_user_links_api_v1_admin_users__user_id__links_get",
         "parameters": [
@@ -1194,10 +1232,7 @@
             "name": "user_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "User Id"
-            }
+            "schema": { "type": "string", "title": "User Id" }
           }
         ],
         "responses": {
@@ -1215,18 +1250,14 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
         }
       },
       "post": {
-        "tags": [
-          "admin cards"
-        ],
+        "tags": ["admin cards"],
         "summary": "Create User Link",
         "operationId": "create_user_link_api_v1_admin_users__user_id__links_post",
         "parameters": [
@@ -1234,19 +1265,14 @@
             "name": "user_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "User Id"
-            }
+            "schema": { "type": "string", "title": "User Id" }
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LinkCreateInput"
-              }
+              "schema": { "$ref": "#/components/schemas/LinkCreateInput" }
             }
           }
         },
@@ -1265,9 +1291,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1276,9 +1300,7 @@
     },
     "/api/v1/admin/cards/{card_id}/link": {
       "get": {
-        "tags": [
-          "admin cards"
-        ],
+        "tags": ["admin cards"],
         "summary": "Get Card Link",
         "operationId": "get_card_link_api_v1_admin_cards__card_id__link_get",
         "parameters": [
@@ -1286,10 +1308,7 @@
             "name": "card_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Card Id"
-            }
+            "schema": { "type": "string", "title": "Card Id" }
           }
         ],
         "responses": {
@@ -1297,9 +1316,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AdminCardOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/AdminCardOutput" }
               }
             }
           },
@@ -1307,9 +1324,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1318,9 +1333,7 @@
     },
     "/api/v1/admin/cards/{card_id}/link/attach": {
       "post": {
-        "tags": [
-          "admin cards"
-        ],
+        "tags": ["admin cards"],
         "summary": "Attach Card Link",
         "operationId": "attach_card_link_api_v1_admin_cards__card_id__link_attach_post",
         "parameters": [
@@ -1328,19 +1341,14 @@
             "name": "card_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Card Id"
-            }
+            "schema": { "type": "string", "title": "Card Id" }
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LinkAttachInput"
-              }
+              "schema": { "$ref": "#/components/schemas/LinkAttachInput" }
             }
           }
         },
@@ -1349,9 +1357,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AdminCardOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/AdminCardOutput" }
               }
             }
           },
@@ -1359,9 +1365,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1370,9 +1374,7 @@
     },
     "/api/v1/admin/cards/{card_id}/link/activate": {
       "post": {
-        "tags": [
-          "admin cards"
-        ],
+        "tags": ["admin cards"],
         "summary": "Activate Card Link",
         "operationId": "activate_card_link_api_v1_admin_cards__card_id__link_activate_post",
         "parameters": [
@@ -1380,10 +1382,7 @@
             "name": "card_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Card Id"
-            }
+            "schema": { "type": "string", "title": "Card Id" }
           }
         ],
         "responses": {
@@ -1391,9 +1390,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AdminCardOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/AdminCardOutput" }
               }
             }
           },
@@ -1401,9 +1398,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1412,9 +1407,7 @@
     },
     "/api/v1/admin/cards/{card_id}/link/disable": {
       "post": {
-        "tags": [
-          "admin cards"
-        ],
+        "tags": ["admin cards"],
         "summary": "Disable Card Link",
         "operationId": "disable_card_link_api_v1_admin_cards__card_id__link_disable_post",
         "parameters": [
@@ -1422,10 +1415,7 @@
             "name": "card_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Card Id"
-            }
+            "schema": { "type": "string", "title": "Card Id" }
           }
         ],
         "responses": {
@@ -1433,9 +1423,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AdminCardOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/AdminCardOutput" }
               }
             }
           },
@@ -1443,9 +1431,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1454,9 +1440,7 @@
     },
     "/api/v1/admin/cards/{card_id}/link/revoke": {
       "post": {
-        "tags": [
-          "admin cards"
-        ],
+        "tags": ["admin cards"],
         "summary": "Revoke Card Link",
         "operationId": "revoke_card_link_api_v1_admin_cards__card_id__link_revoke_post",
         "parameters": [
@@ -1464,19 +1448,14 @@
             "name": "card_id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Card Id"
-            }
+            "schema": { "type": "string", "title": "Card Id" }
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LinkDetachInput"
-              }
+              "schema": { "$ref": "#/components/schemas/LinkDetachInput" }
             }
           }
         },
@@ -1485,9 +1464,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AdminCardOutput"
-                }
+                "schema": { "$ref": "#/components/schemas/AdminCardOutput" }
               }
             }
           },
@@ -1495,9 +1472,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1506,9 +1481,7 @@
     },
     "/api/v1/public/{token}": {
       "get": {
-        "tags": [
-          "public profile lookup"
-        ],
+        "tags": ["public profile lookup"],
         "summary": "Lookup Public Profile",
         "operationId": "lookup_public_profile_api_v1_public__token__get",
         "parameters": [
@@ -1516,10 +1489,7 @@
             "name": "token",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Token"
-            }
+            "schema": { "type": "string", "title": "Token" }
           }
         ],
         "responses": {
@@ -1537,9 +1507,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1548,9 +1516,7 @@
     },
     "/api/v1/public/{token}/location-alert": {
       "post": {
-        "tags": [
-          "public profile lookup"
-        ],
+        "tags": ["public profile lookup"],
         "summary": "Send Location Alert",
         "operationId": "send_location_alert_api_v1_public__token__location_alert_post",
         "parameters": [
@@ -1558,19 +1524,14 @@
             "name": "token",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Token"
-            }
+            "schema": { "type": "string", "title": "Token" }
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LocationAlertRequest"
-              }
+              "schema": { "$ref": "#/components/schemas/LocationAlertRequest" }
             }
           }
         },
@@ -1589,9 +1550,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1600,9 +1559,7 @@
     },
     "/api/v1/emergency/{token}": {
       "get": {
-        "tags": [
-          "emergency lookup"
-        ],
+        "tags": ["emergency lookup"],
         "summary": "Lookup Emergency Profile",
         "operationId": "lookup_emergency_profile_api_v1_emergency__token__get",
         "parameters": [
@@ -1610,10 +1567,7 @@
             "name": "token",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Token"
-            }
+            "schema": { "type": "string", "title": "Token" }
           }
         ],
         "responses": {
@@ -1631,9 +1585,7 @@
             "description": "Validation Error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
               }
             }
           }
@@ -1642,9 +1594,7 @@
     },
     "/api/v1/meta": {
       "get": {
-        "tags": [
-          "infrastructure"
-        ],
+        "tags": ["infrastructure"],
         "summary": "Meta",
         "operationId": "meta_api_v1_meta_get",
         "responses": {
@@ -1668,105 +1618,70 @@
     "schemas": {
       "AdminCardOutput": {
         "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "serial": {
-            "type": "string",
-            "title": "Serial"
-          },
-          "status": {
-            "$ref": "#/components/schemas/CardStatus"
-          },
-          "is_current": {
-            "type": "boolean",
-            "title": "Is Current"
-          },
+          "id": { "type": "string", "title": "Id" },
+          "serial": { "type": "string", "title": "Serial" },
+          "status": { "$ref": "#/components/schemas/CardStatus" },
+          "is_current": { "type": "boolean", "title": "Is Current" },
           "encoding_state": {
             "type": "string",
-            "enum": [
-              "not_provisioned",
-              "link_generated",
-              "verified"
-            ],
+            "enum": ["not_provisioned", "link_generated", "verified"],
             "title": "Encoding State"
           },
           "owner": {
             "anyOf": [
-              {
-                "$ref": "#/components/schemas/CardOwnerOutput"
-              },
-              {
-                "type": "null"
-              }
+              { "$ref": "#/components/schemas/CardOwnerOutput" },
+              { "type": "null" }
             ]
           },
           "link": {
             "anyOf": [
-              {
-                "$ref": "#/components/schemas/PublicLinkSummaryOutput"
-              },
-              {
-                "type": "null"
-              }
+              { "$ref": "#/components/schemas/PublicLinkSummaryOutput" },
+              { "type": "null" }
             ]
           },
           "assignment": {
             "anyOf": [
-              {
-                "$ref": "#/components/schemas/CardAssignmentSummaryOutput"
-              },
-              {
-                "type": "null"
-              }
+              { "$ref": "#/components/schemas/CardAssignmentSummaryOutput" },
+              { "type": "null" }
             ]
+          },
+          "batch_id": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Batch Id"
+          },
+          "chip_type": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Chip Type"
+          },
+          "hardware_uid": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Hardware Uid"
           },
           "provisioned_at": {
             "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
             ],
             "title": "Provisioned At"
           },
           "encoding_verified_at": {
             "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
             ],
             "title": "Encoding Verified At"
           },
           "assigned_at": {
             "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
             ],
             "title": "Assigned At"
           },
           "issued_at": {
             "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
             ],
             "title": "Issued At"
           },
@@ -1796,82 +1711,44 @@
       },
       "AuthenticatedProfileOutput": {
         "properties": {
-          "profile_id": {
-            "type": "string",
-            "title": "Profile Id"
-          },
+          "profile_id": { "type": "string", "title": "Profile Id" },
           "display_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Display Name"
           },
           "birth_year": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
             "title": "Birth Year"
           },
           "gender": {
             "anyOf": [
-              {
-                "$ref": "#/components/schemas/Gender"
-              },
-              {
-                "type": "null"
-              }
+              { "$ref": "#/components/schemas/Gender" },
+              { "type": "null" }
             ]
           },
           "blood_type": {
             "anyOf": [
-              {
-                "$ref": "#/components/schemas/BloodType"
-              },
-              {
-                "type": "null"
-              }
+              { "$ref": "#/components/schemas/BloodType" },
+              { "type": "null" }
             ]
           },
           "critical_allergies": {
-            "items": {
-              "type": "string"
-            },
+            "items": { "type": "string" },
             "type": "array",
             "title": "Critical Allergies"
           },
           "important_conditions": {
-            "items": {
-              "type": "string"
-            },
+            "items": { "type": "string" },
             "type": "array",
             "title": "Important Conditions"
           },
           "critical_medications": {
-            "items": {
-              "type": "string"
-            },
+            "items": { "type": "string" },
             "type": "array",
             "title": "Critical Medications"
           },
           "emergency_note": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Emergency Note"
           },
           "location_alerts_enabled": {
@@ -1884,9 +1761,7 @@
               {
                 "$ref": "#/components/schemas/EncryptedPrivateProfileEnvelope"
               },
-              {
-                "type": "null"
-              }
+              { "type": "null" }
             ]
           },
           "emergency_contacts": {
@@ -1926,30 +1801,66 @@
         "title": "AuthenticatedProfileOutput",
         "description": "Sanitized current-user profile response without ownership or readiness metadata."
       },
+      "BatchCardProvisionInput": {
+        "properties": {
+          "batch_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 3,
+            "title": "Batch Id"
+          },
+          "chip_type": {
+            "type": "string",
+            "maxLength": 32,
+            "title": "Chip Type",
+            "default": "ntag215"
+          },
+          "quantity": {
+            "type": "integer",
+            "maximum": 500.0,
+            "minimum": 1.0,
+            "title": "Quantity"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["batch_id", "quantity"],
+        "title": "BatchCardProvisionInput"
+      },
+      "BatchCardProvisionOutput": {
+        "properties": {
+          "batch_id": { "type": "string", "title": "Batch Id" },
+          "chip_type": { "type": "string", "title": "Chip Type" },
+          "quantity": { "type": "integer", "title": "Quantity" },
+          "serial_start": { "type": "string", "title": "Serial Start" },
+          "serial_end": { "type": "string", "title": "Serial End" },
+          "cards": {
+            "items": { "$ref": "#/components/schemas/AdminCardOutput" },
+            "type": "array",
+            "title": "Cards"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "batch_id",
+          "chip_type",
+          "quantity",
+          "serial_start",
+          "serial_end",
+          "cards"
+        ],
+        "title": "BatchCardProvisionOutput"
+      },
       "BloodType": {
         "type": "string",
-        "enum": [
-          "A+",
-          "A-",
-          "B+",
-          "B-",
-          "AB+",
-          "AB-",
-          "O+",
-          "O-",
-          "unknown"
-        ],
+        "enum": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "unknown"],
         "title": "BloodType"
       },
       "CardAssignmentSummaryOutput": {
         "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "status": {
-            "$ref": "#/components/schemas/CardLinkAssignmentStatus"
-          },
+          "id": { "type": "string", "title": "Id" },
+          "status": { "$ref": "#/components/schemas/CardLinkAssignmentStatus" },
           "attached_at": {
             "type": "string",
             "format": "date-time",
@@ -1962,109 +1873,82 @@
           },
           "detached_at": {
             "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
             ],
             "title": "Detached At"
           },
           "detach_reason": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Detach Reason"
           }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "id",
-          "status",
-          "attached_at",
-          "updated_at"
-        ],
+        "required": ["id", "status", "attached_at", "updated_at"],
         "title": "CardAssignmentSummaryOutput"
+      },
+      "CardInventoryStatsOutput": {
+        "properties": {
+          "total": { "type": "integer", "title": "Total" },
+          "active": { "type": "integer", "title": "Active" },
+          "available": { "type": "integer", "title": "Available" },
+          "suspended": { "type": "integer", "title": "Suspended" },
+          "lost": { "type": "integer", "title": "Lost" },
+          "void": { "type": "integer", "title": "Void" }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "total",
+          "active",
+          "available",
+          "suspended",
+          "lost",
+          "void"
+        ],
+        "title": "CardInventoryStatsOutput"
       },
       "CardLinkAssignmentStatus": {
         "type": "string",
-        "enum": [
-          "active",
-          "disabled",
-          "detached"
-        ],
+        "enum": ["active", "disabled", "detached"],
         "title": "CardLinkAssignmentStatus"
       },
       "CardListOutput": {
         "properties": {
           "items": {
-            "items": {
-              "$ref": "#/components/schemas/AdminCardOutput"
-            },
+            "items": { "$ref": "#/components/schemas/AdminCardOutput" },
             "type": "array",
             "title": "Items"
           },
           "next_cursor": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Next Cursor"
           }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "title": "CardListOutput"
       },
       "CardOwnerOutput": {
         "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "email": {
-            "type": "string",
-            "title": "Email"
-          }
+          "id": { "type": "string", "title": "Id" },
+          "email": { "type": "string", "title": "Email" }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "id",
-          "email"
-        ],
+        "required": ["id", "email"],
         "title": "CardOwnerOutput"
       },
       "CardProvisioningOutput": {
         "properties": {
-          "card": {
-            "$ref": "#/components/schemas/AdminCardOutput"
-          },
-          "provisioning": {
-            "$ref": "#/components/schemas/ProvisioningOutput"
-          }
+          "card": { "$ref": "#/components/schemas/AdminCardOutput" },
+          "provisioning": { "$ref": "#/components/schemas/ProvisioningOutput" }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "card",
-          "provisioning"
-        ],
+        "required": ["card", "provisioning"],
         "title": "CardProvisioningOutput"
       },
       "CardStatus": {
@@ -2081,6 +1965,26 @@
         "title": "CardStatus",
         "description": "Persisted physical-card lifecycle states."
       },
+      "CardStatusUpdateInput": {
+        "properties": {
+          "target_status": {
+            "type": "string",
+            "enum": ["active", "suspended", "lost", "void"],
+            "title": "Target Status"
+          },
+          "reason": {
+            "anyOf": [
+              { "type": "string", "maxLength": 256 },
+              { "type": "null" }
+            ],
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["target_status"],
+        "title": "CardStatusUpdateInput"
+      },
       "ConfirmEncodingInput": {
         "properties": {
           "public_url": {
@@ -2092,28 +1996,21 @@
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "public_url"
-        ],
+        "required": ["public_url"],
         "title": "ConfirmEncodingInput"
       },
       "CurrentUserOutput": {
         "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "email": {
-            "type": "string",
-            "title": "Email"
-          },
+          "id": { "type": "string", "title": "Id" },
+          "email": { "type": "string", "title": "Email" },
           "role": {
             "type": "string",
-            "enum": [
-              "user",
-              "admin"
-            ],
+            "enum": ["user", "admin"],
             "title": "Role"
+          },
+          "phone": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Phone"
           },
           "created_at": {
             "type": "string",
@@ -2128,137 +2025,123 @@
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "id",
-          "email",
-          "role",
-          "created_at",
-          "updated_at"
-        ],
+        "required": ["id", "email", "role", "created_at", "updated_at"],
         "title": "CurrentUserOutput",
         "description": "Authenticated user response with no password material."
       },
-      "EmergencyContactAuthenticated": {
+      "CustodyEventListOutput": {
         "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name"
+          "items": {
+            "items": { "$ref": "#/components/schemas/CustodyEventOutput" },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["items"],
+        "title": "CustodyEventListOutput"
+      },
+      "CustodyEventOutput": {
+        "properties": {
+          "id": { "type": "string", "title": "Id" },
+          "card_id": { "type": "string", "title": "Card Id" },
+          "card_serial": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Card Serial"
           },
-          "relationship": {
-            "type": "string",
-            "title": "Relationship"
+          "event_type": { "type": "string", "title": "Event Type" },
+          "previous_owner_id": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Previous Owner Id"
           },
-          "phone": {
-            "type": "string",
-            "title": "Phone"
+          "new_owner_id": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "New Owner Id"
           },
-          "email": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Email"
+          "performed_by_admin_id": {
+            "type": "string",
+            "title": "Performed By Admin Id"
+          },
+          "reason": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Reason"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "name",
-          "relationship",
-          "phone"
+          "id",
+          "card_id",
+          "event_type",
+          "performed_by_admin_id",
+          "created_at"
         ],
+        "title": "CustodyEventOutput"
+      },
+      "EmergencyContactAuthenticated": {
+        "properties": {
+          "name": { "type": "string", "title": "Name" },
+          "relationship": { "type": "string", "title": "Relationship" },
+          "phone": { "type": "string", "title": "Phone" },
+          "email": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Email"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["name", "relationship", "phone"],
         "title": "EmergencyContactAuthenticated",
         "description": "Owner-only contact projection, including the private email address."
       },
       "EmergencyContactInput": {
         "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "relationship": {
-            "type": "string",
-            "title": "Relationship"
-          },
-          "phone": {
-            "type": "string",
-            "title": "Phone"
-          },
+          "name": { "type": "string", "title": "Name" },
+          "relationship": { "type": "string", "title": "Relationship" },
+          "phone": { "type": "string", "title": "Phone" },
           "email": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Email"
           }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "name",
-          "relationship",
-          "phone"
-        ],
+        "required": ["name", "relationship", "phone"],
         "title": "EmergencyContactInput",
         "description": "Client input; contact IDs are intentionally not client-controlled."
       },
       "EmergencyContactPublic": {
         "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "relationship": {
-            "type": "string",
-            "title": "Relationship"
-          },
-          "phone": {
-            "type": "string",
-            "title": "Phone"
-          }
+          "name": { "type": "string", "title": "Name" },
+          "relationship": { "type": "string", "title": "Relationship" },
+          "phone": { "type": "string", "title": "Phone" }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "name",
-          "relationship",
-          "phone"
-        ],
+        "required": ["name", "relationship", "phone"],
         "title": "EmergencyContactPublic",
         "description": "Explicit public allowlist; the internal contact ID is excluded."
       },
       "EmergencyProfileResponse": {
         "properties": {
-          "profile": {
-            "$ref": "#/components/schemas/PublicProfileOutput"
-          }
+          "profile": { "$ref": "#/components/schemas/PublicProfileOutput" }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "profile"
-        ],
+        "required": ["profile"],
         "title": "EmergencyProfileResponse",
         "description": "Envelope for the allowlisted emergency profile projection."
       },
       "EncryptedPrivateProfileEnvelope": {
         "properties": {
-          "version": {
-            "type": "integer",
-            "const": 1,
-            "title": "Version"
-          },
-          "kdf": {
-            "$ref": "#/components/schemas/PrivateProfileKdfParameters"
-          },
+          "version": { "type": "integer", "const": 1, "title": "Version" },
+          "kdf": { "$ref": "#/components/schemas/PrivateProfileKdfParameters" },
           "nonce": {
             "type": "string",
             "maxLength": 128,
@@ -2293,20 +2176,13 @@
       },
       "Gender": {
         "type": "string",
-        "enum": [
-          "female",
-          "male",
-          "other",
-          "prefer_not_to_say"
-        ],
+        "enum": ["female", "male", "other", "prefer_not_to_say"],
         "title": "Gender"
       },
       "HTTPValidationError": {
         "properties": {
           "detail": {
-            "items": {
-              "$ref": "#/components/schemas/ValidationError"
-            },
+            "items": { "$ref": "#/components/schemas/ValidationError" },
             "type": "array",
             "title": "Detail"
           }
@@ -2316,51 +2192,52 @@
       },
       "LinkAccessEventOutput": {
         "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
+          "id": { "type": "string", "title": "Id" },
           "accessed_at": {
             "type": "string",
             "format": "date-time",
             "title": "Accessed At"
+          },
+          "device": {
+            "type": "string",
+            "title": "Device",
+            "default": "Thi\u1ebft b\u1ecb di \u0111\u1ed9ng"
+          },
+          "latency_ms": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Latency Ms"
           }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "id",
-          "accessed_at"
-        ],
+        "required": ["id", "accessed_at"],
         "title": "LinkAccessEventOutput",
-        "description": "Minimal event projection exposed to the authenticated profile owner."
+        "description": "Event projection exposed to the authenticated profile owner."
       },
       "LinkAccessHistoryOutput": {
         "properties": {
           "items": {
-            "items": {
-              "$ref": "#/components/schemas/LinkAccessEventOutput"
-            },
+            "items": { "$ref": "#/components/schemas/LinkAccessEventOutput" },
             "type": "array",
             "title": "Items"
           },
           "next_cursor": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Next Cursor"
+          },
+          "scans_this_month": {
+            "type": "integer",
+            "title": "Scans This Month",
+            "default": 0
+          },
+          "average_latency_ms": {
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
+            "title": "Average Latency Ms"
           }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "title": "LinkAccessHistoryOutput"
       },
       "LinkAttachInput": {
@@ -2374,47 +2251,31 @@
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "public_access_link_id"
-        ],
+        "required": ["public_access_link_id"],
         "title": "LinkAttachInput"
       },
       "LinkCreateInput": {
         "properties": {
-          "purpose": {
-            "$ref": "#/components/schemas/PublicLinkPurpose"
-          },
+          "purpose": { "$ref": "#/components/schemas/PublicLinkPurpose" },
           "label": {
             "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 128
-              },
-              {
-                "type": "null"
-              }
+              { "type": "string", "maxLength": 128 },
+              { "type": "null" }
             ],
             "title": "Label"
           }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "purpose"
-        ],
+        "required": ["purpose"],
         "title": "LinkCreateInput"
       },
       "LinkDetachInput": {
         "properties": {
           "reason": {
             "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 256
-              },
-              {
-                "type": "null"
-              }
+              { "type": "string", "maxLength": 256 },
+              { "type": "null" }
             ],
             "title": "Reason"
           }
@@ -2425,26 +2286,79 @@
       },
       "LinkProvisioningOutput": {
         "properties": {
-          "link": {
-            "$ref": "#/components/schemas/PublicLinkSummaryOutput"
+          "link": { "$ref": "#/components/schemas/PublicLinkSummaryOutput" },
+          "public_token": { "type": "string", "title": "Public Token" },
+          "public_url": { "type": "string", "title": "Public Url" }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["link", "public_token", "public_url"],
+        "title": "LinkProvisioningOutput"
+      },
+      "LocationAlertHistoryOutput": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LocationAlertIncidentOutput"
+            },
+            "type": "array",
+            "title": "Items"
           },
-          "public_token": {
-            "type": "string",
-            "title": "Public Token"
-          },
-          "public_url": {
-            "type": "string",
-            "title": "Public Url"
+          "next_cursor": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Next Cursor"
           }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "link",
-          "public_token",
-          "public_url"
-        ],
-        "title": "LinkProvisioningOutput"
+        "required": ["items"],
+        "title": "LocationAlertHistoryOutput"
+      },
+      "LocationAlertIncidentOutput": {
+        "properties": {
+          "id": { "type": "string", "title": "Id" },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["sent", "provider_error", "unavailable", "cooldown"],
+            "title": "Status"
+          },
+          "latitude": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }],
+            "title": "Latitude"
+          },
+          "longitude": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }],
+            "title": "Longitude"
+          },
+          "accuracy_meters": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }],
+            "title": "Accuracy Meters"
+          },
+          "nearby_place": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Nearby Place"
+          },
+          "map_url": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Map Url"
+          },
+          "recipients": {
+            "items": {
+              "$ref": "#/components/schemas/SmsDeliveryReceiptOutput"
+            },
+            "type": "array",
+            "title": "Recipients"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["id", "created_at", "status"],
+        "title": "LocationAlertIncidentOutput"
       },
       "LocationAlertRequest": {
         "properties": {
@@ -2474,12 +2388,7 @@
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "latitude",
-          "longitude",
-          "accuracy_meters",
-          "occurred_at"
-        ],
+        "required": ["latitude", "longitude", "accuracy_meters", "occurred_at"],
         "title": "LocationAlertRequest",
         "description": "Only accept location data produced by the consenting browser."
       },
@@ -2487,19 +2396,13 @@
         "properties": {
           "status": {
             "type": "string",
-            "enum": [
-              "sent",
-              "unavailable",
-              "cooldown"
-            ],
+            "enum": ["sent", "unavailable", "cooldown"],
             "title": "Status"
           }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "status"
-        ],
+        "required": ["status"],
         "title": "LocationAlertResponse",
         "description": "Neutral response that does not disclose recipients or provider state."
       },
@@ -2514,9 +2417,7 @@
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "password"
-        ],
+        "required": ["password"],
         "title": "PrivateProfileAuthorizationInput",
         "description": "Current account password used only to authorize private-profile changes."
       },
@@ -2541,11 +2442,7 @@
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "authorization_token",
-          "expires_at",
-          "purpose"
-        ],
+        "required": ["authorization_token", "expires_at", "purpose"],
         "title": "PrivateProfileAuthorizationOutput",
         "description": "Short-lived bearer authorization for an owner private-profile write."
       },
@@ -2615,11 +2512,7 @@
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "algorithm",
-          "nonce",
-          "ciphertext"
-        ],
+        "required": ["algorithm", "nonce", "ciphertext"],
         "title": "PrivateProfileKeyWrap",
         "description": "Opaque AES-GCM wrapped data-encryption key material."
       },
@@ -2627,17 +2520,11 @@
         "properties": {
           "status": {
             "type": "string",
-            "enum": [
-              "not_started",
-              "incomplete",
-              "ready"
-            ],
+            "enum": ["not_started", "incomplete", "ready"],
             "title": "Status"
           },
           "missing_fields": {
-            "items": {
-              "type": "string"
-            },
+            "items": { "type": "string" },
             "type": "array",
             "title": "Missing Fields"
           },
@@ -2669,77 +2556,42 @@
       "ProfileUpsertInput": {
         "properties": {
           "display_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Display Name"
           },
           "birth_year": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
             "title": "Birth Year"
           },
           "gender": {
             "anyOf": [
-              {
-                "$ref": "#/components/schemas/Gender"
-              },
-              {
-                "type": "null"
-              }
+              { "$ref": "#/components/schemas/Gender" },
+              { "type": "null" }
             ]
           },
           "blood_type": {
             "anyOf": [
-              {
-                "$ref": "#/components/schemas/BloodType"
-              },
-              {
-                "type": "null"
-              }
+              { "$ref": "#/components/schemas/BloodType" },
+              { "type": "null" }
             ]
           },
           "critical_allergies": {
-            "items": {
-              "type": "string"
-            },
+            "items": { "type": "string" },
             "type": "array",
             "title": "Critical Allergies"
           },
           "important_conditions": {
-            "items": {
-              "type": "string"
-            },
+            "items": { "type": "string" },
             "type": "array",
             "title": "Important Conditions"
           },
           "critical_medications": {
-            "items": {
-              "type": "string"
-            },
+            "items": { "type": "string" },
             "type": "array",
             "title": "Critical Medications"
           },
           "emergency_note": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Emergency Note"
           },
           "location_alerts_enabled": {
@@ -2752,15 +2604,11 @@
               {
                 "$ref": "#/components/schemas/EncryptedPrivateProfileEnvelope"
               },
-              {
-                "type": "null"
-              }
+              { "type": "null" }
             ]
           },
           "emergency_contacts": {
-            "items": {
-              "$ref": "#/components/schemas/EmergencyContactInput"
-            },
+            "items": { "$ref": "#/components/schemas/EmergencyContactInput" },
             "type": "array",
             "title": "Emergency Contacts"
           }
@@ -2774,105 +2622,60 @@
         "properties": {
           "profile": {
             "anyOf": [
-              {
-                "$ref": "#/components/schemas/AuthenticatedProfileOutput"
-              },
-              {
-                "type": "null"
-              }
+              { "$ref": "#/components/schemas/AuthenticatedProfileOutput" },
+              { "type": "null" }
             ]
           },
-          "readiness": {
-            "$ref": "#/components/schemas/ProfileReadiness"
-          }
+          "readiness": { "$ref": "#/components/schemas/ProfileReadiness" }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "profile",
-          "readiness"
-        ],
+        "required": ["profile", "readiness"],
         "title": "ProfileView",
         "description": "Current-user profile envelope with explicit readiness metadata."
       },
       "ProvisioningOutput": {
         "properties": {
-          "public_token": {
-            "type": "string",
-            "title": "Public Token"
-          },
-          "public_url": {
-            "type": "string",
-            "title": "Public Url"
-          }
+          "public_token": { "type": "string", "title": "Public Token" },
+          "public_url": { "type": "string", "title": "Public Url" }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "public_token",
-          "public_url"
-        ],
+        "required": ["public_token", "public_url"],
         "title": "ProvisioningOutput"
       },
       "PublicAccessLinkStatus": {
         "type": "string",
-        "enum": [
-          "pending",
-          "active",
-          "disabled",
-          "revoked",
-          "expired"
-        ],
+        "enum": ["pending", "active", "disabled", "revoked", "expired"],
         "title": "PublicAccessLinkStatus"
       },
       "PublicLinkListOutput": {
         "properties": {
           "items": {
-            "items": {
-              "$ref": "#/components/schemas/PublicLinkSummaryOutput"
-            },
+            "items": { "$ref": "#/components/schemas/PublicLinkSummaryOutput" },
             "type": "array",
             "title": "Items"
           }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "title": "PublicLinkListOutput"
       },
       "PublicLinkPurpose": {
         "type": "string",
-        "enum": [
-          "card",
-          "standalone"
-        ],
+        "enum": ["card", "standalone"],
         "title": "PublicLinkPurpose"
       },
       "PublicLinkSummaryOutput": {
         "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "purpose": {
-            "$ref": "#/components/schemas/PublicLinkPurpose"
-          },
+          "id": { "type": "string", "title": "Id" },
+          "purpose": { "$ref": "#/components/schemas/PublicLinkPurpose" },
           "label": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Label"
           },
-          "status": {
-            "$ref": "#/components/schemas/PublicAccessLinkStatus"
-          },
+          "status": { "$ref": "#/components/schemas/PublicAccessLinkStatus" },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -2885,154 +2688,85 @@
           },
           "activated_at": {
             "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
             ],
             "title": "Activated At"
           },
           "disabled_at": {
             "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
             ],
             "title": "Disabled At"
           },
           "revoked_at": {
             "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
             ],
             "title": "Revoked At"
           },
           "expires_at": {
             "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
             ],
             "title": "Expires At"
           },
           "expired_at": {
             "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
             ],
             "title": "Expired At"
           }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "id",
-          "purpose",
-          "status",
-          "created_at",
-          "updated_at"
-        ],
+        "required": ["id", "purpose", "status", "created_at", "updated_at"],
         "title": "PublicLinkSummaryOutput"
       },
       "PublicProfileOutput": {
         "properties": {
-          "profile_id": {
-            "type": "string",
-            "title": "Profile Id"
-          },
+          "profile_id": { "type": "string", "title": "Profile Id" },
           "display_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Display Name"
           },
           "birth_year": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "integer" }, { "type": "null" }],
             "title": "Birth Year"
           },
           "gender": {
             "anyOf": [
-              {
-                "$ref": "#/components/schemas/Gender"
-              },
-              {
-                "type": "null"
-              }
+              { "$ref": "#/components/schemas/Gender" },
+              { "type": "null" }
             ]
           },
           "blood_type": {
             "anyOf": [
-              {
-                "$ref": "#/components/schemas/BloodType"
-              },
-              {
-                "type": "null"
-              }
+              { "$ref": "#/components/schemas/BloodType" },
+              { "type": "null" }
             ]
           },
           "critical_allergies": {
-            "items": {
-              "type": "string"
-            },
+            "items": { "type": "string" },
             "type": "array",
             "title": "Critical Allergies"
           },
           "important_conditions": {
-            "items": {
-              "type": "string"
-            },
+            "items": { "type": "string" },
             "type": "array",
             "title": "Important Conditions"
           },
           "critical_medications": {
-            "items": {
-              "type": "string"
-            },
+            "items": { "type": "string" },
             "type": "array",
             "title": "Critical Medications"
           },
           "emergency_note": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Emergency Note"
           },
           "private_profile_envelope": {
@@ -3040,15 +2774,11 @@
               {
                 "$ref": "#/components/schemas/EncryptedPrivateProfileEnvelope"
               },
-              {
-                "type": "null"
-              }
+              { "type": "null" }
             ]
           },
           "emergency_contacts": {
-            "items": {
-              "$ref": "#/components/schemas/EmergencyContactPublic"
-            },
+            "items": { "$ref": "#/components/schemas/EmergencyContactPublic" },
             "type": "array",
             "title": "Emergency Contacts"
           },
@@ -3078,51 +2808,69 @@
       },
       "PublicProfileResponse": {
         "properties": {
-          "profile": {
-            "$ref": "#/components/schemas/PublicProfileOutput"
+          "profile": { "$ref": "#/components/schemas/PublicProfileOutput" }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["profile"],
+        "title": "PublicProfileResponse",
+        "description": "Envelope for the allowlisted public profile projection."
+      },
+      "QuickLinkCardInput": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "User Id"
+          },
+          "reason": {
+            "anyOf": [
+              { "type": "string", "maxLength": 256 },
+              { "type": "null" }
+            ],
+            "title": "Reason"
           }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "profile"
-        ],
-        "title": "PublicProfileResponse",
-        "description": "Envelope for the allowlisted public profile projection."
+        "required": ["user_id"],
+        "title": "QuickLinkCardInput"
+      },
+      "QuickUnlinkCardInput": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              { "type": "string", "maxLength": 256 },
+              { "type": "null" }
+            ],
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "QuickUnlinkCardInput"
       },
       "SafeUserListOutput": {
         "properties": {
           "items": {
-            "items": {
-              "$ref": "#/components/schemas/SafeUserOutput"
-            },
+            "items": { "$ref": "#/components/schemas/SafeUserOutput" },
             "type": "array",
             "title": "Items"
           }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "title": "SafeUserListOutput"
       },
       "SafeUserOutput": {
         "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "email": {
-            "type": "string",
-            "title": "Email"
-          },
+          "id": { "type": "string", "title": "Id" },
+          "email": { "type": "string", "title": "Email" },
           "role": {
             "type": "string",
-            "enum": [
-              "user",
-              "admin"
-            ],
+            "enum": ["user", "admin"],
             "title": "Role"
           },
           "created_at": {
@@ -3138,49 +2886,51 @@
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "id",
-          "email",
-          "role",
-          "created_at",
-          "updated_at"
-        ],
+        "required": ["id", "email", "role", "created_at", "updated_at"],
         "title": "SafeUserOutput"
+      },
+      "SmsDeliveryReceiptOutput": {
+        "properties": {
+          "recipient_name": { "type": "string", "title": "Recipient Name" },
+          "recipient_phone": { "type": "string", "title": "Recipient Phone" },
+          "recipient_relationship": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Recipient Relationship"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["sent", "failed"],
+            "title": "Status"
+          },
+          "provider_id": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Provider Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": ["recipient_name", "recipient_phone", "status"],
+        "title": "SmsDeliveryReceiptOutput"
       },
       "UserCardListOutput": {
         "properties": {
           "cards": {
-            "items": {
-              "$ref": "#/components/schemas/UserCardOutput"
-            },
+            "items": { "$ref": "#/components/schemas/UserCardOutput" },
             "type": "array",
             "title": "Cards"
           }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "cards"
-        ],
+        "required": ["cards"],
         "title": "UserCardListOutput"
       },
       "UserCardOutput": {
         "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "serial": {
-            "type": "string",
-            "title": "Serial"
-          },
-          "status": {
-            "$ref": "#/components/schemas/CardStatus"
-          },
-          "is_current": {
-            "type": "boolean",
-            "title": "Is Current"
-          },
+          "id": { "type": "string", "title": "Id" },
+          "serial": { "type": "string", "title": "Serial" },
+          "status": { "$ref": "#/components/schemas/CardStatus" },
+          "is_current": { "type": "boolean", "title": "Is Current" },
           "issued_at": {
             "type": "string",
             "format": "date-time",
@@ -3188,25 +2938,15 @@
           },
           "activated_at": {
             "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
             ],
             "title": "Activated At"
           },
           "disabled_at": {
             "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
             ],
             "title": "Disabled At"
           },
@@ -3220,62 +2960,28 @@
             "format": "date-time",
             "title": "Updated At"
           },
-          "can_activate": {
-            "type": "boolean",
-            "title": "Can Activate"
-          },
-          "can_disable": {
-            "type": "boolean",
-            "title": "Can Disable"
-          },
-          "can_revoke": {
-            "type": "boolean",
-            "title": "Can Revoke"
-          },
-          "can_report_lost": {
-            "type": "boolean",
-            "title": "Can Report Lost"
-          },
+          "can_activate": { "type": "boolean", "title": "Can Activate" },
+          "can_disable": { "type": "boolean", "title": "Can Disable" },
+          "can_revoke": { "type": "boolean", "title": "Can Revoke" },
+          "can_report_lost": { "type": "boolean", "title": "Can Report Lost" },
           "blocking_reason": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Blocking Reason"
           },
           "link_status": {
             "anyOf": [
-              {
-                "$ref": "#/components/schemas/PublicAccessLinkStatus"
-              },
-              {
-                "type": "null"
-              }
+              { "$ref": "#/components/schemas/PublicAccessLinkStatus" },
+              { "type": "null" }
             ]
           },
           "link_purpose": {
             "anyOf": [
-              {
-                "$ref": "#/components/schemas/PublicLinkPurpose"
-              },
-              {
-                "type": "null"
-              }
+              { "$ref": "#/components/schemas/PublicLinkPurpose" },
+              { "type": "null" }
             ]
           },
           "link_label": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
             "title": "Link Label"
           }
         },
@@ -3316,10 +3022,7 @@
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "email",
-          "password"
-        ],
+        "required": ["email", "password"],
         "title": "UserLoginInput"
       },
       "UserRegistrationInput": {
@@ -3330,6 +3033,13 @@
             "minLength": 3,
             "title": "Email"
           },
+          "phone": {
+            "anyOf": [
+              { "type": "string", "maxLength": 32 },
+              { "type": "null" }
+            ],
+            "title": "Phone"
+          },
           "password": {
             "type": "string",
             "maxLength": 128,
@@ -3339,51 +3049,24 @@
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "email",
-          "password"
-        ],
+        "required": ["email", "password"],
         "title": "UserRegistrationInput",
         "description": "Registration input kept separate from the persistence document."
       },
       "ValidationError": {
         "properties": {
           "loc": {
-            "items": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ]
-            },
+            "items": { "anyOf": [{ "type": "string" }, { "type": "integer" }] },
             "type": "array",
             "title": "Location"
           },
-          "msg": {
-            "type": "string",
-            "title": "Message"
-          },
-          "type": {
-            "type": "string",
-            "title": "Error Type"
-          },
-          "input": {
-            "title": "Input"
-          },
-          "ctx": {
-            "type": "object",
-            "title": "Context"
-          }
+          "msg": { "type": "string", "title": "Message" },
+          "type": { "type": "string", "title": "Error Type" },
+          "input": { "title": "Input" },
+          "ctx": { "type": "object", "title": "Context" }
         },
         "type": "object",
-        "required": [
-          "loc",
-          "msg",
-          "type"
-        ],
+        "required": ["loc", "msg", "type"],
         "title": "ValidationError"
       }
     }

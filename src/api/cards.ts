@@ -96,6 +96,9 @@ const adminCardSchema = z
       .optional(),
     link: publicLinkSummarySchema.nullable().optional(),
     assignment: cardAssignmentSummarySchema.nullable().optional(),
+    batch_id: z.string().nullable().optional(),
+    chip_type: z.string().nullable().optional(),
+    hardware_uid: z.string().nullable().optional(),
     provisioned_at: z.string().nullable().optional(),
     encoding_verified_at: z.string().nullable().optional(),
     assigned_at: z.string().nullable().optional(),
@@ -131,6 +134,40 @@ const linkAccessHistoryResponseSchema = z.object({
 });
 const adminCardResponseSchema = adminCardSchema;
 
+const cardInventoryStatsSchema = z.object({
+  total: z.number(),
+  active: z.number(),
+  available: z.number(),
+  suspended: z.number(),
+  lost: z.number(),
+  void: z.number(),
+});
+
+const batchCardProvisionResponseSchema = z.object({
+  batch_id: z.string(),
+  chip_type: z.string(),
+  quantity: z.number(),
+  serial_start: z.string(),
+  serial_end: z.string(),
+  cards: z.array(adminCardSchema),
+});
+
+const custodyEventSchema = z.object({
+  id: z.string(),
+  card_id: z.string(),
+  card_serial: z.string(),
+  event_type: z.string(),
+  previous_owner_id: z.string().nullable().optional(),
+  new_owner_id: z.string().nullable().optional(),
+  performed_by_admin_id: z.string().nullable().optional(),
+  reason: z.string().nullable().optional(),
+  created_at: z.string(),
+});
+
+const custodyEventListResponseSchema = z.object({
+  items: z.array(custodyEventSchema),
+});
+
 export type UserCard = z.infer<typeof userCardSchema>;
 export type AdminCard = z.infer<typeof adminCardSchema>;
 export type PublicLinkSummary = z.infer<typeof publicLinkSummarySchema>;
@@ -145,12 +182,31 @@ export type LinkAccessEvent = z.infer<typeof linkAccessEventSchema>;
 export type LinkAccessHistoryResponse = z.infer<typeof linkAccessHistoryResponseSchema>;
 export type SafeUser = z.infer<typeof safeUserSchema>;
 export type SafeUserListResponse = z.infer<typeof safeUserListResponseSchema>;
+export type CardInventoryStats = z.infer<typeof cardInventoryStatsSchema>;
+export type BatchCardProvisionResponse = z.infer<
+  typeof batchCardProvisionResponseSchema
+>;
+export type CustodyEvent = z.infer<typeof custodyEventSchema>;
+export type CustodyEventListResponse = z.infer<
+  typeof custodyEventListResponseSchema
+>;
 
 export const cardKeys = {
   myCards: ["cards", "my"] as const,
   myCard: (cardId: string) => ["cards", "my", cardId] as const,
   myCardAccessHistory: (cardId: string) => ["cards", "my", cardId, "access-history"] as const,
   adminCards: ["cards", "admin"] as const,
+  adminCardList: (filters?: { search?: string; status?: string }) =>
+    [
+      "cards",
+      "admin",
+      "list",
+      filters?.search?.trim().toLowerCase() ?? "",
+      filters?.status ?? "all",
+    ] as const,
+  adminStats: ["cards", "admin", "stats"] as const,
+  adminCustodyEvents: (limit?: number) =>
+    ["cards", "admin", "custody-events", limit ?? 20] as const,
   adminCard: (cardId: string) => ["cards", "admin", cardId] as const,
   adminUsers: (search = "") =>
     ["users", "admin", "list", search.trim().toLowerCase()] as const,
@@ -207,10 +263,36 @@ export const reportMyCardLost = (cardId: string, signal?: AbortSignal) =>
   userCardMutation(cardId, "lost", signal);
 
 export async function getAdminCards(
+  options?:
+    | {
+        search?: string;
+        status?: string;
+        limit?: number;
+        cursor?: string | null;
+      }
+    | AbortSignal,
   signal?: AbortSignal,
 ): Promise<AdminCardsResponse> {
+  let resolvedSignal = signal;
+  let queryParams = "";
+
+  if (options instanceof AbortSignal) {
+    resolvedSignal = options;
+  } else if (options && typeof options === "object") {
+    const params = new URLSearchParams();
+    if (options.search?.trim()) params.set("search", options.search.trim());
+    if (options.status && options.status !== "all") params.set("status", options.status);
+    if (options.limit) params.set("limit", String(options.limit));
+    if (options.cursor) params.set("cursor", options.cursor);
+    const qs = params.toString();
+    if (qs) queryParams = `?${qs}`;
+  }
+
   return adminCardsResponseSchema.parse(
-    await requestJson<unknown>({ path: "/admin/cards", signal }),
+    await requestJson<unknown>({
+      path: `/admin/cards${queryParams}`,
+      signal: resolvedSignal,
+    }),
   );
 }
 
@@ -391,6 +473,85 @@ export async function revokeAdminCardLink(
       path: `/admin/cards/${encodeURIComponent(cardId)}/link/revoke`,
       method: "POST",
       body: { reason: reason ?? null },
+      signal,
+    }),
+  );
+}
+
+export async function getAdminInventoryStats(
+  signal?: AbortSignal,
+): Promise<CardInventoryStats> {
+  return cardInventoryStatsSchema.parse(
+    await requestJson<unknown>({ path: "/admin/cards/stats", signal }),
+  );
+}
+
+export async function batchProvisionCards(
+  payload: { batch_id: string; chip_type: string; quantity: number },
+  signal?: AbortSignal,
+): Promise<BatchCardProvisionResponse> {
+  return batchCardProvisionResponseSchema.parse(
+    await requestJson<unknown>({
+      path: "/admin/cards/batch",
+      method: "POST",
+      body: payload,
+      signal,
+    }),
+  );
+}
+
+export async function updateAdminCardStatus(
+  cardId: string,
+  payload: { target_status: string; reason: string },
+  signal?: AbortSignal,
+): Promise<AdminCard> {
+  return adminCardResponseSchema.parse(
+    await requestJson<unknown>({
+      path: `/admin/cards/${encodeURIComponent(cardId)}/status`,
+      method: "POST",
+      body: payload,
+      signal,
+    }),
+  );
+}
+
+export async function quickLinkAdminCard(
+  cardId: string,
+  payload: { user_id: string; reason: string },
+  signal?: AbortSignal,
+): Promise<AdminCard> {
+  return adminCardResponseSchema.parse(
+    await requestJson<unknown>({
+      path: `/admin/cards/${encodeURIComponent(cardId)}/quick-link`,
+      method: "POST",
+      body: payload,
+      signal,
+    }),
+  );
+}
+
+export async function quickUnlinkAdminCard(
+  cardId: string,
+  payload: { reason: string },
+  signal?: AbortSignal,
+): Promise<AdminCard> {
+  return adminCardResponseSchema.parse(
+    await requestJson<unknown>({
+      path: `/admin/cards/${encodeURIComponent(cardId)}/quick-unlink`,
+      method: "POST",
+      body: payload,
+      signal,
+    }),
+  );
+}
+
+export async function listAdminCustodyEvents(
+  limit = 20,
+  signal?: AbortSignal,
+): Promise<CustodyEventListResponse> {
+  return custodyEventListResponseSchema.parse(
+    await requestJson<unknown>({
+      path: `/admin/cards/audit-log?limit=${encodeURIComponent(limit)}`,
       signal,
     }),
   );

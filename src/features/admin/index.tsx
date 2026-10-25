@@ -12,6 +12,7 @@ import {
   cardKeys,
   createBlankCard,
   getAdminCards,
+  getAdminInventoryStats,
   issueCard,
   reportAdminCardLost,
   replaceCard,
@@ -23,6 +24,7 @@ import { assignLocation } from "../../lib/navigation";
 import { PageApplicationRoot, useSession } from "../session";
 import { AdminLinkManagerPanel } from "./link-manager";
 import { AdminCardDetailPanel } from "./card-detail";
+import { AdminBatchProvisioningPanel } from "./batch-provisioning";
 
 export type AdminAppSection = "overview" | "cards" | "links" | "detail";
 
@@ -99,39 +101,43 @@ function nextCardAction(card: AdminCard) {
   return "Không cần thao tác thêm";
 }
 
+function getCardStatusBadge(card: AdminCard) {
+  if (card.status === "active") {
+    return { className: "card-status-pill status-active", label: "Hoạt Động" };
+  }
+  if (card.status === "unassigned" || card.status === "assigned") {
+    return { className: "card-status-pill status-available", label: "Sẵn Sàng" };
+  }
+  if (card.status === "disabled") {
+    return { className: "card-status-pill status-suspended", label: "Tạm Đình Chỉ" };
+  }
+  if (card.status === "lost") {
+    return { className: "card-status-pill status-suspended", label: "Báo Mất" };
+  }
+  return { className: "card-status-pill status-retired", label: "Đã Thu Hồi" };
+}
+
 function AdminCardsPanel() {
   const { clearSessionCache } = useSession();
-  const queryClient = useQueryClient();
+  const [view, setView] = useState<"list" | "batch">("list");
+  const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+
+  const statsQuery = useQuery({
+    queryKey: cardKeys.adminStats,
+    queryFn: ({ signal }) => getAdminInventoryStats(signal),
+    staleTime: 10_000,
+  });
+
   const query = useQuery({
-    queryKey: cardKeys.adminCards,
-    queryFn: ({ signal }) => getAdminCards(signal),
+    queryKey: cardKeys.adminCardList({ search, status: filterStatus }),
+    queryFn: ({ signal }) =>
+      getAdminCards({ search, status: filterStatus }, signal),
     staleTime: 10_000,
     retry: (failureCount, error) =>
       isApiError(error)
         ? error.retryable && failureCount < 1
         : failureCount < 1,
-  });
-  const invalidate = () =>
-    void queryClient.invalidateQueries({ queryKey: cardKeys.adminCards });
-  const createMutation = useMutation({
-    mutationFn: () => createBlankCard(),
-    onSuccess: invalidate,
-  });
-  const issueMutation = useMutation({
-    mutationFn: (cardId: string) => issueCard(cardId),
-    onSuccess: invalidate,
-  });
-  const lostMutation = useMutation({
-    mutationFn: (cardId: string) => reportAdminCardLost(cardId),
-    onSuccess: invalidate,
-  });
-  const voidMutation = useMutation({
-    mutationFn: (cardId: string) => voidCard(cardId),
-    onSuccess: invalidate,
-  });
-  const replaceMutation = useMutation({
-    mutationFn: (cardId: string) => replaceCard(cardId),
-    onSuccess: invalidate,
   });
 
   useEffect(() => {
@@ -174,52 +180,195 @@ function AdminCardsPanel() {
     );
   }
 
+  const items = query.data?.items ?? [];
+  const stats = statsQuery.data ?? {
+    total: items.length,
+    active: items.filter((c) => c.status === "active").length,
+    available: items.filter(
+      (c) => c.status === "unassigned" || c.status === "assigned",
+    ).length,
+    suspended: items.filter(
+      (c) => c.status === "disabled" || c.status === "lost",
+    ).length,
+    lost: items.filter((c) => c.status === "lost").length,
+    void: items.filter((c) => c.status === "void").length,
+  };
+
+  if (view === "batch") {
+    return (
+      <AdminBatchProvisioningPanel
+        onCancel={() => setView("list")}
+        onSuccess={() => setView("list")}
+        nextSerialSeed={12001 + (stats.total || 0)}
+      />
+    );
+  }
+
   return (
-    <div className="space-y-6">
-      <Panel className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-xl font-semibold text-foreground">
-            Thao tác nhanh
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Theo dõi từng bước: gắn liên kết, xác minh URL, phát hành thẻ, rồi mở trang thông tin công khai.
-          </p>
-        </div>
-        <Button
-          type="button"
-          busy={createMutation.isPending}
-          onClick={() => createMutation.mutate()}
-        >
-          Tạo thẻ trống
-        </Button>
-      </Panel>
-      {query.data.items.length === 0 ? (
-        <EmptyState
-          title="Chưa có thẻ"
-          description="Tạo một thẻ trống để bắt đầu quy trình."
-        />
-      ) : (
-        <div className="space-y-4">
-          {query.data.items.map((card) => (
-            <AdminCardPanel
-              key={card.id}
-              card={card}
-              actions={{
-                issue: () => issueMutation.mutate(card.id),
-                lost: () => lostMutation.mutate(card.id),
-                void: () => voidMutation.mutate(card.id),
-                replace: () => replaceMutation.mutate(card.id),
-              }}
-              busy={{
-                issue: issueMutation.isPending,
-                lost: lostMutation.isPending,
-                void: voidMutation.isPending,
-                replace: replaceMutation.isPending,
-              }}
+    <div
+      className="w-full max-w-[420px] mx-auto flex flex-col gap-4"
+      data-od-id="board-inventory-overview"
+    >
+      <div className="phone-frame">
+        <div className="screen-content">
+          <div className="flex justify-end items-center">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-[var(--accent)] rounded-[var(--radius-control)] shadow-sm hover:opacity-90 cursor-pointer border-none"
+              onClick={() => setView("batch")}
+            >
+              + Nhập Lô Mới
+            </button>
+          </div>
+          {/* KPI Summary Grid */}
+          <div className="kpi-summary-grid">
+            <div className="kpi-metric-card full-width">
+              <span className="kpi-label">Tổng Số Thẻ Trong Hệ Thống</span>
+              <span className="kpi-num">{stats.total.toLocaleString()}</span>
+              <span className="kpi-subtext">
+                Chip NTAG215 (504 Bytes) · 100% Đồng bộ
+              </span>
+            </div>
+            <div className="kpi-metric-card">
+              <span className="kpi-label">Đang Hoạt Động</span>
+              <span className="kpi-num">{stats.active.toLocaleString()}</span>
+              <span className="kpi-subtext">Đã liên kết chủ thẻ</span>
+            </div>
+            <div className="kpi-metric-card">
+              <span className="kpi-label">Sẵn Sàng Gán</span>
+              <span className="kpi-num">{stats.available.toLocaleString()}</span>
+              <span className="kpi-subtext">Kho thẻ trắng (Chưa gán)</span>
+            </div>
+            <div className="kpi-metric-card">
+              <span className="kpi-label">Tạm Đình Chỉ</span>
+              <span className="kpi-num">{stats.suspended.toLocaleString()}</span>
+              <span className="kpi-subtext">Báo mất / Tạm khóa</span>
+            </div>
+            <div className="kpi-metric-card">
+              <span className="kpi-label">Đã Thu Hồi</span>
+              <span className="kpi-num">
+                {(stats.void + stats.lost).toLocaleString()}
+              </span>
+              <span className="kpi-subtext">Hỏng chip / Hết hạn</span>
+            </div>
+          </div>
+
+          {/* Search & Filter Controls */}
+          <div className="search-filter-wrap">
+            <div className="field-input-wrap">
+              <input
+                type="text"
+                className="input-text input-mono"
+                placeholder="Tìm theo mã EMC-..., UID, user_id..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+
+            <div className="filter-pills-row" id="inventoryFilterPills">
+              <button
+                type="button"
+                className={`filter-pill ${filterStatus === "all" ? "active" : ""}`}
+                onClick={() => setFilterStatus("all")}
+              >
+                Tất cả ({stats.total})
+              </button>
+              <button
+                type="button"
+                className={`filter-pill ${filterStatus === "active" ? "active" : ""}`}
+                onClick={() => setFilterStatus("active")}
+              >
+                Hoạt động ({stats.active})
+              </button>
+              <button
+                type="button"
+                className={`filter-pill ${filterStatus === "available" ? "active" : ""}`}
+                onClick={() => setFilterStatus("available")}
+              >
+                Sẵn sàng ({stats.available})
+              </button>
+              <button
+                type="button"
+                className={`filter-pill ${filterStatus === "suspended" ? "active" : ""}`}
+                onClick={() => setFilterStatus("suspended")}
+              >
+                Tạm dừng ({stats.suspended})
+              </button>
+            </div>
+          </div>
+
+          {/* Card Inventory List */}
+          {items.length === 0 ? (
+            <EmptyState
+              title="Không tìm thấy thẻ"
+              description="Không có thẻ nào phù hợp với bộ lọc hiện tại."
             />
-          ))}
+          ) : (
+            <div className="card-inventory-list" id="cardListContainer">
+              {items.map((card) => {
+                const badge = getCardStatusBadge(card);
+                return (
+                  <div key={card.id} className="card-item-row">
+                    <div className="card-item-top">
+                      <span className="card-serial">{card.serial}</span>
+                      <span className={badge.className}>{badge.label}</span>
+                    </div>
+                    <div className="card-meta-row">
+                      <span>
+                        UID:{" "}
+                        {card.hardware_uid
+                          ? card.hardware_uid.length > 17
+                            ? `${card.hardware_uid.slice(0, 14)}...`
+                            : card.hardware_uid
+                          : "04:A2:8B:E2..."}
+                      </span>
+                      <span>
+                        Chủ thẻ:{" "}
+                        <span className="card-user-id">
+                          {card.owner?.id ? card.owner.id : "Chưa gán"}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="flex justify-end gap-2 mt-0.5">
+                      {card.status === "active" ? (
+                        <a
+                          href={`/admin/cards/detail?cardId=${encodeURIComponent(card.id)}`}
+                          className="link-subtle"
+                        >
+                          Chi tiết thẻ →
+                        </a>
+                      ) : card.status === "unassigned" ||
+                        card.status === "assigned" ? (
+                        <a
+                          href={`/admin/cards/detail?cardId=${encodeURIComponent(card.id)}&tab=link`}
+                          className="link-subtle"
+                        >
+                          Gán thẻ này →
+                        </a>
+                      ) : (
+                        <a
+                          href={`/admin/cards/detail?cardId=${encodeURIComponent(card.id)}&tab=lifecycle`}
+                          className="link-subtle"
+                        >
+                          Đổi trạng thái →
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <button
+            type="button"
+            className="btn-primary mt-1"
+            onClick={() => setView("batch")}
+          >
+            + Nhập Lô Thẻ Mới Vào Kho
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -378,8 +527,6 @@ export function AdminApplicationRoot({
     <PageApplicationRoot
       role="admin"
       brand={appBrand}
-      title={copy.title}
-      description={copy.description}
       navigation={navigation.map((item) => ({
         ...item,
         current: item.href === currentPath,

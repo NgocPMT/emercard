@@ -5,7 +5,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AdminCardDetailPanel } from "./card-detail";
 
 const useQueryMock = vi.fn();
-const useMutationMock = vi.fn();
 const invalidateQueriesMock = vi.fn();
 
 vi.mock("@tanstack/react-query", async () => {
@@ -15,7 +14,7 @@ vi.mock("@tanstack/react-query", async () => {
   return {
     ...actual,
     useQuery: (...args: unknown[]) => useQueryMock(...args),
-    useMutation: (...args: unknown[]) => useMutationMock(...args),
+    useMutation: () => ({ isPending: false, error: undefined, mutate: vi.fn() }),
     useQueryClient: () => ({ invalidateQueries: invalidateQueriesMock }),
   };
 });
@@ -52,58 +51,69 @@ beforeEach(() => {
       updated_at: "2026-01-01T00:00:00Z",
     },
   });
-  useMutationMock.mockImplementation(() => ({
-    isPending: false,
-    error: undefined,
-    mutate: vi.fn(),
-  }));
 });
 
 afterEach(() => {
   useQueryMock.mockReset();
-  useMutationMock.mockReset();
   invalidateQueriesMock.mockReset();
 });
 
 describe("AdminCardDetailPanel", () => {
-  it("renders the selected card detail workflow", () => {
+  it("renders Board 04 Zero-Knowledge specs and hardware card details", () => {
     render(<AdminCardDetailPanel cardId="card-1" />);
 
+    expect(screen.getByText("EMERCARD TAG")).toBeInTheDocument();
+    expect(screen.getAllByText("EMC-0000-0000-0000-0")).toHaveLength(2);
+    expect(screen.getByText("OPAQUE ID")).toBeInTheDocument();
+    expect(screen.getByText("nur***@example.com")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: /Thẻ EMC-0000-0000-0000-0/i }),
+      screen.getByText(/Cam kết Zero-Knowledge: Hệ thống quản trị thẻ vật lý/i),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", {
-        name: "Gắn hoặc đổi liên kết trước phát hành",
-      }),
+      screen.getByRole("link", { name: "← Quay lại Kho Thẻ" }),
+    ).toHaveAttribute("href", "/admin/cards");
+    expect(
+      screen.getByRole("button", { name: "Quản Lý Trạng Thái Thẻ Này →" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Tìm hồ sơ" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Kích hoạt liên kết" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Vô hiệu hóa liên kết" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Phân công" }),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Cấp liên kết" }),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Thay thế" }),
+      screen.getByRole("button", { name: "Liên Kết / Hủy Liên Kết Chủ Thẻ →" }),
     ).toBeInTheDocument();
   });
 
-  it("asks for confirmation before revoking a public link", async () => {
+  it("navigates smoothly to Board 05 Lifecycle and returns", async () => {
     const user = userEvent.setup();
     render(<AdminCardDetailPanel cardId="card-1" />);
 
-    await user.click(screen.getByRole("button", { name: "Thu hồi liên kết" }));
+    // Navigate to Lifecycle
+    await user.click(
+      screen.getByRole("button", { name: "Quản Lý Trạng Thái Thẻ Này →" }),
+    );
+    expect(screen.getByText("Thẻ Đang Xử Lý")).toBeInTheDocument();
+    expect(screen.getByText("Khu Vực Nguy Hiểm: Thu Hồi Thẻ")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Lưu Thay Đổi Trạng Thái" }),
+    ).toBeInTheDocument();
 
-    expect(screen.getByRole("dialog")).toHaveTextContent("Đây là thao tác kết thúc");
-    expect(screen.getAllByRole("button", { name: "Thu hồi liên kết" })).toHaveLength(2);
+    // Go back to Detail
+    await user.click(screen.getByRole("button", { name: /Quay lại/i }));
+    expect(screen.getByText("EMERCARD TAG")).toBeInTheDocument();
+  });
+
+  it("navigates smoothly to Board 06 Link Panel and returns", async () => {
+    const user = userEvent.setup();
+    render(<AdminCardDetailPanel cardId="card-1" />);
+
+    // Navigate to Link Panel
+    await user.click(
+      screen.getByRole("button", { name: "Liên Kết / Hủy Liên Kết Chủ Thẻ →" }),
+    );
+    expect(
+      screen.getByText("1. Gán Thẻ Trắng Cho Tài Khoản"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("2. Hủy Liên Kết Thẻ Cũ")).toBeInTheDocument();
+
+    // Go back to Detail
+    await user.click(screen.getByRole("button", { name: /Quay lại/i }));
+    expect(screen.getByText("EMERCARD TAG")).toBeInTheDocument();
   });
 });
