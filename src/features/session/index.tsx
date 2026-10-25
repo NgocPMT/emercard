@@ -13,7 +13,7 @@ export type SessionStatus = "loading" | "authenticated" | "unauthenticated" | "f
 export type SessionRole = "user" | "admin";
 
 export const homeRoutes: Record<SessionRole, string> = {
-  user: "/app",
+  user: "/app/profile",
   admin: "/admin",
 };
 

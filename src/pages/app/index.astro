@@ -1,8 +1,3 @@
 ---
-import ApplicationPageLayout from "../../layouts/ApplicationPageLayout.astro";
-import { UserApplicationRoot } from "../../features/app";
+return Astro.redirect("/app/profile");
 ---
-
-<ApplicationPageLayout title="EmerCard | Tổng quan" description="Khu vực người dùng EmerCard">
-  <UserApplicationRoot client:load section="overview" />
-</ApplicationPageLayout>
