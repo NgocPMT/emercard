@@ -105,6 +105,7 @@ const adminCardSchema = z
     issued_at: z.string().nullable().optional(),
     created_at: z.string(),
     updated_at: z.string(),
+    public_url: z.string().nullable().optional(),
   })
   .passthrough();
 

@@ -13,6 +13,7 @@ import {
   type SafeUser,
 } from "../../api/cards";
 import { isApiError } from "../../api/http-client";
+import { copyText } from "../../lib/clipboard";
 
 interface AdminCardLinkPanelProps {
   card: AdminCard;
@@ -32,6 +33,8 @@ export function AdminCardLinkPanel({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [showConfirmUnlink, setShowConfirmUnlink] = useState(false);
+  const [createdPublicUrl, setCreatedPublicUrl] = useState<string | null>(null);
+  const [copiedUrl, setCopiedUrl] = useState(false);
 
   const isUnassigned = card.status === "unassigned" && !card.issued_at;
   const hasExistingBinding = Boolean(
@@ -83,7 +86,10 @@ export function AdminCardLinkPanel({
     },
     onSuccess: (updatedCard) => {
       setActionError(null);
-      setToastMessage(`Thao tác liên kết thẻ ${updatedCard.serial} thành công!`);
+      if (updatedCard.public_url) {
+        setCreatedPublicUrl(updatedCard.public_url);
+      }
+      setToastMessage(`Đã liên kết và kích hoạt thẻ ${updatedCard.serial} thành công!`);
       void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(card.id) });
       void queryClient.invalidateQueries({ queryKey: cardKeys.adminCards });
       void queryClient.invalidateQueries({ queryKey: cardKeys.adminCustodyEvents() });
@@ -115,7 +121,7 @@ export function AdminCardLinkPanel({
       attachAdminCardLink(card.id, publicAccessLinkId),
     onSuccess: (updatedCard) => {
       setActionError(null);
-      setToastMessage(`Đã gắn thẻ ${updatedCard.serial} vào liên kết thành công!`);
+      setToastMessage(`Đã gắn thẻ ${updatedCard.serial} vào hồ sơ và kích hoạt thành công!`);
       void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(card.id) });
       void queryClient.invalidateQueries({ queryKey: cardKeys.adminCards });
       void queryClient.invalidateQueries({ queryKey: cardKeys.adminCustodyEvents() });
@@ -188,6 +194,31 @@ export function AdminCardLinkPanel({
           {actionError && (
             <div className="p-3 bg-[#fdf2f2] border border-[#f8c8c8] text-[#991b1b] rounded-[14px] text-xs">
               {actionError}
+            </div>
+          )}
+
+          {createdPublicUrl && (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-[14px] text-xs space-y-2 text-emerald-900">
+              <div className="flex items-center justify-between font-semibold">
+                <span>🔗 Link hồ sơ vừa tạo (ghi chip NFC):</span>
+                <button
+                  type="button"
+                  className="btn-secondary !w-auto !py-1 !px-2.5 !text-xs cursor-pointer"
+                  onClick={() => {
+                    void copyText(createdPublicUrl);
+                    setCopiedUrl(true);
+                    setTimeout(() => setCopiedUrl(false), 2000);
+                  }}
+                >
+                  {copiedUrl ? "Đã sao chép!" : "Sao chép link"}
+                </button>
+              </div>
+              <div className="font-mono text-[11px] break-all p-2 bg-white rounded border border-emerald-200 select-all">
+                {createdPublicUrl}
+              </div>
+              <p className="text-[11px] text-emerald-700">
+                Sao chép link trên để nạp vào chip thẻ NFC qua ứng dụng NFC Tools. Thẻ đã được tự động kích hoạt.
+              </p>
             </div>
           )}
 
