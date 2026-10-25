@@ -210,4 +210,59 @@ describe("AdminLinkManagerPanel", () => {
       screen.queryByRole("button", { name: /kích hoạt/i }),
     ).not.toBeInTheDocument();
   });
+
+  it("renders 'Gắn vào phôi thẻ →' button for pending links", async () => {
+    const user = userEvent.setup();
+    useQueryMock.mockImplementation(
+      (config: { enabled?: boolean; queryKey?: readonly unknown[] }) => {
+        if (config.queryKey?.[2] === "list") {
+          return {
+            isPending: false,
+            isFetching: false,
+            error: undefined,
+            data: {
+              items: [
+                {
+                  id: "user-1",
+                  email: "nurse@example.com",
+                  role: "user",
+                  created_at: "2026-01-01T00:00:00Z",
+                  updated_at: "2026-01-01T00:00:00Z",
+                },
+              ],
+            },
+          };
+        }
+        return config.enabled
+          ? {
+              isPending: false,
+              error: undefined,
+              data: {
+                items: [
+                  {
+                    id: "link-pending-1",
+                    purpose: "card",
+                    label: "Thẻ khẩn cấp mới",
+                    status: "pending",
+                    created_at: "2026-01-01T00:00:00Z",
+                    updated_at: "2026-01-01T00:00:00Z",
+                  },
+                ],
+              },
+            }
+          : { isPending: false, error: undefined, data: undefined };
+      },
+    );
+
+    render(<AdminLinkManagerPanel />);
+    await user.click(
+      screen.getByRole("button", { name: /nurse@example\.com/ }),
+    );
+
+    expect(screen.getByText("Thẻ khẩn cấp mới")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Gắn vào phôi thẻ →" }),
+    ).toBeInTheDocument();
+  });
 });
+

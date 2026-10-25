@@ -22,27 +22,31 @@ export function CardInspectorDrawer({ card, isOpen, onClose }: CardInspectorDraw
   if (!card) return null;
 
   const isActive = card.status === "active";
-  const isAvailable = card.status === "unassigned" || card.status === "assigned";
+  const isUnassigned = card.status === "unassigned";
+  const isAssigned = card.status === "assigned";
   const isSuspended = card.status === "disabled";
-  const isDanger = ["lost", "replaced", "void"].includes(card.status);
 
   const statusClass = isActive
     ? "success"
-    : isAvailable
+    : isUnassigned
       ? "info"
-      : isSuspended
+      : isAssigned
         ? "warning"
-        : "danger";
+        : isSuspended
+          ? "warning"
+          : "danger";
 
   const statusLabel = isActive
     ? "Đang Hoạt Động"
-    : isAvailable
-      ? "Sẵn Sàng Gán"
-      : isSuspended
-        ? "Tạm Đình Chỉ"
-        : card.status === "lost"
-          ? "Báo Mất Cắp"
-          : "Đã Thu Hồi";
+    : isUnassigned
+      ? "Phôi Trắng (Chưa Cấp)"
+      : isAssigned
+        ? "Đã Gán Hồ Sơ"
+        : isSuspended
+          ? "Tạm Đình Chỉ"
+          : card.status === "lost"
+            ? "Báo Mất Cắp"
+            : "Đã Thu Hồi";
 
   const chipUid = card.hardware_uid || "04:A2:8B:E2:19:6C:80";
   const chipSpec = card.chip_type ? `NXP ${card.chip_type}` : "NXP NTAG215 (504 Bytes)";

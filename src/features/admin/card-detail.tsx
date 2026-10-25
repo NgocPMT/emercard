@@ -112,24 +112,29 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
   }
 
   const isActive = card.status === "active";
-  const isAvailable = card.status === "unassigned" || card.status === "assigned";
+  const isUnassigned = card.status === "unassigned";
+  const isAssigned = card.status === "assigned";
   const isSuspended = card.status === "disabled";
   const statusClass = isActive
     ? "success"
-    : isAvailable
+    : isUnassigned
       ? "info"
-      : isSuspended
+      : isAssigned
         ? "warning"
-        : "danger";
+        : isSuspended
+          ? "warning"
+          : "danger";
   const statusLabel = isActive
     ? "Đang Hoạt Động"
-    : isAvailable
-      ? "Sẵn Sàng Gán"
-      : isSuspended
-        ? "Tạm Đình Chỉ"
-        : card.status === "lost"
-          ? "Báo Mất Cắp"
-          : "Đã Thu Hồi";
+    : isUnassigned
+      ? "Phôi Trắng (Chưa Cấp)"
+      : isAssigned
+        ? "Đã Gán Hồ Sơ"
+        : isSuspended
+          ? "Tạm Đình Chỉ"
+          : card.status === "lost"
+            ? "Báo Mất Cắp"
+            : "Đã Thu Hồi";
 
   return (
     <div className="flex flex-col gap-6" data-od-id="board-card-details-privacy">
@@ -311,10 +316,22 @@ export function AdminCardDetailPanel({ cardId }: { cardId: string }) {
                 {statusLabel}
               </span>
             </div>
+            <div className="admin-spec-row" style={{ background: "transparent", padding: "0 0 8px 0" }}>
+              <span className="admin-spec-k">Liên Kết Hồ Sơ (Link ID)</span>
+              <span className="admin-spec-v mono" style={{ fontSize: "13px" }}>
+                {card.link?.id ? card.link.id : "— Chưa gán liên kết —"}
+              </span>
+            </div>
+            {card.link?.label && (
+              <div className="admin-spec-row" style={{ background: "transparent", padding: "0 0 8px 0" }}>
+                <span className="admin-spec-k">Nhãn Liên Kết</span>
+                <span className="admin-spec-v">{card.link.label}</span>
+              </div>
+            )}
             <div className="admin-spec-row" style={{ background: "transparent", padding: "0" }}>
               <span className="admin-spec-k">Ngày Liên Kết Thẻ</span>
               <span className="admin-spec-v mono">
-                {card.issued_at ? new Date(card.issued_at).toLocaleDateString("vi-VN") : "Chưa liên kết"}
+                {card.issued_at ? new Date(card.issued_at).toLocaleDateString("vi-VN") : "Chưa kích hoạt"}
               </span>
             </div>
           </div>

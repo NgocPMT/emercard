@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  attachAdminCardLink,
   cardKeys,
   listAdminCustodyEvents,
+  listAdminUserLinks,
   listAdminUsers,
   lookupAdminUserByEmail,
   quickLinkAdminCard,
@@ -30,6 +32,11 @@ export function AdminCardLinkPanel({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [showConfirmUnlink, setShowConfirmUnlink] = useState(false);
+
+  const isUnassigned = card.status === "unassigned" && !card.issued_at;
+  const hasExistingBinding = Boolean(
+    card.owner?.id || card.link || card.status === "assigned" || card.issued_at,
+  );
 
   // Custody audit log query
   const auditLogQuery = useQuery({
@@ -93,6 +100,43 @@ export function AdminCardLinkPanel({
     },
   });
 
+  // Query pending links of the matched user if card is unassigned
+  const userLinksQuery = useQuery({
+    queryKey: matchedUser ? cardKeys.adminUserLinks(matchedUser.id) : ["links", "admin", "empty"],
+    queryFn: ({ signal }) => listAdminUserLinks(matchedUser?.id ?? "", signal),
+    enabled: Boolean(matchedUser && isUnassigned),
+    staleTime: 10_000,
+  });
+  const pendingLinks = (userLinksQuery.data?.items ?? []).filter((l) => l.status === "pending");
+
+  // Attach card to existing pending link
+  const attachMutation = useMutation({
+    mutationFn: (publicAccessLinkId: string) =>
+      attachAdminCardLink(card.id, publicAccessLinkId),
+    onSuccess: (updatedCard) => {
+      setActionError(null);
+      setToastMessage(`Đã gắn thẻ ${updatedCard.serial} vào liên kết thành công!`);
+      void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(card.id) });
+      void queryClient.invalidateQueries({ queryKey: cardKeys.adminCards });
+      void queryClient.invalidateQueries({ queryKey: cardKeys.adminCustodyEvents() });
+      if (matchedUser) {
+        void queryClient.invalidateQueries({
+          queryKey: cardKeys.adminUserLinks(matchedUser.id),
+        });
+      }
+      setTimeout(() => {
+        if (onSuccess) onSuccess();
+      }, 1200);
+    },
+    onError: (err) => {
+      if (isApiError(err)) {
+        setActionError(err.message || "Lỗi khi gắn liên kết vào thẻ.");
+      } else {
+        setActionError("Lỗi kết nối máy chủ.");
+      }
+    },
+  });
+
   // Unlink card mutation
   const unlinkMutation = useMutation({
     mutationFn: () =>
@@ -147,79 +191,157 @@ export function AdminCardLinkPanel({
             </div>
           )}
 
-          {/* Flow 1: Link Available Card to User */}
+          {/* Flow 1: Link Available Blank Card to User */}
           <div className="link-workspace-card">
             <div className="link-workspace-title">
               1. Gán Thẻ Trắng Cho Tài Khoản
             </div>
 
-            <div className="bg-white border border-[var(--border)] rounded-[var(--radius-control)] p-2.5 flex justify-between items-center text-xs">
-              <span className="text-[#64748b]">Thẻ Đang Chọn:</span>
-              <span className="font-mono text-sm font-bold text-[var(--accent)]">
-                {card.serial}
-              </span>
-            </div>
-
-            <div className="field-group">
-              <label className="field-label" htmlFor="userSearchInput">
-                Tìm Kiếm Người Dùng (Email hoặc user_id)
-              </label>
-              <div className="search-user-box">
-                <input
-                  id="userSearchInput"
-                  type="text"
-                  className="input-text"
-                  placeholder="nhập email hoặc user_id..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      searchMutation.mutate(searchQuery);
-                    }
-                  }}
-                />
-                <button
-                  type="button"
-                  className="btn-secondary !w-auto !px-3.5"
-                  disabled={searchMutation.isPending}
-                  onClick={() => searchMutation.mutate(searchQuery)}
-                >
-                  {searchMutation.isPending ? "..." : "Tìm"}
-                </button>
-              </div>
-              {searchError && (
-                <span className="text-xs text-[#991b1b] mt-0.5">{searchError}</span>
-              )}
-            </div>
-
-            {/* Matched User Preview */}
-            {matchedUser && (
-              <div className="user-search-match">
-                <div className="user-match-meta">
-                  <span className="user-match-name">{matchedUser.email}</span>
-                  <span className="user-match-id">
-                    user_id: {matchedUser.id} · Hồ sơ 1:1
+            {isUnassigned ? (
+              <>
+                <div className="bg-white border border-[var(--border)] rounded-[var(--radius-control)] p-2.5 flex justify-between items-center text-xs">
+                  <span className="text-[#64748b]">Thẻ Đang Chọn:</span>
+                  <span className="font-mono text-sm font-bold text-[var(--accent)]">
+                    {card.serial}
                   </span>
                 </div>
-                <span className="card-status-pill status-available">Sẵn sàng gán</span>
+
+                <div className="field-group">
+                  <label className="field-label" htmlFor="userSearchInput">
+                    Tìm Kiếm Người Dùng (Email hoặc user_id)
+                  </label>
+                  <div className="search-user-box">
+                    <input
+                      id="userSearchInput"
+                      type="text"
+                      className="input-text"
+                      placeholder="nhập email hoặc user_id..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          searchMutation.mutate(searchQuery);
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      className="btn-secondary !w-auto !px-3.5"
+                      disabled={searchMutation.isPending}
+                      onClick={() => searchMutation.mutate(searchQuery)}
+                    >
+                      {searchMutation.isPending ? "..." : "Tìm"}
+                    </button>
+                  </div>
+                  {searchError && (
+                    <span className="text-xs text-[#991b1b] mt-0.5">{searchError}</span>
+                  )}
+                </div>
+
+                {/* Matched User Preview */}
+                {matchedUser && (
+                  <div className="user-search-match">
+                    <div className="user-match-meta">
+                      <span className="user-match-name">{matchedUser.email}</span>
+                      <span className="user-match-id">
+                        user_id: {matchedUser.id} · Hồ sơ 1:1
+                      </span>
+                    </div>
+                    <span className="card-status-pill status-available">Sẵn sàng gán</span>
+                  </div>
+                )}
+
+                {/* Pending Links of matched user */}
+                {matchedUser && pendingLinks.length > 0 && (
+                  <div className="flex flex-col gap-2 p-3 bg-[var(--surface)] border border-[var(--border)] rounded-[12px] text-xs">
+                    <span className="font-semibold text-[var(--fg)]">
+                      Liên kết chờ sẵn có ({pendingLinks.length}):
+                    </span>
+                    <div className="flex flex-col gap-1.5 max-h-36 overflow-y-auto">
+                      {pendingLinks.map((link) => (
+                        <div
+                          key={link.id}
+                          className="flex items-center justify-between p-2 bg-white rounded border border-[var(--border)]"
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-medium">{link.label || "Liên kết thẻ"}</span>
+                            <span className="font-mono text-[10px] text-[#64748b]">ID: {link.id}</span>
+                          </div>
+                          <button
+                            type="button"
+                            className="btn-secondary !w-auto !py-1 !px-2.5 !text-xs"
+                            disabled={attachMutation.isPending}
+                            onClick={() => attachMutation.mutate(link.id)}
+                          >
+                            {attachMutation.isPending ? "Đang gắn..." : "Gán vào link này"}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <span className="text-[11px] text-[#64748b] text-center my-0.5">
+                      — Hoặc tạo liên kết mới bên dưới —
+                    </span>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  className="btn-primary"
+                  disabled={!matchedUser || linkMutation.isPending || attachMutation.isPending}
+                  onClick={() => linkMutation.mutate()}
+                >
+                  {linkMutation.isPending
+                    ? "Đang liên kết..."
+                    : "Tạo Mới & Gán Nhanh Vào Tài Khoản"}
+                </button>
+              </>
+            ) : (
+              /* Card already bound/delivered info */
+              <div className="flex flex-col gap-3">
+                <div className="p-3 rounded-[12px] bg-[#f8fafc] border border-[var(--border)] text-xs flex flex-col gap-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#64748b]">Mã Thẻ:</span>
+                    <span className="font-mono font-bold text-[var(--accent)]">{card.serial}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#64748b]">Chủ Sở Hữu:</span>
+                    <span className="font-semibold text-[var(--fg)]">
+                      {card.owner ? `${card.owner.email} (${card.owner.id})` : "— Đã gán hồ sơ —"}
+                    </span>
+                  </div>
+                  {card.link && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-[#64748b]">Mã Link ID:</span>
+                      <span className="font-mono text-[var(--fg)]">{card.link.id}</span>
+                    </div>
+                  )}
+                  {card.link?.label && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-[#64748b]">Nhãn Link:</span>
+                      <span className="font-medium text-[var(--fg)]">{card.link.label}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#64748b]">Trạng Thái Thẻ:</span>
+                    <span className="font-semibold text-[var(--accent)]">
+                      {card.status === "assigned"
+                        ? "Đã Gán Hồ Sơ (Chờ kích hoạt)"
+                        : card.status === "active"
+                          ? "Đang Hoạt Động"
+                          : card.status}
+                    </span>
+                  </div>
+                </div>
+                <div className="p-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-[12px] text-xs leading-relaxed">
+                  ⚠️ Thẻ này đã được bàn giao cho tài khoản. Không thể gán đè trực tiếp cho người khác. Nếu muốn đổi chủ thẻ, vui lòng thực hiện <strong>Hủy liên kết thẻ</strong> ở mục 2 bên dưới.
+                </div>
               </div>
             )}
-
-            <button
-              type="button"
-              className="btn-primary"
-              disabled={!matchedUser || linkMutation.isPending}
-              onClick={() => linkMutation.mutate()}
-            >
-              {linkMutation.isPending
-                ? "Đang liên kết..."
-                : "Xác Nhận Liên Kết Thẻ Vào Tài Khoản"}
-            </button>
           </div>
 
           {/* Flow 2: Unlink Card */}
-          {card.owner?.id && (
+          {hasExistingBinding && (
             <div className="link-workspace-card bg-white">
               <div className="link-workspace-title">
                 2. Hủy Liên Kết Thẻ Cũ
@@ -236,9 +358,9 @@ export function AdminCardLinkPanel({
                   </span>
                 </div>
                 <div>
-                  <span className="text-[11px] text-[#64748b] block">Chủ Thẻ:</span>
+                  <span className="text-[11px] text-[#64748b] block">Chủ Thẻ / Hồ Sơ:</span>
                   <span className="font-mono text-[13px] font-semibold text-[var(--accent)]">
-                    {card.owner.id}
+                    {card.owner?.id || "Đã gán hồ sơ"}
                   </span>
                 </div>
               </div>
