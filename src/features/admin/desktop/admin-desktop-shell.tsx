@@ -6,7 +6,7 @@ import { BrandMark } from "../../../components/layout";
 import { useSession } from "../../session";
 
 export interface AdminDesktopShellProps {
-  activeSection: "overview" | "cards" | "links" | "detail";
+  activeSection: "overview" | "cards" | "links" | "detail" | "batch";
   children: ReactNode;
   onSearch?: (query: string) => void;
   onNewBatchClick?: () => void;
@@ -107,12 +107,12 @@ export function AdminDesktopShell({
 
               <button
                 type="button"
-                className="admin-nav-item"
+                className={`admin-nav-item ${activeSection === "batch" ? "active" : ""}`}
                 onClick={() => {
                   if (onNewBatchClick) {
                     onNewBatchClick();
                   } else {
-                    assignLocation("/admin/cards?action=batch");
+                    assignLocation("/admin/batch");
                   }
                 }}
               >

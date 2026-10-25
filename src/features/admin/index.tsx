@@ -28,7 +28,7 @@ import { AdminBatchProvisioningPanel } from "./batch-provisioning";
 import { AdminDesktopShell } from "./desktop/admin-desktop-shell";
 import { CardInspectorDrawer } from "./desktop/card-inspector-drawer";
 
-export type AdminAppSection = "overview" | "cards" | "links" | "detail";
+export type AdminAppSection = "overview" | "cards" | "links" | "detail" | "batch";
 
 const navigation = [
   { href: "/admin", label: "Bảng điều khiển" },
@@ -55,6 +55,10 @@ const sectionCopy: Record<
   detail: {
     title: "Chi tiết thẻ",
     description: "Gắn liên kết, xác minh mã và quản lý vòng đời thẻ.",
+  },
+  batch: {
+    title: "Nhập Kho Lô Thẻ Mới",
+    description: "Nhập dải phôi thẻ NFC chuẩn NTAG215 và kiểm tra trùng lặp serial.",
   },
 };
 
@@ -693,6 +697,11 @@ export function AdminApplicationRoot({
     >
       {section === "cards" || section === "overview" ? (
         <AdminCardsPanel searchQuery={globalSearch} />
+      ) : section === "batch" ? (
+        <AdminBatchProvisioningPanel
+          onCancel={() => assignLocation("/admin/cards")}
+          onSuccess={() => assignLocation("/admin/cards")}
+        />
       ) : section === "links" ? (
         <AdminLinkManagerPanel />
       ) : section === "detail" ? (

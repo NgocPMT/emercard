@@ -1,0 +1,8 @@
+---
+import ApplicationPageLayout from "../../layouts/ApplicationPageLayout.astro";
+import { AdminApplicationRoot } from "../../features/admin";
+---
+
+<ApplicationPageLayout title="EmerCard | Nhập kho lô thẻ" description="Nhập lô phôi thẻ NFC EmerCard">
+  <AdminApplicationRoot client:load section="batch" />
+</ApplicationPageLayout>
