@@ -9,9 +9,11 @@ import {
   type PublicLinkSummary,
 } from "../../api/cards";
 import { isApiError } from "../../api/http-client";
+import { copyText } from "../../lib/clipboard";
 
 export interface AdminAttachCardModalProps {
   link: PublicLinkSummary | null;
+  publicUrl?: string | null;
   userId: string;
   userEmail: string;
   isOpen: boolean;
@@ -21,6 +23,7 @@ export interface AdminAttachCardModalProps {
 
 export function AdminAttachCardModal({
   link,
+  publicUrl,
   userId,
   userEmail,
   isOpen,
@@ -31,6 +34,26 @@ export function AdminAttachCardModal({
   const [filterQuery, setFilterQuery] = useState("");
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [attachedSuccessCard, setAttachedSuccessCard] = useState<AdminCard | null>(null);
+
+  const handleCopyLink = async () => {
+    if (!publicUrl) return;
+    await copyText(publicUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleClose = () => {
+    if (!attachMutation.isPending) {
+      setActionError(null);
+      setSelectedCardId(null);
+      setFilterQuery("");
+      setAttachedSuccessCard(null);
+      setCopied(false);
+      onClose();
+    }
+  };
 
   // Query unassigned blank cards from inventory
   const cardsQuery = useQuery({
@@ -63,12 +86,12 @@ export function AdminAttachCardModal({
     },
     onSuccess: (updatedCard) => {
       setActionError(null);
+      setAttachedSuccessCard(updatedCard);
       void queryClient.invalidateQueries({ queryKey: cardKeys.adminCard(updatedCard.id) });
       void queryClient.invalidateQueries({ queryKey: cardKeys.adminCards });
       void queryClient.invalidateQueries({ queryKey: cardKeys.adminUserLinks(userId) });
       void queryClient.invalidateQueries({ queryKey: cardKeys.adminCustodyEvents() });
       if (onSuccess) onSuccess();
-      onClose();
     },
     onError: (err) => {
       if (isApiError(err)) {
@@ -83,26 +106,65 @@ export function AdminAttachCardModal({
 
   if (!link) return null;
 
+  if (attachedSuccessCard) {
+    return (
+      <Dialog
+        open={isOpen}
+        onClose={handleClose}
+        title="Gắn & Kích Hoạt Thẻ Thành Công"
+        description={`Thẻ đã được tự động cấp phát và kích hoạt sang trạng thái Đang hoạt động.`}
+        actions={
+          <Button type="button" variant="primary" onClick={handleClose}>
+            Hoàn tất & Đóng
+          </Button>
+        }
+      >
+        <div className="space-y-4">
+          <Alert variant="success" title="Thẻ đã sẵn sàng sử dụng!">
+            Thẻ <strong>{attachedSuccessCard.serial}</strong> đã được gán vào hồ sơ {userEmail} và kích hoạt thành công. Người dùng không cần bấm kích hoạt thủ công.
+          </Alert>
+
+          {publicUrl && (
+            <div className="rounded-[var(--radius-control)] border border-primary/20 bg-primary/5 p-3.5 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-primary">
+                  🔗 Link hồ sơ nạp vào thẻ NFC:
+                </span>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="!py-0.5 !px-2.5 !text-xs !h-auto"
+                  onClick={() => void handleCopyLink()}
+                >
+                  {copied ? "Đã sao chép!" : "Sao chép link"}
+                </Button>
+              </div>
+              <div className="font-mono text-xs break-all bg-white p-2 rounded border border-border select-all text-foreground">
+                {publicUrl}
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Hãy sao chép link trên để nạp vào chip thẻ NFC qua ứng dụng NFC Tools trên điện thoại hoặc máy nạp thẻ.
+              </p>
+            </div>
+          )}
+        </div>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog
       open={isOpen}
-      onClose={() => {
-        if (!attachMutation.isPending) {
-          setActionError(null);
-          setSelectedCardId(null);
-          setFilterQuery("");
-          onClose();
-        }
-      }}
+      onClose={handleClose}
       title="Gắn Liên Kết Vào Phôi Thẻ Vật Lý"
-      description={`Gán liên kết đang chờ của hồ sơ ${userEmail} vào một phôi thẻ NFC trắng trong kho.`}
+      description={`Gán liên kết của hồ sơ ${userEmail} vào phôi thẻ NFC trắng trong kho. Thẻ sẽ tự động được kích hoạt ngay lập tức.`}
       actions={
         <>
           <Button
             type="button"
             variant="secondary"
             disabled={attachMutation.isPending}
-            onClick={onClose}
+            onClick={handleClose}
           >
             Hủy
           </Button>
@@ -113,13 +175,38 @@ export function AdminAttachCardModal({
             busy={attachMutation.isPending}
             onClick={() => attachMutation.mutate()}
           >
-            {attachMutation.isPending ? "Đang gắn thẻ..." : "Xác Nhận Gắn Thẻ"}
+            {attachMutation.isPending ? "Đang gắn & kích hoạt..." : "Xác Nhận Gắn Thẻ"}
           </Button>
         </>
       }
     >
       <div className="space-y-4">
         {actionError ? <Alert variant="danger">{actionError}</Alert> : null}
+
+        {/* Highlighted Public URL with Copy button */}
+        {publicUrl && (
+          <div className="rounded-[var(--radius-control)] border border-primary/20 bg-primary/5 p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-primary">
+                🔗 Link hồ sơ để nạp vào thẻ NFC:
+              </span>
+              <Button
+                type="button"
+                variant="secondary"
+                className="!py-0.5 !px-2.5 !text-xs !h-auto"
+                onClick={() => void handleCopyLink()}
+              >
+                {copied ? "Đã sao chép!" : "Sao chép link"}
+              </Button>
+            </div>
+            <div className="font-mono text-xs break-all bg-white p-2 rounded border border-border select-all text-foreground">
+              {publicUrl}
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Copy link này để nạp vào chip NFC vật lý. Sau khi gắn, thẻ sẽ lập tức ở trạng thái hoạt động.
+            </p>
+          </div>
+        )}
 
         {/* Selected Link Context */}
         <div className="rounded-[var(--radius-control)] border border-border bg-muted/40 p-3 text-xs flex justify-between items-center">

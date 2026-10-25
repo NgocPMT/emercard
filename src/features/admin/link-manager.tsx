@@ -920,10 +920,11 @@ export function AdminLinkManagerPanel() {
         isOpen={Boolean(attachingLink)}
         onClose={() => setAttachingLink(null)}
         link={attachingLink}
+        publicUrl={lastUrl}
         userId={selectedUser?.id ?? ""}
         userEmail={selectedUser?.email ?? ""}
         onSuccess={() => {
-          setMessage("Đã gắn liên kết vào phôi thẻ thành công.");
+          setMessage("Đã gắn liên kết vào phôi thẻ và kích hoạt thành công.");
         }}
       />
     </div>
