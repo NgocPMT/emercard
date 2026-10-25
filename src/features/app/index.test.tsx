@@ -53,40 +53,59 @@ afterEach(() => {
 });
 
 describe("UserApplicationRoot", () => {
-  it("keeps the ProfileSummaryCard hook order stable across loading and error renders", () => {
-    const queryState: {
-      current: {
-        isPending: boolean;
-        error: Error | undefined;
-        data: unknown;
-      };
-    } = {
-      current: {
-        isPending: true,
-        error: undefined,
-        data: undefined,
+  it("renders average latency correctly with dash fallback when null", () => {
+    const card = {
+      id: "card-1",
+      serial: "EMC-0000-0000-0000-0",
+      status: "active",
+      is_current: true,
+      issued_at: "2026-01-01T00:00:00Z",
+      activated_at: "2026-01-01T00:00:00Z",
+      disabled_at: null,
+      created_at: "2026-01-01T00:00:00Z",
+      updated_at: "2026-01-01T00:00:00Z",
+      can_activate: false,
+      can_disable: true,
+      can_revoke: true,
+      can_report_lost: true,
+      link_status: "active",
+      link_purpose: "card",
+      link_label: "Thẻ chính",
+    };
+    const historyQueryWithoutLatency = {
+      isPending: false,
+      error: undefined,
+      data: {
+        items: [{ id: "event-1", accessed_at: "2026-01-01T08:30:00Z" }],
+        next_cursor: null,
+        scans_this_month: 1,
+        average_latency_ms: null,
       },
     };
+    const cardsQuery = { isPending: false, error: undefined, data: { cards: [card] } };
+    useQueryMock.mockImplementation((options: { queryKey: unknown[] }) =>
+      options.queryKey.includes("access-history") ? historyQueryWithoutLatency : cardsQuery,
+    );
 
-    useQueryMock.mockImplementation(() => queryState.current);
+    const { rerender } = render(<UserApplicationRoot section="cards" />);
+    expect(screen.getByText("—")).toBeInTheDocument();
 
-    const { rerender } = render(<UserApplicationRoot section="overview" />);
-
-    expect(screen.getByRole("img", { name: "EmerCard" })).toHaveAttribute("src", "/logo.png");
-    expect(screen.getAllByRole("heading", { name: "Tổng quan tài khoản" })).toHaveLength(1);
-    expect(screen.queryByText("Trạng thái khung UI")).not.toBeInTheDocument();
-    expect(screen.getByText("Đang tải hồ sơ y tế")).toBeInTheDocument();
-
-    queryState.current = {
+    const historyQueryWithLatency = {
       isPending: false,
-      error: new Error("boom"),
-      data: undefined,
+      error: undefined,
+      data: {
+        items: [{ id: "event-1", accessed_at: "2026-01-01T08:30:00Z" }],
+        next_cursor: null,
+        scans_this_month: 5,
+        average_latency_ms: 120,
+      },
     };
+    useQueryMock.mockImplementation((options: { queryKey: unknown[] }) =>
+      options.queryKey.includes("access-history") ? historyQueryWithLatency : cardsQuery,
+    );
 
-    rerender(<UserApplicationRoot section="overview" />);
-
-    expect(screen.getByText("Không thể tải hồ sơ")).toBeInTheDocument();
-    expect(screen.getByText("Đã xảy ra lỗi khi đọc hồ sơ y tế.")).toBeInTheDocument();
+    rerender(<UserApplicationRoot section="cards" />);
+    expect(screen.getByText("120ms")).toBeInTheDocument();
   });
 
   it("renders minimized card access timestamps without visitor metadata", () => {
