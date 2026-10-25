@@ -131,7 +131,7 @@ function AuthLayout({
   if (mode === "register") {
     return (
       <div className="w-full max-w-[420px] mx-auto py-6">
-        <RegisterForm initialEmail={initialEmail} notice={notice} />
+        <RegisterForm initialEmail={initialEmail} notice={notice} returnTo={returnTo} />
       </div>
     );
   }
@@ -293,24 +293,16 @@ function LoginForm({ initialEmail, returnTo }: { initialEmail?: string | null; r
   );
 }
 
-function RegisterForm({ initialEmail, notice }: { initialEmail?: string | null; notice?: string | null }) {
+function RegisterForm({
+  initialEmail,
+  returnTo,
+}: {
+  initialEmail?: string | null;
+  notice?: string | null;
+  returnTo?: string | null;
+}) {
+  const queryClient = useQueryClient();
   const [rootMessage, setRootMessage] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState<boolean>(() => {
-    if (notice === "registration-success") return true;
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      return params.get("notice") === "registration-success";
-    }
-    return false;
-  });
-  const [registeredEmail, setRegisteredEmail] = useState<string>(() => {
-    if (initialEmail?.trim()) return initialEmail.trim();
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      return params.get("email")?.trim() ?? "";
-    }
-    return "";
-  });
 
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
@@ -326,7 +318,6 @@ function RegisterForm({ initialEmail, notice }: { initialEmail?: string | null; 
   useEffect(() => {
     if (initialEmail) {
       form.reset({ email: initialEmail.trim(), phone: "", password: "", confirmPassword: "" });
-      setRegisteredEmail(initialEmail.trim());
     }
   }, [form, initialEmail]);
 
@@ -334,43 +325,18 @@ function RegisterForm({ initialEmail, notice }: { initialEmail?: string | null; 
     setRootMessage(null);
     form.clearErrors();
     try {
-      await registerAccount({
+      const session = await registerAccount({
         email: values.email.trim(),
         phone: values.phone?.trim() || undefined,
         password: values.password,
       });
-      setRegisteredEmail(values.email.trim());
-      setIsSuccess(true);
+      queryClient.setQueryData(sessionKeys.current, session);
       form.reset({ email: values.email.trim(), phone: "", password: "", confirmPassword: "" });
+      assignLocation(validateReturnTo(returnTo, session.role));
     } catch (error) {
       handleRegisterError(error, form.setError, form.setFocus, setRootMessage);
     }
   });
-
-  if (isSuccess) {
-    return (
-      <div className="w-full max-w-md mx-auto" data-od-id="board-register-success">
-        <div className="reg-success-wrap">
-          <div className="reg-success-content">
-            <div className="success-icon-badge">
-              <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-            </div>
-            <h3 className="reg-success-title">Đăng ký thành công!</h3>
-            <p className="reg-success-desc">Tài khoản EmerCard của bạn đã sẵn sàng. Bạn có thể đăng nhập để hoàn thiện hồ sơ y tế.</p>
-          </div>
-
-          <button
-            className="btn-login-action"
-            data-od-id="path-1-6-1-1-1"
-            type="button"
-            onClick={() => assignLocation(`/login?notice=registration-success&email=${encodeURIComponent(registeredEmail)}`)}
-          >
-            Đăng Nhập
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full max-w-md mx-auto" data-od-id="board-register-form">

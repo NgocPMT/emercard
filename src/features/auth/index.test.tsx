@@ -43,7 +43,7 @@ function renderAuth(mode: "login" | "register", props: Partial<Parameters<typeof
 }
 
 describe("auth page root", () => {
-  it("registers successfully, shows Board 06 success screen, and navigates to login", async () => {
+  it("registers successfully, updates session cache, and redirects directly to application", async () => {
     const user = userEvent.setup();
     const session = {
       id: "user-1",
@@ -54,7 +54,7 @@ describe("auth page root", () => {
     };
     registerMock.mockResolvedValueOnce(session);
 
-    renderAuth("register", { initialEmail: " new@example.com " });
+    renderAuth("register", { initialEmail: " new@example.com ", returnTo: "/app/profile" });
 
     expect(screen.getByDisplayValue("new@example.com")).toBeInTheDocument();
     await user.type(screen.getByLabelText(/Mật khẩu/), "password123");
@@ -62,14 +62,10 @@ describe("auth page root", () => {
     await user.click(screen.getByRole("button", { name: /Tạo tài khoản|Đăng Ký/i }));
 
     await waitFor(() => expect(registerMock).toHaveBeenCalledWith({ email: "new@example.com", password: "password123" }));
-    expect(await screen.findByText("Đăng ký thành công!")).toBeInTheDocument();
-    expect(screen.getByText(/Tài khoản EmerCard của bạn đã sẵn sàng/)).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Đăng Nhập" }));
-    expect(navigateMock).toHaveBeenCalledWith("/login?notice=registration-success&email=new%40example.com");
+    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith("/app/profile"));
   });
 
-  it("registers successfully with phone number", async () => {
+  it("registers successfully with phone number and redirects to default app path", async () => {
     const user = userEvent.setup();
     const session = {
       id: "user-phone",
@@ -95,7 +91,7 @@ describe("auth page root", () => {
         password: "password123",
       }),
     );
-    expect(await screen.findByText("Đăng ký thành công!")).toBeInTheDocument();
+    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith("/app"));
   });
 
   it("validates invalid phone number format", async () => {
