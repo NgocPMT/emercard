@@ -95,7 +95,11 @@ export function AdminAttachCardModal({
     },
     onError: (err) => {
       if (isApiError(err)) {
-        setActionError(err.message || "Lỗi khi gắn liên kết vào thẻ.");
+        if (err.code === "card.profile_not_ready") {
+          setActionError("Hồ sơ y tế của người dùng chưa hoàn tất. Người dùng cần điền đủ 5 trường bắt buộc (Họ tên, Năm sinh, Giới tính, Nhóm máu, Người liên hệ) để kích hoạt thẻ.");
+        } else {
+          setActionError(err.message || "Lỗi khi gắn liên kết vào thẻ.");
+        }
       } else if (err instanceof Error) {
         setActionError(err.message);
       } else {

@@ -374,6 +374,50 @@ function ProfileEditorCard({ profileView, onCancel }: { profileView: ProfileView
   const conditionsList = splitLines(form.watch("important_conditions") || "");
   const medicationsList = splitLines(form.watch("critical_medications") || "");
 
+  const watchedName = form.watch("display_name");
+  const watchedYear = form.watch("birth_year");
+  const watchedGender = form.watch("gender");
+  const watchedContacts = form.watch("emergency_contacts");
+
+  const isNameValid = Boolean(watchedName?.trim());
+  const isYearValid = Boolean(watchedYear?.trim() && /^\d{4}$/.test(watchedYear.trim()));
+  const isGenderValid = Boolean(watchedGender);
+  const isBloodValid = Boolean(selectedBloodType);
+  const hasValidContact = Boolean(
+    watchedContacts &&
+    watchedContacts.some(
+      (c) => c?.name?.trim() && c?.phone?.trim() && c.phone.trim().length >= 8
+    )
+  );
+
+  const missingItems = useMemo(() => {
+    const items: Array<{ id: string; label: string }> = [];
+    if (!isNameValid) items.push({ id: "edit-name", label: "Họ và tên" });
+    if (!isYearValid) items.push({ id: "edit-year", label: "Năm sinh" });
+    if (!isGenderValid) items.push({ id: "edit-gender", label: "Giới tính" });
+    if (!isBloodValid) items.push({ id: "field-blood-type", label: "Nhóm máu" });
+    if (!hasValidContact) items.push({ id: "field-emergency-contacts", label: "Người liên hệ" });
+    return items;
+  }, [isNameValid, isYearValid, isGenderValid, isBloodValid, hasValidContact]);
+
+  const completedCount = 5 - missingItems.length;
+  const progressPercent = Math.round((completedCount / 5) * 100);
+
+  const handleScrollToField = (fieldId: string) => {
+    const el = document.getElementById(fieldId);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    const targetFocus =
+      el.tagName === "INPUT" || el.tagName === "SELECT" || el.tagName === "TEXTAREA"
+        ? (el as HTMLElement)
+        : el.querySelector<HTMLElement>("input, select, button");
+    targetFocus?.focus();
+    el.classList.add("ring-2", "ring-primary", "ring-offset-2", "transition-all");
+    setTimeout(() => {
+      el.classList.remove("ring-2", "ring-primary", "ring-offset-2", "transition-all");
+    }, 1800);
+  };
+
   const handleAddAllergy = () => {
     if (!newAllergy.trim()) return;
     const updated = [...allergiesList, newAllergy.trim()];
@@ -463,7 +507,7 @@ function ProfileEditorCard({ profileView, onCancel }: { profileView: ProfileView
   const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-6" data-od-id="board-profile-edit">
+    <div className="w-full max-w-5xl mx-auto space-y-6 pb-20" data-od-id="board-profile-edit">
       {/* Top Action Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-sm">
         <div>
@@ -502,7 +546,9 @@ function ProfileEditorCard({ profileView, onCancel }: { profileView: ProfileView
               </h3>
 
               <div className="field-group">
-                <label className="field-label" htmlFor="edit-name">Họ và tên</label>
+                <label className="field-label" htmlFor="edit-name">
+                  Họ và tên <span className="text-destructive font-bold ml-1" title="Bắt buộc để kích hoạt thẻ">*</span>
+                </label>
                 <input
                   id="edit-name"
                   type="text"
@@ -514,7 +560,9 @@ function ProfileEditorCard({ profileView, onCancel }: { profileView: ProfileView
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="field-group">
-                  <label className="field-label" htmlFor="edit-year">Năm sinh</label>
+                  <label className="field-label" htmlFor="edit-year">
+                    Năm sinh <span className="text-destructive font-bold ml-1" title="Bắt buộc để kích hoạt thẻ">*</span>
+                  </label>
                   <input
                     id="edit-year"
                     type="text"
@@ -525,7 +573,9 @@ function ProfileEditorCard({ profileView, onCancel }: { profileView: ProfileView
                   />
                 </div>
                 <div className="field-group">
-                  <label className="field-label" htmlFor="edit-gender">Giới tính</label>
+                  <label className="field-label" htmlFor="edit-gender">
+                    Giới tính <span className="text-destructive font-bold ml-1" title="Bắt buộc để kích hoạt thẻ">*</span>
+                  </label>
                   <select id="edit-gender" className="input-text" {...form.register("gender")}>
                     <option value="">Chọn giới tính</option>
                     {genderOptions.map((opt) => (
@@ -536,8 +586,10 @@ function ProfileEditorCard({ profileView, onCancel }: { profileView: ProfileView
               </div>
 
               {/* Blood Type Selector Grid */}
-              <div className="field-group">
-                <label className="field-label">Chọn Nhóm Máu</label>
+              <div className="field-group" id="field-blood-type">
+                <label className="field-label">
+                  Chọn Nhóm Máu <span className="text-destructive font-bold ml-1" title="Bắt buộc để kích hoạt thẻ">*</span>
+                </label>
                 <div className="blood-selector-grid">
                   {bloodTypes.map((type) => (
                     <button
@@ -688,9 +740,12 @@ function ProfileEditorCard({ profileView, onCancel }: { profileView: ProfileView
             </div>
 
             {/* Emergency Contacts Edit */}
-            <div className="rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-sm space-y-4">
+            <div className="rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-sm space-y-4" id="field-emergency-contacts">
               <div className="flex items-center justify-between border-b border-border pb-2">
-                <label className="field-label m-0 font-semibold text-sm text-foreground">Người Liên Hệ Khẩn Cấp</label>
+                <label className="field-label m-0 font-semibold text-sm text-foreground">
+                  Người Liên Hệ Khẩn Cấp <span className="text-destructive font-bold ml-1" title="Bắt buộc để kích hoạt thẻ">*</span>
+                  <span className="text-[11px] text-muted-foreground font-normal ml-2">(Tối thiểu 1 người thân)</span>
+                </label>
                 <button
                   type="button"
                   className="link-subtle text-xs"
@@ -700,38 +755,42 @@ function ProfileEditorCard({ profileView, onCancel }: { profileView: ProfileView
                 </button>
               </div>
               <div className="flex flex-col gap-2.5">
-                {fields.map((field, index) => (
-                  <div key={field.id} className="med-edit-card">
-                    <div className="med-edit-header">
-                      <span className="med-edit-title">Người liên hệ {index + 1} {index === 0 ? "(Ưu tiên chính)" : ""}</span>
-                      {fields.length > 1 ? (
+                {fields.length === 0 ? (
+                  <div className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
+                    Chưa có người liên hệ khẩn cấp. Hãy bấm <strong>"+ Thêm người thân"</strong> ở góc trên để thêm.
+                  </div>
+                ) : (
+                  fields.map((field, index) => (
+                    <div key={field.id} className="med-edit-card">
+                      <div className="med-edit-header">
+                        <span className="med-edit-title">Người liên hệ {index + 1} {index === 0 ? "(Ưu tiên chính)" : ""}</span>
                         <button type="button" className="btn-remove-item" onClick={() => remove(index)}>
                           Xóa
                         </button>
-                      ) : null}
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          className="input-text"
+                          placeholder="Họ tên"
+                          {...form.register(`emergency_contacts.${index}.name` as const)}
+                        />
+                        <input
+                          type="text"
+                          className="input-text"
+                          placeholder="Mối quan hệ"
+                          {...form.register(`emergency_contacts.${index}.relationship` as const)}
+                        />
+                      </div>
                       <input
-                        type="text"
-                        className="input-text"
-                        placeholder="Họ tên"
-                        {...form.register(`emergency_contacts.${index}.name` as const)}
-                      />
-                      <input
-                        type="text"
-                        className="input-text"
-                        placeholder="Mối quan hệ"
-                        {...form.register(`emergency_contacts.${index}.relationship` as const)}
+                        type="tel"
+                        className="input-text input-mono"
+                        placeholder="Số điện thoại"
+                        {...form.register(`emergency_contacts.${index}.phone` as const)}
                       />
                     </div>
-                    <input
-                      type="tel"
-                      className="input-text input-mono"
-                      placeholder="Số điện thoại"
-                      {...form.register(`emergency_contacts.${index}.phone` as const)}
-                    />
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
 
@@ -768,6 +827,51 @@ function ProfileEditorCard({ profileView, onCancel }: { profileView: ProfileView
           </div>
         </div>
       </form>
+
+      {/* Sticky Two-tier Slim Readiness Dock (only visible when incomplete) */}
+      {missingItems.length > 0 ? (
+        <aside
+          className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-3xl z-40 rounded-2xl border border-border/80 bg-card/95 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.12)] overflow-hidden transition-all duration-300"
+          role="region"
+          aria-label="Tiến độ kích hoạt thẻ"
+          data-od-id="profile-readiness-dock"
+        >
+          {/* Hairline 3px Progress Line at the very top edge */}
+          <div className="h-[3px] bg-muted w-full overflow-hidden">
+            <div
+              className="h-full bg-primary transition-all duration-300 ease-out"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+
+          {/* Content Row */}
+          <div className="px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2.5">
+              <span className="font-mono font-bold text-primary px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-xs">
+                {completedCount}/5
+              </span>
+              <span className="font-medium text-foreground">
+                Cần điền để kích hoạt thẻ:
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-1.5">
+              {missingItems.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => handleScrollToField(item.id)}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted/80 hover:bg-primary/15 text-foreground hover:text-primary font-medium transition-colors border border-border/60 hover:border-primary/40 text-[11px] cursor-pointer"
+                  title={`Cuộn đến ${item.label}`}
+                >
+                  <span>{item.label}</span>
+                  <span className="text-[10px] text-muted-foreground">↗</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </aside>
+      ) : null}
     </div>
   );
 }

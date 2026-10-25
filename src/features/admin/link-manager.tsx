@@ -508,6 +508,15 @@ export function AdminLinkManagerPanel() {
                     </Button>
                   ) : null}
                 </div>
+                {createMutation.error ? (
+                  <Alert variant="danger">
+                    {isApiError(createMutation.error) && createMutation.error.code === "card.profile_not_ready"
+                      ? "Hồ sơ y tế của người dùng chưa hoàn tất. Người dùng cần điền đủ 5 trường bắt buộc (Họ tên, Năm sinh, Giới tính, Nhóm máu, Người liên hệ) để có thể tạo liên kết và kích hoạt thẻ."
+                      : isApiError(createMutation.error)
+                        ? createMutation.error.message
+                        : "Không thể tạo liên kết thẻ."}
+                  </Alert>
+                ) : null}
                 {lastUrl ? (
                   <>
                     <Alert variant="success" title="URL dùng để mã hóa thẻ">
