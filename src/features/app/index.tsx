@@ -21,15 +21,11 @@ import {
   type LocationAlertIncident,
   type UserCard,
 } from "../../api/cards";
-import {
-  getCurrentProfile,
-  profileKeys,
-} from "../../api/profile";
 import { isApiError } from "../../api/http-client";
 import { assignLocation } from "../../lib/navigation";
 import { PageApplicationRoot, useSession } from "../session";
 
-export type UserAppSection = "overview" | "profile" | "cards";
+export type UserAppSection = "profile" | "cards";
 
 const navigation = [
   { href: "/app/profile", label: "Hồ sơ y tế" },
@@ -42,11 +38,6 @@ const sectionCopy: Record<
   UserAppSection,
   { title: string; description: string }
 > = {
-  overview: {
-    title: "Tổng quan tài khoản",
-    description:
-      "Xem mức độ sẵn sàng của hồ sơ và việc cần làm tiếp theo để thông tin khẩn cấp có thể được sử dụng.",
-  },
   profile: {
     title: "Hồ sơ y tế",
     description:
@@ -57,16 +48,6 @@ const sectionCopy: Record<
     description: "Quản lý trạng thái thẻ đã cấp cho tài khoản hiện tại.",
   },
 };
-
-function getInitials(name: string) {
-  const parts = name.trim().split(/\s+/);
-  const first = parts[0]?.charAt(0);
-  const last = parts[parts.length - 1]?.charAt(0);
-  if (parts.length >= 2 && first && last) {
-    return (first + last).toUpperCase();
-  }
-  return name.slice(0, 2).toUpperCase() || "NA";
-}
 
 function cardStatusLabel(card: UserCard) {
   switch (card.status) {
@@ -134,166 +115,6 @@ function cardBlockingReasonLabel(card: UserCard) {
   : null;
 }
 
-function ProfileSummaryCard() {
-  const { session, logoutAndClear, clearSessionCache } = useSession();
-  const [isSigningOut, setIsSigningOut] = useState(false);
-  const query = useQuery({
-    queryKey: profileKeys.current,
-    queryFn: ({ signal }) => getCurrentProfile(signal),
-    staleTime: 15_000,
-    retry: (failureCount, error) => {
-      if (isApiError(error)) {
-        return error.retryable && failureCount < 1;
-      }
-      return failureCount < 1;
-    },
-  });
-
-  const isSessionExpired =
-    isApiError(query.error) && query.error.status === 401;
-
-  useEffect(() => {
-    if (!isSessionExpired) {
-      return;
-    }
-    clearSessionCache();
-    assignLocation("/login?returnTo=/app/profile");
-  }, [clearSessionCache, isSessionExpired]);
-
-  const handleSignOut = async () => {
-    if (isSigningOut) return;
-    setIsSigningOut(true);
-    if (logoutAndClear) {
-      await logoutAndClear();
-    } else {
-      clearSessionCache();
-    }
-    assignLocation("/login");
-  };
-
-  if (query.isPending) {
-    return (
-      <PageLoadingState
-        title="Đang tải hồ sơ y tế"
-        description="Kiểm tra trạng thái hồ sơ hiện tại của tài khoản."
-      />
-    );
-  }
-
-  if (query.error) {
-    if (isSessionExpired) {
-      return (
-        <PageLoadingState
-          title="Đang chuyển hướng đến đăng nhập"
-          description="Phiên đã hết hạn, bạn sẽ được đăng nhập lại an toàn."
-        />
-      );
-    }
-    if (
-      isApiError(query.error) &&
-      (query.error.status === 503 || query.error.retryable)
-    ) {
-      return (
-        <ServiceUnavailableState
-          title="Không thể tải hồ sơ"
-          description="Máy chủ tạm thời không phản hồi. Vui lòng thử lại sau."
-        />
-      );
-    }
-    return (
-      <RetryState
-        title="Không thể tải hồ sơ"
-        description="Đã xảy ra lỗi khi đọc hồ sơ y tế."
-      />
-    );
-  }
-
-  const profile = query.data.profile;
-  const displayName = profile?.display_name || "Nguyen Van A";
-  const email = session?.email || "nguyen.vana@domain.com";
-  const initials = getInitials(displayName);
-
-  return (
-    <div className="w-full max-w-[420px] mx-auto flex flex-col gap-4" data-od-id="board-account-details">
-      <div className="flex items-center justify-between px-1">
-        <span className="text-xs font-semibold text-[#64748b] uppercase tracking-wider">
-          Thông Tin Chủ Thẻ
-        </span>
-        <a href="/app/profile" className="portal-tag text-xs" style={{ textDecoration: "none" }}>
-          Xem Hồ Sơ Y Tế →
-        </a>
-      </div>
-
-      <div className="screen-content bg-white border border-[#d3d9e0] rounded-[18px] p-5 sm:p-6 shadow-[0_4px_20px_rgba(30,36,44,0.06)] flex flex-col gap-4">
-        {/* User Profile Summary Card */}
-        <div style={{ background: "var(--surface)", borderRadius: "var(--radius-card)", padding: "16px", display: "flex", alignItems: "center", gap: "14px" }}>
-          <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: "var(--accent)", color: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", fontWeight: "700", flexShrink: 0 }}>
-            {initials}
-          </div>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ fontFamily: "var(--font-display)", fontSize: "16px", fontWeight: "700", color: "var(--fg)" }}>
-              {displayName}
-            </span>
-            <span style={{ fontSize: "13px", color: "var(--muted)", fontFamily: "var(--font-mono)" }}>
-              {email}
-            </span>
-            <span style={{ fontSize: "12px", color: "var(--accent)", fontWeight: "600", marginTop: "2px" }}>
-              • Đã xác thực CCCD &amp; SĐT
-            </span>
-          </div>
-        </div>
-
-        {/* NFC Hardware Tag Section */}
-        <div className="nfc-hardware-card">
-          <div className="nfc-card-chip-row">
-            <div className="nfc-card-brand">
-              <div className="nfc-emblem">+</div>
-              <span className="nfc-card-brand-text">EMERCARD NFC TAG</span>
-            </div>
-            <span className="nfc-status-badge">
-              <span className="nfc-status-dot"></span> Đang Hoạt Động
-            </span>
-          </div>
-
-          <div className="nfc-serial-display">
-            <span className="nfc-serial-label">Mã Thẻ Phần Cứng</span>
-            <span className="nfc-serial-val">EMC-08422</span>
-          </div>
-
-          <div className="nfc-specs-grid">
-            <div className="nfc-spec-box">
-              <span className="nfc-spec-key">Chuẩn chip</span>
-              <span className="nfc-spec-val">NTAG215 (504B)</span>
-            </div>
-            <div className="nfc-spec-box">
-              <span className="nfc-spec-key">Ngày kích hoạt</span>
-              <span className="nfc-spec-val">15/08/2026</span>
-            </div>
-          </div>
-
-          <div style={{ fontSize: "12px", color: "var(--muted)", lineHeight: 1.4 }}>
-            Thẻ vật lý liên kết cố định với hồ sơ y tế duy nhất. Mọi thay đổi thông tin y tế trên cổng này sẽ cập nhật tức thời khi quét thẻ.
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" }}>
-          <a href="/app/profile" className="btn-primary">
-            Xem Hồ Sơ Y Tế Khẩn Cấp
-          </a>
-          <button
-            type="button"
-            className="btn-ghost-danger"
-            disabled={isSigningOut}
-            onClick={() => void handleSignOut()}
-          >
-            {isSigningOut ? "Đang đăng xuất..." : "Đăng Xuất Khỏi Thiết Bị"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function formatAccessTime(event: LinkAccessEvent): string {
   return new Intl.DateTimeFormat("vi-VN", {
@@ -405,7 +226,7 @@ function CardAccessHistoryPanel({ cardId }: { cardId: string }) {
   };
 
   const scansThisMonth = query.data?.scans_this_month ?? items.length;
-  const avgLatency = query.data?.average_latency_ms ? `${query.data.average_latency_ms}ms` : "85ms";
+  const avgLatency = query.data?.average_latency_ms != null ? `${query.data.average_latency_ms}ms` : "—";
 
   return viewMode === "sos" ? (
     <div className="w-full flex flex-col gap-4 mt-2" data-od-id="board-alert-history">
@@ -840,9 +661,7 @@ export function UserApplicationRoot({ section }: { section: UserAppSection }) {
       userLabel={<StatusBadge variant="primary">Người dùng</StatusBadge>}
     >
       <h1 className="sr-only">{copy.title}</h1>
-      {section === "overview" ? (
-        <ProfileSummaryCard />
-      ) : section === "cards" ? (
+      {section === "cards" ? (
         <MyCardsPanel />
       ) : (
         <EmptyState title="Hồ sơ y tế" description={copy.description} />
