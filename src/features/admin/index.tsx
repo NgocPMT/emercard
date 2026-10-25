@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { QueryClientProvider, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Dialog, Panel, StatusBadge } from "../../components/primitives";
 import {
   EmptyState,
@@ -21,7 +21,13 @@ import {
 } from "../../api/cards";
 import { isApiError } from "../../api/http-client";
 import { assignLocation } from "../../lib/navigation";
-import { PageApplicationRoot, useSession } from "../session";
+import {
+  createPageQueryClient,
+  PageErrorBoundary,
+  RouteAccessGate,
+  SessionProvider,
+  useSession,
+} from "../session";
 import { AdminLinkManagerPanel } from "./link-manager";
 import { AdminCardDetailPanel } from "./card-detail";
 import { AdminBatchProvisioningPanel } from "./batch-provisioning";
@@ -672,7 +678,7 @@ function AdminCardPanel({
   );
 }
 
-export function AdminApplicationRoot({
+function AdminApplicationContent({
   section,
   cardId,
 }: {
@@ -717,5 +723,27 @@ export function AdminApplicationRoot({
         <AdminCardsPanel searchQuery={globalSearch} />
       )}
     </AdminDesktopShell>
+  );
+}
+
+export function AdminApplicationRoot({
+  section,
+  cardId,
+}: {
+  section: AdminAppSection;
+  cardId?: string | null;
+}) {
+  const [queryClient] = useState(() => createPageQueryClient());
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <PageErrorBoundary>
+        <SessionProvider>
+          <RouteAccessGate role="admin" returnTo="/admin">
+            <AdminApplicationContent section={section} cardId={cardId} />
+          </RouteAccessGate>
+        </SessionProvider>
+      </PageErrorBoundary>
+    </QueryClientProvider>
   );
 }
