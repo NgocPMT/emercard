@@ -4,6 +4,7 @@ import {
   createAdminUserLink,
   getAdminCard,
   getMyCardAccessHistory,
+  getMyCardAlerts,
   getMyCards,
   listAdminUserLinks,
   listAdminUsers,
@@ -49,6 +50,62 @@ describe("cards api helpers", () => {
     expect(requestJsonMock).toHaveBeenCalledWith(
       expect.objectContaining({
         path: "/me/cards/card%2F1/access-history?cursor=opaque+cursor",
+      }),
+    );
+  });
+
+  it("parses card location alert incident history", async () => {
+    requestJsonMock.mockResolvedValue({
+      items: [
+        {
+          id: "alert-1",
+          created_at: "2026-10-25T10:35:00Z",
+          status: "sent",
+          latitude: 9.738,
+          longitude: 105.641,
+          accuracy_meters: 13.5,
+          nearby_place: "Cần Thơ, Việt Nam",
+          map_url: "https://www.google.com/maps?q=9.738,105.641",
+          recipients: [
+            {
+              recipient_name: "Người thân",
+              recipient_phone: "036****038",
+              recipient_relationship: "Gia đình",
+              status: "sent",
+              provider_id: "prov-1",
+            },
+          ],
+        },
+      ],
+      next_cursor: null,
+    });
+    await expect(getMyCardAlerts("card-1")).resolves.toEqual({
+      items: [
+        {
+          id: "alert-1",
+          created_at: "2026-10-25T10:35:00Z",
+          status: "sent",
+          latitude: 9.738,
+          longitude: 105.641,
+          accuracy_meters: 13.5,
+          nearby_place: "Cần Thơ, Việt Nam",
+          map_url: "https://www.google.com/maps?q=9.738,105.641",
+          recipients: [
+            {
+              recipient_name: "Người thân",
+              recipient_phone: "036****038",
+              recipient_relationship: "Gia đình",
+              status: "sent",
+              provider_id: "prov-1",
+            },
+          ],
+        },
+      ],
+      next_cursor: null,
+    });
+    expect(requestJsonMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: "/me/cards/card-1/alerts",
       }),
     );
   });

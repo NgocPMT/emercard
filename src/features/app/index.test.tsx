@@ -4,8 +4,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "../../api/errors";
 import { UserApplicationRoot } from ".";
 
-const { getMyCardAccessHistoryMock, assignLocationMock } = vi.hoisted(() => ({
+const { getMyCardAccessHistoryMock, getMyCardAlertsMock, assignLocationMock } = vi.hoisted(() => ({
   getMyCardAccessHistoryMock: vi.fn(),
+  getMyCardAlertsMock: vi.fn(),
   assignLocationMock: vi.fn(),
 }));
 vi.mock("../../lib/navigation", () => ({
@@ -15,6 +16,7 @@ vi.mock("../../lib/navigation", () => ({
 vi.mock("../../api/cards", async () => ({
   ...(await vi.importActual<typeof import("../../api/cards")>("../../api/cards")),
   getMyCardAccessHistory: (...args: unknown[]) => getMyCardAccessHistoryMock(...args),
+  getMyCardAlerts: (...args: unknown[]) => getMyCardAlertsMock(...args),
 }));
 
 const useQueryMock = vi.fn();
@@ -46,6 +48,7 @@ afterEach(() => {
   useQueryMock.mockReset();
   clearSessionCacheMock.mockReset();
   getMyCardAccessHistoryMock.mockReset();
+  getMyCardAlertsMock.mockReset();
   assignLocationMock.mockReset();
 });
 
@@ -253,4 +256,138 @@ describe("UserApplicationRoot", () => {
     expect(screen.queryByText("Thẻ của tôi sắp ra mắt")).not.toBeInTheDocument();
   });
 
+  it("renders real SOS incidents with interactive Google Maps embed, telemetry, and SMS logs", () => {
+    const card = {
+      id: "card-1",
+      serial: "EMC-0000-0000-0000-0",
+      status: "active",
+      is_current: true,
+      issued_at: "2026-01-01T00:00:00Z",
+      activated_at: "2026-01-01T00:00:00Z",
+      disabled_at: null,
+      created_at: "2026-01-01T00:00:00Z",
+      updated_at: "2026-01-01T00:00:00Z",
+      can_activate: false,
+      can_disable: true,
+      can_revoke: true,
+      can_report_lost: true,
+      link_status: "active",
+      link_purpose: "card",
+      link_label: null,
+    };
+    const historyQuery = { isPending: false, error: undefined, data: { items: [], next_cursor: null } };
+    const cardsQuery = { isPending: false, error: undefined, data: { cards: [card] } };
+    const alertsQuery = {
+      isPending: false,
+      error: undefined,
+      data: {
+        items: [
+          {
+            id: "incident-001",
+            created_at: "2026-10-25T10:35:00Z",
+            status: "broadcasted",
+            latitude: 9.738257,
+            longitude: 105.641038,
+            accuracy_meters: 15.2,
+            nearby_place: "ĐT. 927, Xã Phương Bình, Thành phố Cần Thơ, Việt Nam",
+            map_url: "https://www.google.com/maps/search/?api=1&query=9.738257,105.641038",
+            recipients: [
+              {
+                recipient_name: "Nguyen Van A",
+                recipient_phone: "0361234567",
+                recipient_relationship: "Bạn",
+                status: "sent",
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    useQueryMock.mockImplementation((options: { queryKey: unknown[] }) => {
+      if (options.queryKey.includes("alerts")) return alertsQuery;
+      if (options.queryKey.includes("access-history")) return historyQuery;
+      return cardsQuery;
+    });
+
+    render(<UserApplicationRoot section="cards" />);
+
+    // Switch to SOS view
+    fireEvent.click(screen.getByRole("button", { name: "Xem Nhật Ký Phát SOS & Tọa Độ →" }));
+
+    expect(screen.getByText("Nhật Ký Sự Cố Khẩn Cấp")).toBeInTheDocument();
+    expect(screen.getByText("1 sự cố ghi nhận")).toBeInTheDocument();
+    expect(screen.getByText("ĐÃ PHÁT BÁO ĐỘNG")).toBeInTheDocument();
+    expect(screen.getByText("9.738257° N, 105.641038° E")).toBeInTheDocument();
+    expect(screen.getByText("±15 mét (GPS Cấp Cứu)")).toBeInTheDocument();
+    expect(screen.getByText("ĐT. 927, Xã Phương Bình, Thành phố Cần Thơ, Việt Nam")).toBeInTheDocument();
+
+    // Verify Google Maps iframe embed
+    const iframe = screen.getByTitle("Google Maps vị trí sự cố incident-001");
+    expect(iframe).toBeInTheDocument();
+    expect(iframe).toHaveAttribute(
+      "src",
+      "https://maps.google.com/maps?q=9.738257,105.641038&hl=vi&z=15&output=embed",
+    );
+
+    // Verify navigation link
+    const mapLink = screen.getByRole("link", { name: /Mở trên Google Maps/ });
+    expect(mapLink).toHaveAttribute(
+      "href",
+      "https://www.google.com/maps/search/?api=1&query=9.738257,105.641038",
+    );
+
+    // Verify SMS logs
+    expect(screen.getByText("Nguyen Van A (Bạn)")).toBeInTheDocument();
+    expect(screen.getByText("0361234567")).toBeInTheDocument();
+    expect(screen.getByText("Đã Gửi")).toBeInTheDocument();
+
+    // Switch back to passive audit
+    fireEvent.click(screen.getByRole("button", { name: "← Xem Nhật Ký Quét Thẻ Thụ Động" }));
+    expect(screen.getByText("Giám Sát Truy Cập Thẻ")).toBeInTheDocument();
+  });
+
+  it("renders empty SOS alert state when no incidents exist", () => {
+    const card = {
+      id: "card-1",
+      serial: "EMC-0000-0000-0000-0",
+      status: "active",
+      is_current: true,
+      issued_at: "2026-01-01T00:00:00Z",
+      activated_at: "2026-01-01T00:00:00Z",
+      disabled_at: null,
+      created_at: "2026-01-01T00:00:00Z",
+      updated_at: "2026-01-01T00:00:00Z",
+      can_activate: false,
+      can_disable: true,
+      can_revoke: true,
+      can_report_lost: true,
+      link_status: "active",
+      link_purpose: "card",
+      link_label: null,
+    };
+    const historyQuery = { isPending: false, error: undefined, data: { items: [], next_cursor: null } };
+    const cardsQuery = { isPending: false, error: undefined, data: { cards: [card] } };
+    const alertsQuery = {
+      isPending: false,
+      error: undefined,
+      data: { items: [] },
+    };
+
+    useQueryMock.mockImplementation((options: { queryKey: unknown[] }) => {
+      if (options.queryKey.includes("alerts")) return alertsQuery;
+      if (options.queryKey.includes("access-history")) return historyQuery;
+      return cardsQuery;
+    });
+
+    render(<UserApplicationRoot section="cards" />);
+
+    // Switch to SOS view
+    fireEvent.click(screen.getByRole("button", { name: "Xem Nhật Ký Phát SOS & Tọa Độ →" }));
+
+    expect(screen.getByText("Nhật Ký Sự Cố Khẩn Cấp")).toBeInTheDocument();
+    expect(screen.getByText("0 sự cố ghi nhận")).toBeInTheDocument();
+    expect(screen.getByText("Chưa có sự cố SOS nào")).toBeInTheDocument();
+    expect(screen.getByText("Thẻ này chưa ghi nhận tín hiệu khẩn cấp nào từ người quét.")).toBeInTheDocument();
+  });
 });
