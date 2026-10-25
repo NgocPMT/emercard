@@ -212,90 +212,128 @@ function ProfileViewCard({ profileView, onEdit }: { profileView: ProfileView; on
   const medications = profile?.critical_medications ?? [];
 
   return (
-    <div className="w-full max-w-[420px] mx-auto py-6" data-od-id="board-profile-view">
-      <div className="screen-content bg-white border border-[#d3d9e0] rounded-[18px] p-5 sm:p-6 shadow-[0_4px_20px_rgba(30,36,44,0.06)] flex flex-col gap-4">
-        <div className="flex items-center justify-between text-xs text-[#64748b] border-b border-[#e2e8f0] pb-2">
-          <h3 className="font-semibold text-[#1e242c] text-sm">Xem trước trang khẩn cấp</h3>
-          <span>Chỉ xem trong ứng dụng, không tạo liên kết.</span>
-        </div>
-
-        {/* Hero Identity with Right-Aligned 2-Line Blood Type */}
-        <div className="profile-hero-row">
-          <div className="patient-identity">
-            <h2 className="patient-name">{previewValue(profile?.display_name, "Nguyen Van A")}</h2>
-            <span className="patient-meta">
+    <div className="w-full max-w-5xl mx-auto space-y-6" data-od-id="board-profile-view">
+      {/* Top Hero Banner */}
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius-panel)] border border-border bg-card p-6 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xl font-bold text-primary">
+            {(profile?.display_name || "N").slice(0, 1).toUpperCase()}
+          </div>
+          <div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <h3 className="font-semibold text-foreground text-sm">Xem trước trang khẩn cấp</h3>
+              <span>•</span>
+              <span>Chỉ xem trong ứng dụng, không tạo liên kết.</span>
+            </div>
+            <h2 className="patient-name text-2xl sm:text-3xl font-bold tracking-tight text-foreground mt-1">
+              {previewValue(profile?.display_name, "Nguyen Van A")}
+            </h2>
+            <p className="patient-meta text-sm text-muted-foreground mt-0.5">
               {profile?.birth_year ? `Năm sinh ${profile.birth_year}` : "Năm sinh chưa rõ"}
               {" • Giới tính "}
               {genderLabel(profile?.gender)}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-5">
+          <div className="blood-type-block text-right">
+            <span className="blood-type-caption block text-xs font-medium text-muted-foreground">Nhóm máu</span>
+            <span className="blood-type-val font-mono text-3xl font-extrabold text-primary">
+              {bloodTypeLabel(profile?.blood_type)}
             </span>
           </div>
-
-          {/* Blood Type Block: 2 lines right aligned */}
-          <div className="blood-type-block">
-            <span className="blood-type-caption">Nhóm máu</span>
-            <span className="blood-type-val">{bloodTypeLabel(profile?.blood_type)}</span>
-          </div>
+          <Button
+            type="button"
+            variant="primary"
+            onClick={onEdit}
+            className="shrink-0"
+          >
+            Chỉnh Sửa Hồ Sơ Y Tế
+          </Button>
         </div>
+      </div>
 
-        {/* Medical Cards */}
-        <dl className="flex flex-col gap-3 m-0">
-          <div className="med-card med-card-danger">
-            <div className="med-label">
-              <dt className="inline">Dị ứng quan trọng</dt>
-              <span className="status-pill status-pill-danger">Nguy cơ sốc</span>
-            </div>
-            <dd className="med-val m-0">{allergies.length > 0 ? allergies.join(", ") : "Chưa ghi nhận"}</dd>
-          </div>
-
-          <div className="med-card med-card-warning">
-            <div className="med-label">
-              <dt className="inline">Tình trạng bệnh quan trọng</dt>
-              <span className="status-pill status-pill-warning">Bệnh nền</span>
-            </div>
-            <dd className="med-val m-0">{conditions.length > 0 ? conditions.join(", ") : "Chưa ghi nhận"}</dd>
-          </div>
-
-          <div className="med-card">
-            <div className="med-label">
-              <dt className="inline">Thuốc đang sử dụng</dt>
-            </div>
-            <dd className="med-val m-0">{medications.length > 0 ? medications.join(", ") : "Chưa ghi nhận"}</dd>
-          </div>
-
-          <div className="med-card">
-            <div className="med-label">
-              <dt className="inline">Ghi chú khẩn cấp &amp; Chỉ thị</dt>
-            </div>
-            <dd className="med-val m-0">{previewValue(profile?.emergency_note, "Chưa có ghi chú")}</dd>
-          </div>
-        </dl>
-
-        {/* Emergency Contacts Section */}
-        <div className="contact-container">
-          <div className="contact-section-title">
-            <span>Người Liên Hệ Khẩn Cấp ({contacts.length})</span>
-            <span style={{ fontSize: "11px", color: "var(--muted)", fontWeight: "normal" }}>Ưu tiên gọi tự động</span>
-          </div>
-
-          {contacts.length > 0 ? (
-            contacts.map((contact, idx) => (
-              <div key={idx} className="contact-inner-card">
-                <div className="contact-details">
-                  <div className="contact-name">{contact.name}</div>
-                  <span className="contact-relation">Mối quan hệ: {contact.relationship}</span>
-                </div>
-                <span className="contact-phone-mono">{contact.phone}</span>
+      {/* Main 2-Column Content Grid */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* Left Column (7 cols): Core Medical Items */}
+        <div className="space-y-4 lg:col-span-7">
+          <dl className="flex flex-col gap-4 m-0">
+            <div className="rounded-[var(--radius-panel)] border border-rose-200 bg-rose-50/40 p-5 shadow-sm space-y-2">
+              <div className="flex items-center justify-between">
+                <dt className="text-sm font-bold text-rose-900">Dị ứng quan trọng</dt>
+                <span className="status-pill status-pill-danger">Nguy cơ sốc</span>
               </div>
-            ))
-          ) : (
-            <p className="text-xs text-[#64748b]">Chưa có người liên hệ khẩn cấp.</p>
-          )}
+              <dd className="med-val m-0 text-sm font-medium text-rose-950">
+                {allergies.length > 0 ? allergies.join(", ") : "Chưa ghi nhận"}
+              </dd>
+            </div>
+
+            <div className="rounded-[var(--radius-panel)] border border-amber-200 bg-amber-50/40 p-5 shadow-sm space-y-2">
+              <div className="flex items-center justify-between">
+                <dt className="text-sm font-bold text-amber-900">Tình trạng bệnh quan trọng</dt>
+                <span className="status-pill status-pill-warning">Bệnh nền</span>
+              </div>
+              <dd className="med-val m-0 text-sm font-medium text-amber-950">
+                {conditions.length > 0 ? conditions.join(", ") : "Chưa ghi nhận"}
+              </dd>
+            </div>
+
+            <div className="rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-sm space-y-2">
+              <div className="flex items-center justify-between">
+                <dt className="text-sm font-bold text-foreground">Thuốc đang sử dụng</dt>
+              </div>
+              <dd className="med-val m-0 text-sm text-foreground">
+                {medications.length > 0 ? medications.join(", ") : "Chưa ghi nhận"}
+              </dd>
+            </div>
+
+            <div className="rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-sm space-y-2">
+              <div className="flex items-center justify-between">
+                <dt className="text-sm font-bold text-foreground">Ghi chú khẩn cấp &amp; Chỉ thị</dt>
+              </div>
+              <dd className="med-val m-0 text-sm text-foreground leading-relaxed">
+                {previewValue(profile?.emergency_note, "Chưa có ghi chú")}
+              </dd>
+            </div>
+          </dl>
         </div>
 
-        {/* Primary CTA Button */}
-        <button type="button" className="btn-primary mt-1" onClick={onEdit}>
-          Chỉnh Sửa Hồ Sơ Y Tế
-        </button>
+        {/* Right Column (5 cols): Emergency Contacts */}
+        <div className="space-y-4 lg:col-span-5">
+          <div className="rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <span className="font-semibold text-foreground text-sm">
+                Người Liên Hệ Khẩn Cấp ({contacts.length})
+              </span>
+              <span className="text-xs text-muted-foreground">Ưu tiên gọi tự động</span>
+            </div>
+
+            {contacts.length > 0 ? (
+              <div className="space-y-3">
+                {contacts.map((contact, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between rounded-[var(--radius-control)] border border-border/80 bg-muted/30 p-3.5"
+                  >
+                    <div>
+                      <div className="font-semibold text-foreground text-sm">{contact.name}</div>
+                      <span className="text-xs text-muted-foreground">Mối quan hệ: {contact.relationship}</span>
+                    </div>
+                    <a
+                      href={`tel:${contact.phone}`}
+                      className="font-mono text-sm font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded hover:bg-primary/20 transition-colors"
+                    >
+                      {contact.phone}
+                    </a>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground py-2">Chưa có người liên hệ khẩn cấp.</p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -425,260 +463,311 @@ function ProfileEditorCard({ profileView, onCancel }: { profileView: ProfileView
   const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
 
   return (
-    <div className="w-full max-w-[420px] mx-auto py-6" data-od-id="board-profile-edit">
-      <div className="screen-content bg-white border border-[#d3d9e0] rounded-[18px] p-5 sm:p-6 shadow-[0_4px_20px_rgba(30,36,44,0.06)] flex flex-col gap-4">
-        <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-3">
-          <span className="font-semibold text-[#1e242c] text-sm">Chỉnh Sửa Hồ Sơ Y Tế</span>
-          <button type="button" className="text-xs font-semibold text-[var(--accent)] hover:underline bg-transparent border-none cursor-pointer p-0" onClick={onCancel}>
-            ← Hủy bỏ
-          </button>
+    <div className="w-full max-w-5xl mx-auto space-y-6" data-od-id="board-profile-edit">
+      {/* Top Action Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-sm">
+        <div>
+          <h2 className="font-bold text-foreground text-lg">Chỉnh Sửa Hồ Sơ Y Tế</h2>
+          <p className="text-xs text-muted-foreground">Cập nhật thông tin y tế khẩn cấp được mã hóa an toàn trên thẻ.</p>
         </div>
-        {rootMessage ? (
-          <Alert variant="danger" title="Không thể lưu hồ sơ">
-            {rootMessage}
-          </Alert>
-        ) : null}
+        <div className="flex items-center gap-3">
+          <Button type="button" variant="secondary" onClick={onCancel}>
+            ← Hủy bỏ
+          </Button>
+          <Button
+            type="submit"
+            form="profile-edit-form"
+            variant="primary"
+            busy={saveMutation.isPending}
+            disabled={saveMutation.isPending}
+          >
+            {saveMutation.isPending ? "Đang lưu..." : "Lưu Thay Đổi"}
+          </Button>
+        </div>
+      </div>
 
-        <form onSubmit={(e) => void submit(e)} className="flex flex-col gap-4" noValidate>
-          {/* Identity Fields */}
-          <div className="field-group">
-            <label className="field-label" htmlFor="edit-name">Họ và tên</label>
-            <input
-              id="edit-name"
-              type="text"
-              className="input-text"
-              placeholder="Nguyen Van A"
-              {...form.register("display_name")}
+      {rootMessage ? (
+        <Alert variant="danger" title="Không thể lưu hồ sơ">
+          {rootMessage}
+        </Alert>
+      ) : null}
+
+      <form id="profile-edit-form" onSubmit={(e) => void submit(e)} className="space-y-6" noValidate>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          {/* Left Column (6 cols): Personal Info & Notes & Private Panel */}
+          <div className="space-y-6 lg:col-span-6">
+            <div className="rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-sm space-y-4">
+              <h3 className="font-semibold text-sm text-foreground border-b border-border pb-2">
+                Thông Tin Cá Nhân
+              </h3>
+
+              <div className="field-group">
+                <label className="field-label" htmlFor="edit-name">Họ và tên</label>
+                <input
+                  id="edit-name"
+                  type="text"
+                  className="input-text"
+                  placeholder="Nguyen Van A"
+                  {...form.register("display_name")}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="field-group">
+                  <label className="field-label" htmlFor="edit-year">Năm sinh</label>
+                  <input
+                    id="edit-year"
+                    type="text"
+                    inputMode="numeric"
+                    className="input-text"
+                    placeholder="1995"
+                    {...form.register("birth_year")}
+                  />
+                </div>
+                <div className="field-group">
+                  <label className="field-label" htmlFor="edit-gender">Giới tính</label>
+                  <select id="edit-gender" className="input-text" {...form.register("gender")}>
+                    <option value="">Chọn giới tính</option>
+                    {genderOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Blood Type Selector Grid */}
+              <div className="field-group">
+                <label className="field-label">Chọn Nhóm Máu</label>
+                <div className="blood-selector-grid">
+                  {bloodTypes.map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      className={`blood-option-btn ${selectedBloodType === type ? "active" : ""}`}
+                      onClick={() => form.setValue("blood_type", type, { shouldDirty: true, shouldValidate: true })}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Emergency Note */}
+            <div className="rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-sm space-y-4">
+              <h3 className="font-semibold text-sm text-foreground border-b border-border pb-2">
+                Ghi Chú Khẩn Cấp &amp; Chỉ Thị Y Tế
+              </h3>
+              <div className="field-group">
+                <textarea
+                  id="edit-note"
+                  className="input-text"
+                  rows={3}
+                  placeholder="Ghi chú thêm cho nhân viên y tế (VD: Có stent tim, dùng máy tạo nhịp)..."
+                  {...form.register("emergency_note")}
+                />
+              </div>
+            </div>
+
+            {/* Private Profile Panel */}
+            <PrivateProfilePanel
+              profileId={profileView.profile?.profile_id ?? ""}
+              envelope={profileView.profile?.private_profile_envelope}
+              onPendingChange={setPrivatePendingChange}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="field-group">
-              <label className="field-label" htmlFor="edit-year">Năm sinh</label>
-              <input
-                id="edit-year"
-                type="text"
-                inputMode="numeric"
-                className="input-text"
-                placeholder="1995"
-                {...form.register("birth_year")}
-              />
-            </div>
-            <div className="field-group">
-              <label className="field-label" htmlFor="edit-gender">Giới tính</label>
-              <select id="edit-gender" className="input-text" {...form.register("gender")}>
-                <option value="">Chọn giới tính</option>
-                {genderOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
+          {/* Right Column (6 cols): Allergies, Conditions, Medications, Emergency Contacts */}
+          <div className="space-y-6 lg:col-span-6">
+            <div className="rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-sm space-y-4">
+              <h3 className="font-semibold text-sm text-foreground border-b border-border pb-2">
+                Tình Trạng Y Tế Đặc Biệt
+              </h3>
 
-          {/* Blood Type Selector Grid */}
-          <div className="field-group">
-            <label className="field-label">Chọn Nhóm Máu</label>
-            <div className="blood-selector-grid">
-              {bloodTypes.map((type) => (
-                <button
-                  key={type}
-                  type="button"
-                  className={`blood-option-btn ${selectedBloodType === type ? "active" : ""}`}
-                  onClick={() => form.setValue("blood_type", type, { shouldDirty: true, shouldValidate: true })}
-                >
-                  {type}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Allergies Tag Management */}
-          <div className="field-group">
-            <label className="field-label">Dị Ứng Quan Trọng</label>
-            <div className="tag-cloud-wrap">
-              {allergiesList.map((tag, idx) => (
-                <span key={idx} className="removable-tag">
-                  {tag}{" "}
-                  <button type="button" className="removable-tag-btn" onClick={() => handleRemoveAllergy(idx)}>
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-            <div className="add-tag-row">
-              <input
-                type="text"
-                className="input-text"
-                placeholder="Thêm dị ứng mới (VD: Đậu phộng)..."
-                value={newAllergy}
-                onChange={(e) => setNewAllergy(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleAddAllergy();
-                  }
-                }}
-              />
-              <button type="button" className="btn-add-tag" onClick={handleAddAllergy}>
-                + Thêm
-              </button>
-            </div>
-          </div>
-
-          {/* Chronic Conditions Tag Management */}
-          <div className="field-group">
-            <label className="field-label">Bệnh Lý Mãn Tính</label>
-            <div className="tag-cloud-wrap">
-              {conditionsList.map((tag, idx) => (
-                <span key={idx} className="removable-tag">
-                  {tag}{" "}
-                  <button type="button" className="removable-tag-btn" onClick={() => handleRemoveCondition(idx)}>
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-            <div className="add-tag-row">
-              <input
-                type="text"
-                className="input-text"
-                placeholder="Thêm bệnh lý mới (VD: Hen suyễn)..."
-                value={newCondition}
-                onChange={(e) => setNewCondition(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleAddCondition();
-                  }
-                }}
-              />
-              <button type="button" className="btn-add-tag" onClick={handleAddCondition}>
-                + Thêm
-              </button>
-            </div>
-          </div>
-
-          {/* Active Medications Cards */}
-          <div className="field-group">
-            <label className="field-label">Thuốc Đang Sử Dụng</label>
-            <div className="flex flex-col gap-2">
-              {medicationsList.map((med, idx) => (
-                <div key={idx} className="med-edit-card">
-                  <div className="med-edit-header">
-                    <span className="med-edit-title">{med}</span>
-                    <button type="button" className="btn-remove-item" onClick={() => handleRemoveMedication(idx)}>
-                      Xóa
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="add-tag-row mt-1">
-              <input
-                type="text"
-                className="input-text"
-                placeholder="Tên thuốc..."
-                value={newMedName}
-                onChange={(e) => setNewMedName(e.target.value)}
-              />
-              <input
-                type="text"
-                className="input-text"
-                placeholder="Liều lượng (VD: 5mg/ngày)..."
-                value={newMedDosage}
-                onChange={(e) => setNewMedDosage(e.target.value)}
-              />
-              <button type="button" className="btn-add-tag" onClick={handleAddMedication}>
-                + Thêm
-              </button>
-            </div>
-          </div>
-
-          {/* Emergency Contacts Edit */}
-          <div className="field-group">
-            <div className="flex items-center justify-between mb-1">
-              <label className="field-label m-0">Người Liên Hệ Khẩn Cấp</label>
-              <button
-                type="button"
-                className="link-subtle text-xs"
-                onClick={() => append(emptyContact())}
-              >
-                + Thêm người thân
-              </button>
-            </div>
-            <div className="flex flex-col gap-2.5">
-              {fields.map((field, index) => (
-                <div key={field.id} className="med-edit-card">
-                  <div className="med-edit-header">
-                    <span className="med-edit-title">Người liên hệ {index + 1} {index === 0 ? "(Ưu tiên chính)" : ""}</span>
-                    {fields.length > 1 ? (
-                      <button type="button" className="btn-remove-item" onClick={() => remove(index)}>
-                        Xóa
+              {/* Allergies Tag Management */}
+              <div className="field-group">
+                <label className="field-label">Dị Ứng Quan Trọng</label>
+                <div className="tag-cloud-wrap">
+                  {allergiesList.map((tag, idx) => (
+                    <span key={idx} className="removable-tag">
+                      {tag}{" "}
+                      <button type="button" className="removable-tag-btn" onClick={() => handleRemoveAllergy(idx)}>
+                        ×
                       </button>
-                    ) : null}
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <input
-                      type="text"
-                      className="input-text"
-                      placeholder="Họ tên"
-                      {...form.register(`emergency_contacts.${index}.name` as const)}
-                    />
-                    <input
-                      type="text"
-                      className="input-text"
-                      placeholder="Mối quan hệ"
-                      {...form.register(`emergency_contacts.${index}.relationship` as const)}
-                    />
-                  </div>
-                  <input
-                    type="tel"
-                    className="input-text input-mono"
-                    placeholder="Số điện thoại"
-                    {...form.register(`emergency_contacts.${index}.phone` as const)}
-                  />
+                    </span>
+                  ))}
                 </div>
-              ))}
+                <div className="add-tag-row">
+                  <input
+                    type="text"
+                    className="input-text"
+                    placeholder="Thêm dị ứng mới (VD: Đậu phộng)..."
+                    value={newAllergy}
+                    onChange={(e) => setNewAllergy(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddAllergy();
+                      }
+                    }}
+                  />
+                  <button type="button" className="btn-add-tag" onClick={handleAddAllergy}>
+                    + Thêm
+                  </button>
+                </div>
+              </div>
+
+              {/* Chronic Conditions Tag Management */}
+              <div className="field-group">
+                <label className="field-label">Bệnh Lý Mãn Tính</label>
+                <div className="tag-cloud-wrap">
+                  {conditionsList.map((tag, idx) => (
+                    <span key={idx} className="removable-tag">
+                      {tag}{" "}
+                      <button type="button" className="removable-tag-btn" onClick={() => handleRemoveCondition(idx)}>
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="add-tag-row">
+                  <input
+                    type="text"
+                    className="input-text"
+                    placeholder="Thêm bệnh lý mới (VD: Hen suyễn)..."
+                    value={newCondition}
+                    onChange={(e) => setNewCondition(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddCondition();
+                      }
+                    }}
+                  />
+                  <button type="button" className="btn-add-tag" onClick={handleAddCondition}>
+                    + Thêm
+                  </button>
+                </div>
+              </div>
+
+              {/* Active Medications Cards */}
+              <div className="field-group">
+                <label className="field-label">Thuốc Đang Sử Dụng</label>
+                <div className="flex flex-col gap-2">
+                  {medicationsList.map((med, idx) => (
+                    <div key={idx} className="med-edit-card">
+                      <div className="med-edit-header">
+                        <span className="med-edit-title">{med}</span>
+                        <button type="button" className="btn-remove-item" onClick={() => handleRemoveMedication(idx)}>
+                          Xóa
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="add-tag-row mt-1">
+                  <input
+                    type="text"
+                    className="input-text"
+                    placeholder="Tên thuốc..."
+                    value={newMedName}
+                    onChange={(e) => setNewMedName(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    className="input-text"
+                    placeholder="Liều lượng (VD: 5mg/ngày)..."
+                    value={newMedDosage}
+                    onChange={(e) => setNewMedDosage(e.target.value)}
+                  />
+                  <button type="button" className="btn-add-tag" onClick={handleAddMedication}>
+                    + Thêm
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Emergency Contacts Edit */}
+            <div className="rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-border pb-2">
+                <label className="field-label m-0 font-semibold text-sm text-foreground">Người Liên Hệ Khẩn Cấp</label>
+                <button
+                  type="button"
+                  className="link-subtle text-xs"
+                  onClick={() => append(emptyContact())}
+                >
+                  + Thêm người thân
+                </button>
+              </div>
+              <div className="flex flex-col gap-2.5">
+                {fields.map((field, index) => (
+                  <div key={field.id} className="med-edit-card">
+                    <div className="med-edit-header">
+                      <span className="med-edit-title">Người liên hệ {index + 1} {index === 0 ? "(Ưu tiên chính)" : ""}</span>
+                      {fields.length > 1 ? (
+                        <button type="button" className="btn-remove-item" onClick={() => remove(index)}>
+                          Xóa
+                        </button>
+                      ) : null}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        className="input-text"
+                        placeholder="Họ tên"
+                        {...form.register(`emergency_contacts.${index}.name` as const)}
+                      />
+                      <input
+                        type="text"
+                        className="input-text"
+                        placeholder="Mối quan hệ"
+                        {...form.register(`emergency_contacts.${index}.relationship` as const)}
+                      />
+                    </div>
+                    <input
+                      type="tel"
+                      className="input-text input-mono"
+                      placeholder="Số điện thoại"
+                      {...form.register(`emergency_contacts.${index}.phone` as const)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Success Notification Toast */}
+            <div className={`toast-success-banner ${successMessage ? "show" : ""}`} id="saveSuccessToast">
+              <svg style={{ width: "18px", height: "18px", fill: "var(--accent)", flexShrink: 0 }} viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+              </svg>
+              <div>
+                <div style={{ fontWeight: 600 }}>Lưu hồ sơ thành công!</div>
+                <div style={{ fontSize: "11px", color: "var(--muted)" }}>Dữ liệu đã đồng bộ lập tức lên thẻ NFC.</div>
+              </div>
+            </div>
+
+            {/* Bottom Action Buttons */}
+            <div className="flex gap-3">
+              <Button
+                type="submit"
+                variant="primary"
+                busy={saveMutation.isPending}
+                disabled={saveMutation.isPending}
+                className="flex-1"
+              >
+                {saveMutation.isPending ? "Đang lưu..." : "Lưu Thay Đổi"}
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={onCancel}
+              >
+                Hủy Bỏ
+              </Button>
             </div>
           </div>
-
-          {/* Success Notification Toast */}
-          <div className={`toast-success-banner ${successMessage ? "show" : ""}`} id="saveSuccessToast">
-            <svg style={{ width: "18px", height: "18px", fill: "var(--accent)", flexShrink: 0 }} viewBox="0 0 24 24">
-              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-            </svg>
-            <div>
-              <div style={{ fontWeight: 600 }}>Lưu hồ sơ thành công!</div>
-              <div style={{ fontSize: "11px", color: "var(--muted)" }}>Dữ liệu đã đồng bộ lập tức lên thẻ NFC.</div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-2 mt-2">
-            <button
-              type="submit"
-              className="btn-primary"
-              disabled={saveMutation.isPending}
-            >
-              {saveMutation.isPending ? "Đang lưu..." : "Lưu Thay Đổi"}
-            </button>
-            <button
-              type="button"
-              className="btn-secondary"
-              style={{ width: "auto", padding: "11px 18px" }}
-              onClick={onCancel}
-            >
-              Hủy Bỏ
-            </button>
-          </div>
-
-          <PrivateProfilePanel
-            profileId={profileView.profile?.profile_id ?? ""}
-            envelope={profileView.profile?.private_profile_envelope}
-            onPendingChange={setPrivatePendingChange}
-          />
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   );
 }
