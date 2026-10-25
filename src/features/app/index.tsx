@@ -13,10 +13,12 @@ import {
   cardKeys,
   disableMyCard,
   getMyCardAccessHistory,
+  getMyCardAlerts,
   getMyCards,
   reportMyCardLost,
   revokeMyCard,
   type LinkAccessEvent,
+  type LocationAlertIncident,
   type UserCard,
 } from "../../api/cards";
 import {
@@ -300,6 +302,17 @@ function formatAccessTime(event: LinkAccessEvent): string {
   }).format(new Date(event.accessed_at));
 }
 
+function formatIncidentTime(isoString: string): string {
+  try {
+    return new Intl.DateTimeFormat("vi-VN", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(new Date(isoString));
+  } catch {
+    return isoString;
+  }
+}
+
 function CardAccessHistoryPanel({ cardId }: { cardId: string }) {
   const { clearSessionCache } = useSession();
   const [items, setItems] = useState<LinkAccessEvent[]>([]);
@@ -311,6 +324,19 @@ function CardAccessHistoryPanel({ cardId }: { cardId: string }) {
   const query = useQuery({
     queryKey: cardKeys.myCardAccessHistory(cardId),
     queryFn: ({ signal }) => getMyCardAccessHistory(cardId, null, signal),
+    staleTime: 10_000,
+    retry: (failureCount, error) => {
+      if (isApiError(error)) {
+        return error.retryable && failureCount < 1;
+      }
+      return failureCount < 1;
+    },
+  });
+
+  const alertsQuery = useQuery({
+    queryKey: cardKeys.myCardAlerts(cardId),
+    queryFn: ({ signal }) => getMyCardAlerts(cardId, null, signal),
+    enabled: viewMode === "sos",
     staleTime: 10_000,
     retry: (failureCount, error) => {
       if (isApiError(error)) {
@@ -333,6 +359,13 @@ function CardAccessHistoryPanel({ cardId }: { cardId: string }) {
       assignLocation("/login?returnTo=/app/cards");
     }
   }, [clearSessionCache, query.error]);
+
+  useEffect(() => {
+    if (isApiError(alertsQuery.error) && alertsQuery.error.status === 401) {
+      clearSessionCache();
+      assignLocation("/login?returnTo=/app/cards");
+    }
+  }, [clearSessionCache, alertsQuery.error]);
 
   if (query.isPending) {
     return (
@@ -380,66 +413,134 @@ function CardAccessHistoryPanel({ cardId }: { cardId: string }) {
         <span className="text-xs font-semibold text-[#64748b] uppercase tracking-wider">
           Nhật Ký Sự Cố Khẩn Cấp
         </span>
-        <span className="portal-tag text-xs">1 sự cố ghi nhận</span>
+        <span className="portal-tag text-xs">
+          {alertsQuery.data ? `${alertsQuery.data.items.length} sự cố ghi nhận` : "Đang tải..."}
+        </span>
       </div>
 
       <div className="screen-content bg-white border border-[#d3d9e0] rounded-[14px] p-5 shadow-[0_4px_20px_rgba(30,36,44,0.06)] flex flex-col gap-4">
-        {/* Main Incident Card */}
-        <div className="incident-meta-card">
-          <div className="incident-header-row">
-            <span className="incident-time">09:42 · 21/10/2026</span>
-            <span className="incident-tag">ĐÃ PHÁT BÁO ĐỘNG</span>
+        {alertsQuery.isPending ? (
+          <div className="py-6 text-center text-sm text-muted-foreground">
+            Đang tải nhật ký cảnh báo SOS...
           </div>
-
-          {/* Telemetry Details */}
-          <div className="gps-telemetry-box">
-            <div className="gps-coord-row">
-              <span className="gps-label">Tọa độ GPS chốt</span>
-              <span className="gps-val-mono">10.7769° N, 106.7009° E</span>
-            </div>
-            <div className="gps-coord-row">
-              <span className="gps-label">Bán kính sai số</span>
-              <span className="gps-val-mono">±12 mét (GPS Cấp Cứu)</span>
-            </div>
-            <div className="gps-coord-row">
-              <span className="gps-label">Địa chỉ ước tính</span>
-              <span style={{ fontSize: "12px", fontWeight: 500, color: "var(--fg)" }}>Bến Nghé, Quận 1, TP. HCM</span>
-            </div>
+        ) : alertsQuery.error ? (
+          <div className="py-6 text-center text-sm text-muted-foreground">
+            Chưa thể tải nhật ký cảnh báo SOS. Vui lòng thử lại sau.
           </div>
-
-          {/* Mock Radar Map View */}
-          <div className="mock-map-canvas">
-            <div className="mock-map-grid" />
-            <div className="radar-circle" />
-            <div className="map-pin">
-              <div className="pin-dot" />
-              <span className="pin-label">Vị trí phát SOS</span>
+        ) : alertsQuery.data.items.length === 0 ? (
+          <div className="py-8 text-center flex flex-col items-center justify-center gap-2">
+            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
             </div>
+            <p className="text-sm font-semibold text-slate-700">Chưa có sự cố SOS nào</p>
+            <p className="text-xs text-slate-500 max-w-sm">
+              Thẻ này chưa ghi nhận tín hiệu khẩn cấp nào từ người quét.
+            </p>
           </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {alertsQuery.data.items.map((incident) => (
+              <div key={incident.id} className="incident-meta-card">
+                <div className="incident-header-row">
+                  <span className="incident-time">{formatIncidentTime(incident.created_at)}</span>
+                  <span className="incident-tag">
+                    {incident.status === "broadcasted" || incident.status === "completed"
+                      ? "ĐÃ PHÁT BÁO ĐỘNG"
+                      : incident.status.toUpperCase()}
+                  </span>
+                </div>
 
-          {/* SMS Broadcast Log */}
-          <div className="sms-log-container">
-            <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--fg)", marginBottom: "2px" }}>
-              Nhật Ký Chuyển Phát SMS Khẩn Cấp (2)
-            </div>
+                {/* Telemetry Details */}
+                <div className="gps-telemetry-box">
+                  <div className="gps-coord-row">
+                    <span className="gps-label">Tọa độ GPS chốt</span>
+                    <span className="gps-val-mono">
+                      {incident.latitude != null && incident.longitude != null
+                        ? `${incident.latitude.toFixed(6)}° N, ${incident.longitude.toFixed(6)}° E`
+                        : "Không xác định"}
+                    </span>
+                  </div>
+                  <div className="gps-coord-row">
+                    <span className="gps-label">Bán kính sai số</span>
+                    <span className="gps-val-mono">
+                      {incident.accuracy_meters != null
+                        ? `±${Math.round(incident.accuracy_meters)} mét (GPS Cấp Cứu)`
+                        : "Chưa ghi nhận"}
+                    </span>
+                  </div>
+                  <div className="gps-coord-row">
+                    <span className="gps-label">Địa chỉ ước tính</span>
+                    <span style={{ fontSize: "12px", fontWeight: 500, color: "var(--fg)" }}>
+                      {incident.nearby_place || "Đang xác định hoặc ngoài vùng phủ"}
+                    </span>
+                  </div>
+                </div>
 
-            <div className="sms-log-item">
-              <div className="sms-recipient-wrap">
-                <span className="sms-name">Nguyen Van B (Bạn)</span>
-                <span className="sms-phone">0901234567</span>
+                {/* Interactive Google Maps Embed */}
+                {incident.latitude != null && incident.longitude != null ? (
+                  <div className="overflow-hidden rounded-[var(--radius-control)] border border-[#d3d9e0] bg-slate-50">
+                    <iframe
+                      title={`Google Maps vị trí sự cố ${incident.id}`}
+                      width="100%"
+                      height="220"
+                      style={{ border: 0, display: "block" }}
+                      loading="lazy"
+                      allowFullScreen={false}
+                      referrerPolicy="no-referrer"
+                      src={`https://maps.google.com/maps?q=${incident.latitude},${incident.longitude}&hl=vi&z=15&output=embed`}
+                    />
+                    <div className="flex items-center justify-between px-3 py-2 bg-slate-50/90 border-t border-[#d3d9e0]">
+                      <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                        <span className="inline-block w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                        Bản đồ vệ tinh / tọa độ thực
+                      </div>
+                      {incident.map_url ? (
+                        <a
+                          href={incident.map_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
+                        >
+                          Mở trên Google Maps ↗
+                        </a>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* SMS Broadcast Log */}
+                {incident.recipients && incident.recipients.length > 0 ? (
+                  <div className="sms-log-container">
+                    <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--fg)", marginBottom: "2px" }}>
+                      Nhật Ký Chuyển Phát SMS Khẩn Cấp ({incident.recipients.length})
+                    </div>
+
+                    {incident.recipients.map((rcpt, idx) => (
+                      <div key={`${rcpt.recipient_phone}-${idx}`} className="sms-log-item">
+                        <div className="sms-recipient-wrap">
+                          <span className="sms-name">
+                            {rcpt.recipient_name}
+                            {rcpt.recipient_relationship ? ` (${rcpt.recipient_relationship})` : ""}
+                          </span>
+                          <span className="sms-phone">{rcpt.recipient_phone}</span>
+                        </div>
+                        <span
+                          className={`sms-status-pill ${
+                            rcpt.status === "sent" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : ""
+                          }`}
+                        >
+                          {rcpt.status === "sent" ? "Đã Gửi" : rcpt.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </div>
-              <span className="sms-status-pill">1.2s · Đã Nhận</span>
-            </div>
-
-            <div className="sms-log-item">
-              <div className="sms-recipient-wrap">
-                <span className="sms-name">Tran Thi C (Vợ)</span>
-                <span className="sms-phone">0912345678</span>
-              </div>
-              <span className="sms-status-pill">1.5s · Đã Nhận</span>
-            </div>
+            ))}
           </div>
-        </div>
+        )}
 
         <button type="button" className="btn-secondary" onClick={() => setViewMode("audit")}>
           ← Xem Nhật Ký Quét Thẻ Thụ Động

@@ -169,6 +169,31 @@ const custodyEventListResponseSchema = z.object({
   items: z.array(custodyEventSchema),
 });
 
+const smsDeliveryReceiptOutputSchema = z.object({
+  recipient_name: z.string(),
+  recipient_phone: z.string(),
+  recipient_relationship: z.string().nullable().optional(),
+  status: z.string(),
+  provider_id: z.string().nullable().optional(),
+});
+
+const locationAlertIncidentOutputSchema = z.object({
+  id: z.string(),
+  created_at: z.string(),
+  status: z.string(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
+  accuracy_meters: z.number().nullable().optional(),
+  nearby_place: z.string().nullable().optional(),
+  map_url: z.string().nullable().optional(),
+  recipients: z.array(smsDeliveryReceiptOutputSchema),
+});
+
+const locationAlertHistoryOutputSchema = z.object({
+  items: z.array(locationAlertIncidentOutputSchema),
+  next_cursor: z.string().nullable().optional(),
+});
+
 export type UserCard = z.infer<typeof userCardSchema>;
 export type AdminCard = z.infer<typeof adminCardSchema>;
 export type PublicLinkSummary = z.infer<typeof publicLinkSummarySchema>;
@@ -191,11 +216,17 @@ export type CustodyEvent = z.infer<typeof custodyEventSchema>;
 export type CustodyEventListResponse = z.infer<
   typeof custodyEventListResponseSchema
 >;
+export type SmsDeliveryReceipt = z.infer<typeof smsDeliveryReceiptOutputSchema>;
+export type LocationAlertIncident = z.infer<typeof locationAlertIncidentOutputSchema>;
+export type LocationAlertHistoryResponse = z.infer<
+  typeof locationAlertHistoryOutputSchema
+>;
 
 export const cardKeys = {
   myCards: ["cards", "my"] as const,
   myCard: (cardId: string) => ["cards", "my", cardId] as const,
   myCardAccessHistory: (cardId: string) => ["cards", "my", cardId, "access-history"] as const,
+  myCardAlerts: (cardId: string) => ["cards", "my", cardId, "alerts"] as const,
   adminCards: ["cards", "admin"] as const,
   adminCardList: (filters?: { search?: string; status?: string }) =>
     [
@@ -227,6 +258,22 @@ export async function getMyCardAccessHistory(
   return linkAccessHistoryResponseSchema.parse(
     await requestJson<unknown>({
       path: `/me/cards/${encodeURIComponent(cardId)}/access-history${query ? `?${query}` : ""}`,
+      signal,
+    }),
+  );
+}
+
+export async function getMyCardAlerts(
+  cardId: string,
+  cursor?: string | null,
+  signal?: AbortSignal,
+): Promise<LocationAlertHistoryResponse> {
+  const params = new URLSearchParams();
+  if (cursor) params.set("cursor", cursor);
+  const query = params.toString();
+  return locationAlertHistoryOutputSchema.parse(
+    await requestJson<unknown>({
+      path: `/me/cards/${encodeURIComponent(cardId)}/alerts${query ? `?${query}` : ""}`,
       signal,
     }),
   );
