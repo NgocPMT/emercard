@@ -25,6 +25,8 @@ import { PageApplicationRoot, useSession } from "../session";
 import { AdminLinkManagerPanel } from "./link-manager";
 import { AdminCardDetailPanel } from "./card-detail";
 import { AdminBatchProvisioningPanel } from "./batch-provisioning";
+import { AdminDesktopShell } from "./desktop/admin-desktop-shell";
+import { CardInspectorDrawer } from "./desktop/card-inspector-drawer";
 
 export type AdminAppSection = "overview" | "cards" | "links" | "detail";
 
@@ -117,11 +119,18 @@ function getCardStatusBadge(card: AdminCard) {
   return { className: "card-status-pill status-retired", label: "Đã Thu Hồi" };
 }
 
-function AdminCardsPanel() {
+function AdminCardsPanel({ searchQuery = "" }: { searchQuery?: string }) {
   const { clearSessionCache } = useSession();
   const [view, setView] = useState<"list" | "batch">("list");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchQuery);
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [selectedCard, setSelectedCard] = useState<AdminCard | null>(null);
+
+  useEffect(() => {
+    if (searchQuery !== undefined) {
+      setSearch(searchQuery);
+    }
+  }, [searchQuery]);
 
   const statsQuery = useQuery({
     queryKey: cardKeys.adminStats,
@@ -205,170 +214,328 @@ function AdminCardsPanel() {
   }
 
   return (
-    <div
-      className="w-full max-w-[420px] mx-auto flex flex-col gap-4"
-      data-od-id="board-inventory-overview"
-    >
-      <div className="phone-frame">
-        <div className="screen-content">
-          <div className="flex justify-end items-center">
-            <button
-              type="button"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-[var(--accent)] rounded-[var(--radius-control)] shadow-sm hover:opacity-90 cursor-pointer border-none"
-              onClick={() => setView("batch")}
-            >
-              + Nhập Lô Mới
-            </button>
+    <div className="flex flex-col gap-6" data-od-id="board-inventory-overview">
+      {/* Header Row */}
+      <div className="admin-page-header-row">
+        <div className="admin-page-title-group">
+          <h1 className="admin-page-title">Giám Sát & Quản Lý Kho Thẻ NFC</h1>
+          <div className="admin-page-desc">
+            Theo dõi thời gian thực {stats.total.toLocaleString()} phôi thẻ NTAG215, trạng thái hoạt động và thông số phần cứng bảo mật. Nhấp vào hàng bất kỳ để mở ngăn kéo trượt chi tiết.
           </div>
-          {/* KPI Summary Grid */}
-          <div className="kpi-summary-grid">
-            <div className="kpi-metric-card full-width">
-              <span className="kpi-label">Tổng Số Thẻ Trong Hệ Thống</span>
-              <span className="kpi-num">{stats.total.toLocaleString()}</span>
-              <span className="kpi-subtext">
-                Chip NTAG215 (504 Bytes) · 100% Đồng bộ
-              </span>
-            </div>
-            <div className="kpi-metric-card">
-              <span className="kpi-label">Đang Hoạt Động</span>
-              <span className="kpi-num">{stats.active.toLocaleString()}</span>
-              <span className="kpi-subtext">Đã liên kết chủ thẻ</span>
-            </div>
-            <div className="kpi-metric-card">
-              <span className="kpi-label">Sẵn Sàng Gán</span>
-              <span className="kpi-num">{stats.available.toLocaleString()}</span>
-              <span className="kpi-subtext">Kho thẻ trắng (Chưa gán)</span>
-            </div>
-            <div className="kpi-metric-card">
-              <span className="kpi-label">Tạm Đình Chỉ</span>
-              <span className="kpi-num">{stats.suspended.toLocaleString()}</span>
-              <span className="kpi-subtext">Báo mất / Tạm khóa</span>
-            </div>
-            <div className="kpi-metric-card">
-              <span className="kpi-label">Đã Thu Hồi</span>
-              <span className="kpi-num">
-                {(stats.void + stats.lost).toLocaleString()}
-              </span>
-              <span className="kpi-subtext">Hỏng chip / Hết hạn</span>
-            </div>
-          </div>
-
-          {/* Search & Filter Controls */}
-          <div className="search-filter-wrap">
-            <div className="field-input-wrap">
-              <input
-                type="text"
-                className="input-text input-mono"
-                placeholder="Tìm theo mã EMC-..., UID, user_id..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-
-            <div className="filter-pills-row" id="inventoryFilterPills">
-              <button
-                type="button"
-                className={`filter-pill ${filterStatus === "all" ? "active" : ""}`}
-                onClick={() => setFilterStatus("all")}
-              >
-                Tất cả ({stats.total})
-              </button>
-              <button
-                type="button"
-                className={`filter-pill ${filterStatus === "active" ? "active" : ""}`}
-                onClick={() => setFilterStatus("active")}
-              >
-                Hoạt động ({stats.active})
-              </button>
-              <button
-                type="button"
-                className={`filter-pill ${filterStatus === "available" ? "active" : ""}`}
-                onClick={() => setFilterStatus("available")}
-              >
-                Sẵn sàng ({stats.available})
-              </button>
-              <button
-                type="button"
-                className={`filter-pill ${filterStatus === "suspended" ? "active" : ""}`}
-                onClick={() => setFilterStatus("suspended")}
-              >
-                Tạm dừng ({stats.suspended})
-              </button>
-            </div>
-          </div>
-
-          {/* Card Inventory List */}
-          {items.length === 0 ? (
-            <EmptyState
-              title="Không tìm thấy thẻ"
-              description="Không có thẻ nào phù hợp với bộ lọc hiện tại."
-            />
-          ) : (
-            <div className="card-inventory-list" id="cardListContainer">
-              {items.map((card) => {
-                const badge = getCardStatusBadge(card);
-                return (
-                  <div key={card.id} className="card-item-row">
-                    <div className="card-item-top">
-                      <span className="card-serial">{card.serial}</span>
-                      <span className={badge.className}>{badge.label}</span>
-                    </div>
-                    <div className="card-meta-row">
-                      <span>
-                        UID:{" "}
-                        {card.hardware_uid
-                          ? card.hardware_uid.length > 17
-                            ? `${card.hardware_uid.slice(0, 14)}...`
-                            : card.hardware_uid
-                          : "04:A2:8B:E2..."}
-                      </span>
-                      <span>
-                        Chủ thẻ:{" "}
-                        <span className="card-user-id">
-                          {card.owner?.id ? card.owner.id : "Chưa gán"}
-                        </span>
-                      </span>
-                    </div>
-                    <div className="flex justify-end gap-2 mt-0.5">
-                      {card.status === "active" ? (
-                        <a
-                          href={`/admin/cards/detail?cardId=${encodeURIComponent(card.id)}`}
-                          className="link-subtle"
-                        >
-                          Chi tiết thẻ →
-                        </a>
-                      ) : card.status === "unassigned" ||
-                        card.status === "assigned" ? (
-                        <a
-                          href={`/admin/cards/detail?cardId=${encodeURIComponent(card.id)}&tab=link`}
-                          className="link-subtle"
-                        >
-                          Gán thẻ này →
-                        </a>
-                      ) : (
-                        <a
-                          href={`/admin/cards/detail?cardId=${encodeURIComponent(card.id)}&tab=lifecycle`}
-                          className="link-subtle"
-                        >
-                          Đổi trạng thái →
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
+        </div>
+        <div className="admin-page-actions">
           <button
             type="button"
-            className="btn-primary mt-1"
+            className="admin-btn-primary-action"
             onClick={() => setView("batch")}
           >
-            + Nhập Lô Thẻ Mới Vào Kho
+            + Nhập Lô Mới
           </button>
         </div>
       </div>
+
+      {/* KPI Metric Cards Row */}
+      <div className="admin-metric-grid">
+        <div
+          className={`admin-metric-card ${filterStatus === "all" ? "active" : ""}`}
+          onClick={() => setFilterStatus("all")}
+        >
+          <div className="admin-metric-header">
+            <span className="admin-metric-title">Tổng Số Thẻ Trong Hệ Thống</span>
+            <span
+              className="admin-metric-pill"
+              style={{ background: "var(--info-bg)", color: "var(--info-text)" }}
+            >
+              NTAG215
+            </span>
+          </div>
+          <div className="admin-metric-val">{stats.total.toLocaleString()}</div>
+          <div className="admin-metric-subtext">Dung lượng tối đa 2,000 thẻ đợt 2026</div>
+        </div>
+
+        <div
+          className={`admin-metric-card ${filterStatus === "active" ? "active" : ""}`}
+          onClick={() => setFilterStatus("active")}
+        >
+          <div className="admin-metric-header">
+            <span className="admin-metric-title">Đang Hoạt Động</span>
+            <span
+              className="admin-metric-pill"
+              style={{ background: "var(--success-bg)", color: "var(--success-text)" }}
+            >
+              ACTIVE
+            </span>
+          </div>
+          <div className="admin-metric-val" style={{ color: "var(--success)" }}>
+            {stats.active.toLocaleString()}
+          </div>
+          <div className="admin-metric-subtext">Đã liên kết chủ thẻ y tế</div>
+        </div>
+
+        <div
+          className={`admin-metric-card ${filterStatus === "available" ? "active" : ""}`}
+          onClick={() => setFilterStatus("available")}
+        >
+          <div className="admin-metric-header">
+            <span className="admin-metric-title">Sẵn Sàng Gán</span>
+            <span
+              className="admin-metric-pill"
+              style={{ background: "var(--info-bg)", color: "var(--info-text)" }}
+            >
+              READY
+            </span>
+          </div>
+          <div className="admin-metric-val" style={{ color: "var(--accent)" }}>
+            {stats.available.toLocaleString()}
+          </div>
+          <div className="admin-metric-subtext">Kho thẻ trắng sẵn sàng xuất kho</div>
+        </div>
+
+        <div
+          className={`admin-metric-card ${filterStatus === "suspended" ? "active" : ""}`}
+          onClick={() => setFilterStatus("suspended")}
+        >
+          <div className="admin-metric-header">
+            <span className="admin-metric-title">Tạm Đình Chỉ & Thu Hồi</span>
+            <span
+              className="admin-metric-pill"
+              style={{ background: "var(--warning-bg)", color: "var(--warning-text)" }}
+            >
+              SUSPENDED
+            </span>
+          </div>
+          <div className="admin-metric-val" style={{ color: "var(--warning)" }}>
+            {stats.suspended.toLocaleString()}
+          </div>
+          <div className="admin-metric-subtext">
+            {stats.suspended} tạm khóa · {stats.void + stats.lost} đã thu hồi
+          </div>
+        </div>
+      </div>
+
+      {/* Action Toolbar & Filter Tabs */}
+      <div className="admin-table-toolbar">
+        <div className="admin-filter-tabs">
+          <button
+            type="button"
+            className={`admin-filter-tab ${filterStatus === "all" ? "active" : ""}`}
+            onClick={() => setFilterStatus("all")}
+          >
+            Tất Cả Thẻ
+            <span className="admin-tab-badge">{stats.total}</span>
+          </button>
+          <button
+            type="button"
+            className={`admin-filter-tab ${filterStatus === "active" ? "active" : ""}`}
+            onClick={() => setFilterStatus("active")}
+          >
+            Đang Hoạt Động
+            <span className="admin-tab-badge">{stats.active}</span>
+          </button>
+          <button
+            type="button"
+            className={`admin-filter-tab ${filterStatus === "available" ? "active" : ""}`}
+            onClick={() => setFilterStatus("available")}
+          >
+            Sẵn Sàng Gán
+            <span className="admin-tab-badge">{stats.available}</span>
+          </button>
+          <button
+            type="button"
+            className={`admin-filter-tab ${filterStatus === "suspended" ? "active" : ""}`}
+            onClick={() => setFilterStatus("suspended")}
+          >
+            Tạm Đình Chỉ
+            <span className="admin-tab-badge">{stats.suspended}</span>
+          </button>
+          <button
+            type="button"
+            className={`admin-filter-tab ${filterStatus === "retired" ? "active" : ""}`}
+            onClick={() => setFilterStatus("retired")}
+          >
+            Đã Thu Hồi
+            <span className="admin-tab-badge">{stats.void + stats.lost}</span>
+          </button>
+        </div>
+
+        <div className="admin-toolbar-tools">
+          <select
+            className="admin-tool-select"
+            defaultValue="ntag215"
+            aria-label="Chọn loại chip"
+          >
+            <option value="all">Tất cả loại chip</option>
+            <option value="ntag215">NXP NTAG215 (504 Bytes)</option>
+            <option value="ntag216">NXP NTAG216 (888 Bytes)</option>
+          </select>
+          <button
+            type="button"
+            className="admin-btn-secondary-action"
+            onClick={() => {
+              void statsQuery.refetch();
+              void query.refetch();
+            }}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <polyline points="23 4 23 10 17 10" />
+              <polyline points="1 20 1 14 7 14" />
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+            </svg>
+            Làm mới
+          </button>
+        </div>
+      </div>
+
+      {/* Rich Data Table with Click-to-Inspect */}
+      <div className="admin-table-container">
+        {items.length === 0 ? (
+          <div style={{ padding: "40px 20px", textAlign: "center" }}>
+            <EmptyState
+              title="Không tìm thấy thẻ nào"
+              description="Không có thẻ nào phù hợp với bộ lọc hiện tại."
+            />
+          </div>
+        ) : (
+          <table className="admin-data-table" id="inventory-table">
+            <thead>
+              <tr>
+                <th style={{ width: "40px" }}>
+                  <input type="checkbox" aria-label="Chọn tất cả thẻ" />
+                </th>
+                <th>Mã Thẻ NFC</th>
+                <th>UID Phần Cứng (Chip)</th>
+                <th>Chuẩn Kỹ Thuật</th>
+                <th>Trạng Thái</th>
+                <th>Chủ Thẻ (Opaque ID)</th>
+                <th>Ngày Kích Hoạt</th>
+                <th style={{ textAlign: "right" }}>Thao Tác Nhanh</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((card) => {
+                const isActive = card.status === "active";
+                const isAvailable = card.status === "unassigned" || card.status === "assigned";
+                const isSuspended = card.status === "disabled";
+                const statusClass = isActive
+                  ? "success"
+                  : isAvailable
+                    ? "info"
+                    : isSuspended
+                      ? "warning"
+                      : "danger";
+                const statusLabel = isActive
+                  ? "Đang Hoạt Động"
+                  : isAvailable
+                    ? "Sẵn Sàng Gán"
+                    : isSuspended
+                      ? "Tạm Đình Chỉ"
+                      : card.status === "lost"
+                        ? "Báo Mất Cắp"
+                        : "Đã Thu Hồi";
+
+                return (
+                  <tr
+                    key={card.id}
+                    onClick={() => setSelectedCard(card)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <td>
+                      <input
+                        type="checkbox"
+                        onClick={(e) => e.stopPropagation()}
+                        aria-label={`Chọn thẻ ${card.serial}`}
+                      />
+                    </td>
+                    <td>
+                      <span className="admin-td-serial">{card.serial}</span>
+                    </td>
+                    <td>
+                      <span className="admin-td-uid">
+                        {card.hardware_uid || "04:A2:8B:E2:19:6C:80"}
+                      </span>
+                    </td>
+                    <td>{card.chip_type || "NTAG215"} · 504B</td>
+                    <td>
+                      <span className={`admin-status-pill ${statusClass}`}>
+                        <span className="admin-status-pill-dot" />
+                        {statusLabel}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="admin-td-user">
+                        {card.owner ? `${card.owner.id} (${card.owner.email})` : "— Chưa liên kết —"}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="admin-td-date">
+                        {new Date(card.created_at).toLocaleDateString("vi-VN")}
+                      </span>
+                    </td>
+                    <td style={{ textAlign: "right" }}>
+                      <div
+                        className="admin-table-actions-cell"
+                        style={{ justifyContent: "flex-end" }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <a
+                          href={`/admin/cards/detail?cardId=${encodeURIComponent(card.id)}`}
+                          className="admin-btn-table-action"
+                        >
+                          Chi tiết thẻ →
+                        </a>
+                        <button
+                          type="button"
+                          className="admin-btn-table-action"
+                          onClick={() =>
+                            assignLocation(
+                              `/admin/cards/detail?cardId=${encodeURIComponent(card.id)}&tab=lifecycle`,
+                            )
+                          }
+                        >
+                          Đổi trạng thái
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+
+        {/* Table Pagination */}
+        <div className="admin-table-footer">
+          <div>
+            Hiển thị <strong>1 – {items.length}</strong> trong tổng số{" "}
+            <strong>{stats.total.toLocaleString()}</strong> thẻ NFC
+          </div>
+          <div className="admin-pagination-controls">
+            <button type="button" className="admin-btn-page">
+              &laquo;
+            </button>
+            <button type="button" className="admin-btn-page active">
+              1
+            </button>
+            <button type="button" className="admin-btn-page">
+              &raquo;
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Slide-over Inspector Drawer (440px) */}
+      <CardInspectorDrawer
+        card={selectedCard}
+        isOpen={!!selectedCard}
+        onClose={() => setSelectedCard(null)}
+      />
     </div>
   );
 }
@@ -509,6 +676,7 @@ export function AdminApplicationRoot({
   cardId?: string | null;
 }) {
   const [locationCardId, setLocationCardId] = useState<string | null>(cardId ?? null);
+  const [globalSearch, setGlobalSearch] = useState("");
 
   useEffect(() => {
     if (cardId || section !== "detail") return;
@@ -516,25 +684,15 @@ export function AdminApplicationRoot({
   }, [cardId, section]);
 
   const resolvedCardId = cardId ?? locationCardId;
-  const copy = sectionCopy[section];
-  const currentPath =
-    section === "overview"
-      ? "/admin"
-      : section === "cards" || section === "detail"
-        ? "/admin/cards"
-        : "/admin/links";
+
   return (
-    <PageApplicationRoot
-      role="admin"
-      brand={appBrand}
-      navigation={navigation.map((item) => ({
-        ...item,
-        current: item.href === currentPath,
-      }))}
-      userLabel={<StatusBadge variant="danger">Quản trị viên</StatusBadge>}
+    <AdminDesktopShell
+      activeSection={section}
+      searchValue={globalSearch}
+      onSearch={setGlobalSearch}
     >
-      {section === "cards" ? (
-        <AdminCardsPanel />
+      {section === "cards" || section === "overview" ? (
+        <AdminCardsPanel searchQuery={globalSearch} />
       ) : section === "links" ? (
         <AdminLinkManagerPanel />
       ) : section === "detail" ? (
@@ -547,19 +705,8 @@ export function AdminApplicationRoot({
           />
         )
       ) : (
-        <div className="grid gap-5 lg:grid-cols-2">
-          <Panel className="space-y-3">
-            <h2 className="text-xl font-semibold text-foreground">Bắt đầu một quy trình mới</h2>
-            <p className="text-sm leading-6 text-muted-foreground">Tạo liên kết hồ sơ trước, sau đó gắn liên kết vào thẻ trống trong kho thẻ.</p>
-            <Button type="button" onClick={() => assignLocation("/admin/links")}>Tạo liên kết hồ sơ</Button>
-          </Panel>
-          <Panel className="space-y-3">
-            <h2 className="text-xl font-semibold text-foreground">Tiếp tục công việc đang dở</h2>
-            <p className="text-sm leading-6 text-muted-foreground">Mở kho thẻ để xem trạng thái mã hóa, phát hành và liên kết công khai của từng thẻ.</p>
-            <Button type="button" variant="secondary" onClick={() => assignLocation("/admin/cards")}>Mở kho thẻ</Button>
-          </Panel>
-        </div>
+        <AdminCardsPanel searchQuery={globalSearch} />
       )}
-    </PageApplicationRoot>
+    </AdminDesktopShell>
   );
 }

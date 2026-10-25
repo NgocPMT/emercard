@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { cardKeys, getAdminInventoryStats } from "../../../api/cards";
 import { assignLocation } from "../../../lib/navigation";
+import { BrandMark } from "../../../components/layout";
 import { useSession } from "../../session";
 
 export interface AdminDesktopShellProps {
@@ -23,11 +24,12 @@ export function AdminDesktopShell({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const { data: stats } = useQuery({
+  const statsQueryResult = useQuery({
     queryKey: cardKeys.adminStats,
     queryFn: ({ signal }) => getAdminInventoryStats(signal),
     staleTime: 10_000,
   });
+  const stats = statsQueryResult?.data;
 
   const totalCards = stats?.total ?? 1250;
   const maxQuota = 2000;
@@ -79,16 +81,7 @@ export function AdminDesktopShell({
         <aside className="admin-sidebar" aria-label="Bảng điều khiển quản trị">
           <div className="admin-sidebar-top">
             <div className="admin-sidebar-header">
-              <div className="admin-sidebar-logo">+</div>
-              <div>
-                <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "14px", lineHeight: 1.2 }}>
-                  EmerCard Admin
-                </div>
-                <div style={{ fontSize: "11px", color: "var(--success)", fontWeight: 600, display: "flex", alignItems: "center", gap: "4px" }}>
-                  <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--success)" }} />
-                  Trực tuyến · Sẵn sàng
-                </div>
-              </div>
+              <BrandMark label="EmerCard" />
             </div>
 
             <nav className="admin-sidebar-nav" aria-label="Menu quản trị kho thẻ">
