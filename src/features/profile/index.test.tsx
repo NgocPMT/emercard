@@ -77,9 +77,45 @@ describe("ProfilePageRoot", () => {
     expect(screen.getByRole("heading", { name: "Hồ sơ y tế" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Xem trước trang khẩn cấp" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Alex Example" })).toBeInTheDocument();
-    expect(screen.getByText("Chỉ xem trong ứng dụng, không tạo liên kết.")).toBeInTheDocument();
+    expect(screen.getByText("O+")).toBeInTheDocument();
     expect(screen.getByText("Dị ứng quan trọng", { selector: "dt" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Xem trước trang khẩn cấp" })).not.toBeInTheDocument();
     expect(assignLocationMock).not.toHaveBeenCalled();
+  });
+
+  it("renders subtle placeholder for unprovided blood type without breaking layout", () => {
+    useQueryMock.mockReturnValue({
+      isPending: false,
+      error: undefined,
+      data: {
+        profile: {
+          profile_id: "profile-test-2",
+          display_name: null,
+          birth_year: null,
+          gender: null,
+          blood_type: null,
+          critical_allergies: [],
+          important_conditions: [],
+          critical_medications: [],
+          emergency_note: null,
+          emergency_contacts: [],
+          created_at: "2026-01-01T00:00:00.000Z",
+          updated_at: "2026-01-01T00:00:00.000Z",
+        },
+        readiness: {
+          status: "draft",
+          missing_fields: ["display_name", "emergency_contacts"],
+          required_contact_count: 1,
+          completed_required_field_count: 0,
+          total_required_field_count: 5,
+        },
+      },
+    });
+    useMutationMock.mockReturnValue({ isPending: false, error: undefined, mutateAsync: vi.fn() });
+
+    render(<ProfilePageRoot />);
+
+    expect(screen.getByText("Chưa cung cấp")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Chỉnh Sửa Hồ Sơ Y Tế" })).toBeInTheDocument();
   });
 });
