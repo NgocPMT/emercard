@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ProfilePageRoot } from ".";
 
@@ -118,4 +118,77 @@ describe("ProfilePageRoot", () => {
     expect(screen.getByText("Chưa cung cấp")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Chỉnh Sửa Hồ Sơ Y Tế" })).toBeInTheDocument();
   });
+
+  it("switches to editor on click edit and returns to preview automatically after saving successfully", async () => {
+    const mutateAsyncMock = vi.fn().mockResolvedValue({
+      profile: {
+        profile_id: "profile-test-1",
+        display_name: "Alex Example",
+        birth_year: 1995,
+        gender: "female",
+        blood_type: "O+",
+        critical_allergies: [],
+        important_conditions: [],
+        critical_medications: [],
+        emergency_note: null,
+        emergency_contacts: [{ name: "Bố", relationship: "Bố", phone: "0901234567" }],
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
+      },
+      readiness: {
+        status: "ready",
+        missing_fields: [],
+        required_contact_count: 1,
+        completed_required_field_count: 5,
+        total_required_field_count: 5,
+      },
+    });
+
+    useQueryMock.mockReturnValue({
+      isPending: false,
+      error: undefined,
+      data: {
+        profile: {
+          profile_id: "profile-test-1",
+          display_name: "Alex Example",
+          birth_year: 1995,
+          gender: "female",
+          blood_type: "O+",
+          critical_allergies: [],
+          important_conditions: [],
+          critical_medications: [],
+          emergency_note: null,
+          emergency_contacts: [{ name: "Bố", relationship: "Bố", phone: "0901234567" }],
+          created_at: "2026-01-01T00:00:00.000Z",
+          updated_at: "2026-01-01T00:00:00.000Z",
+        },
+        readiness: {
+          status: "ready",
+          missing_fields: [],
+          required_contact_count: 1,
+          completed_required_field_count: 5,
+          total_required_field_count: 5,
+        },
+      },
+    });
+    useMutationMock.mockReturnValue({ isPending: false, error: undefined, mutateAsync: mutateAsyncMock });
+
+    render(<ProfilePageRoot />);
+
+    // Click edit
+    fireEvent.click(screen.getByRole("button", { name: "Chỉnh Sửa Hồ Sơ Y Tế" }));
+    expect(screen.getByRole("heading", { name: "Chỉnh Sửa Hồ Sơ Y Tế" })).toBeInTheDocument();
+
+    // Click save
+    fireEvent.click(screen.getAllByRole("button", { name: "Lưu Thay Đổi" })[0]);
+
+    // Should automatically return to preview screen without clicking cancel
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Xem trước trang khẩn cấp" })).toBeInTheDocument();
+    });
+    expect(screen.queryByRole("heading", { name: "Chỉnh Sửa Hồ Sơ Y Tế" })).not.toBeInTheDocument();
+    expect(screen.getByText("Lưu hồ sơ thành công!")).toBeInTheDocument();
+    expect(screen.getByText("Dữ liệu đã đồng bộ lập tức lên thẻ NFC.")).toBeInTheDocument();
+  });
 });
+
