@@ -204,7 +204,17 @@ function PreviewContactList({ contacts }: { contacts: ProfilePreviewContact[] })
   );
 }
 
-function ProfileViewCard({ profileView, onEdit }: { profileView: ProfileView; onEdit: () => void }) {
+function ProfileViewCard({
+  profileView,
+  onEdit,
+  successMessage,
+  onDismissSuccess,
+}: {
+  profileView: ProfileView;
+  onEdit: () => void;
+  successMessage?: string | null;
+  onDismissSuccess?: () => void;
+}) {
   const profile = profileView.profile;
   const contacts = profile?.emergency_contacts ?? [];
   const allergies = profile?.critical_allergies ?? [];
@@ -215,6 +225,29 @@ function ProfileViewCard({ profileView, onEdit }: { profileView: ProfileView; on
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6" data-od-id="board-profile-view">
+      {successMessage ? (
+        <div className="toast-success-banner show flex items-center justify-between" id="saveSuccessToast">
+          <div className="flex items-center gap-2">
+            <svg style={{ width: "18px", height: "18px", fill: "var(--accent)", flexShrink: 0 }} viewBox="0 0 24 24">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+            </svg>
+            <div>
+              <div style={{ fontWeight: 600 }}>Lưu hồ sơ thành công!</div>
+              <div style={{ fontSize: "11px", color: "var(--muted)" }}>Dữ liệu đã đồng bộ lập tức lên thẻ NFC.</div>
+            </div>
+          </div>
+          {onDismissSuccess ? (
+            <button
+              type="button"
+              className="text-xs text-muted-foreground hover:text-foreground cursor-pointer px-2 py-1"
+              onClick={onDismissSuccess}
+              aria-label="Đóng thông báo"
+            >
+              ✕
+            </button>
+          ) : null}
+        </div>
+      ) : null}
       {/* Top Hero Banner */}
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius-panel)] border border-border bg-card p-6 shadow-sm">
         <div className="flex items-center gap-4 min-w-0">
@@ -364,7 +397,15 @@ function ProfileViewCard({ profileView, onEdit }: { profileView: ProfileView; on
   );
 }
 
-function ProfileEditorCard({ profileView, onCancel }: { profileView: ProfileView; onCancel: () => void }) {
+function ProfileEditorCard({
+  profileView,
+  onCancel,
+  onSaveSuccess,
+}: {
+  profileView: ProfileView;
+  onCancel: () => void;
+  onSaveSuccess?: () => void;
+}) {
   const { clearSessionCache } = useSession();
   const queryClient = useQueryClient();
   const [rootMessage, setRootMessage] = useState<string | null>(null);
@@ -508,6 +549,7 @@ function ProfileEditorCard({ profileView, onCancel }: { profileView: ProfileView
       replace(nextValues.emergency_contacts);
       setPrivatePendingChange(null);
       setSuccessMessage("Lưu hồ sơ thành công! Dữ liệu đã đồng bộ lập tức lên thẻ NFC.");
+      onSaveSuccess?.();
     } catch (error) {
       if (isApiError(error) && error.status === 401) {
         clearSessionCache();
@@ -931,6 +973,16 @@ function ProfileEditorCard({ profileView, onCancel }: { profileView: ProfileView
 function ProfilePageBody() {
   const { clearSessionCache } = useSession();
   const [isEditing, setIsEditing] = useState(false);
+  const [successBanner, setSuccessBanner] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!successBanner) return;
+    const timer = setTimeout(() => {
+      setSuccessBanner(null);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [successBanner]);
+
   const query = useQuery({
     queryKey: profileKeys.current,
     queryFn: ({ signal }) => getCurrentProfile(signal),
@@ -968,9 +1020,24 @@ function ProfilePageBody() {
   }
 
   return isEditing ? (
-    <ProfileEditorCard profileView={query.data} onCancel={() => setIsEditing(false)} />
+    <ProfileEditorCard
+      profileView={query.data}
+      onCancel={() => setIsEditing(false)}
+      onSaveSuccess={() => {
+        setIsEditing(false);
+        setSuccessBanner("Lưu hồ sơ thành công! Dữ liệu đã đồng bộ lập tức lên thẻ NFC.");
+      }}
+    />
   ) : (
-    <ProfileViewCard profileView={query.data} onEdit={() => setIsEditing(true)} />
+    <ProfileViewCard
+      profileView={query.data}
+      onEdit={() => {
+        setSuccessBanner(null);
+        setIsEditing(true);
+      }}
+      successMessage={successBanner}
+      onDismissSuccess={() => setSuccessBanner(null)}
+    />
   );
 }
 
