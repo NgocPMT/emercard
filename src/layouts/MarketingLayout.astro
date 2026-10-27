@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import GoogleAnalytics from "../components/analytics/GoogleAnalytics.astro";
 
 const {
   title = "EmerCard",
@@ -15,6 +16,7 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <title>{title}</title>
+    <GoogleAnalytics />
   </head>
   <body>
     <slot />
