@@ -1,0 +1,35 @@
+---
+import { publicEnv } from "../../config/public-env";
+
+interface Props {
+  measurementId?: string;
+}
+
+const { measurementId = publicEnv.PUBLIC_GA_MEASUREMENT_ID } = Astro.props;
+const isTest = publicEnv.PUBLIC_APP_ENV === "test";
+const shouldRender = Boolean(measurementId && !isTest);
+---
+
+{
+  shouldRender && (
+    <>
+      <script
+        is:inline
+        async
+        src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
+      />
+      <script is:inline define:vars={{ measurementId }}>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+          window.dataLayer.push(arguments);
+        }
+        window.gtag = gtag;
+        gtag("js", new Date());
+        gtag("config", measurementId, {
+          send_page_view: true,
+          anonymize_ip: true,
+        });
+      </script>
+    </>
+  )
+}
