@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import { Font } from "astro:assets";
+import GoogleAnalytics from "../components/analytics/GoogleAnalytics.astro";
 
 const features = [
   {
@@ -84,6 +85,7 @@ const kitItems = [
     <title>EmerCard</title>
     <Font cssVariable="--font-source-sans-3" preload />
     <Font cssVariable="--font-inconsolata" preload />
+    <GoogleAnalytics />
   </head>
   <body class="[font-family:var(--font-source-sans-3)] scroll-smooth bg-slate-50 text-slate-900 antialiased">
     <div class="relative isolate overflow-hidden">
@@ -108,6 +110,8 @@ const kitItems = [
 
           <a
             href="/login"
+            data-analytics-event="cta_click"
+            data-analytics-label="header_login"
             class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-sky-300 hover:text-sky-700"
           >
             Đăng nhập
@@ -133,12 +137,16 @@ const kitItems = [
               <div class="flex flex-wrap gap-3">
                 <a
                   href="/register"
+                  data-analytics-event="cta_click"
+                  data-analytics-label="hero_register"
                   class="inline-flex items-center justify-center rounded-full bg-sky-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700"
                 >
                   Đăng ký chờ ra mắt
                 </a>
                 <a
                   href="#specs"
+                  data-analytics-event="cta_click"
+                  data-analytics-label="hero_specs"
                   class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-400 hover:text-sky-700"
                 >
                   Xem thông số
@@ -318,5 +326,27 @@ const kitItems = [
         </div>
       </footer>
     </div>
+
+    <script>
+      import { trackEvent } from "../lib/analytics";
+
+      document
+        .querySelectorAll<HTMLElement>("[data-analytics-event]")
+        .forEach((el) => {
+          el.addEventListener("click", () => {
+            const eventName =
+              el.getAttribute("data-analytics-event") || "cta_click";
+            const label = el.getAttribute("data-analytics-label") || undefined;
+            trackEvent(eventName, { label });
+          });
+        });
+
+      const waitlistForm = document.getElementById("waitlist-form");
+      if (waitlistForm) {
+        waitlistForm.addEventListener("submit", () => {
+          trackEvent("waitlist_submit", { source: "landing_page" });
+        });
+      }
+    </script>
   </body>
 </html>

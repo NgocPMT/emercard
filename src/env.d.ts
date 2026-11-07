@@ -6,6 +6,7 @@ interface ImportMetaEnv {
   readonly PUBLIC_SITE_URL?: string;
   readonly PUBLIC_API_BASE_PATH?: string;
   readonly PUBLIC_DEMO_DATA_NOTICE?: string;
+  readonly PUBLIC_GA_MEASUREMENT_ID?: string;
   readonly EMERCARD_API_PROXY_TARGET?: string;
   readonly EMERCARD_OPENAPI_URL?: string;
 }

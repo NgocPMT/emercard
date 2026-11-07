@@ -12,6 +12,11 @@ const publicEnvSchema = z
       .default("http://localhost:4321"),
     PUBLIC_API_BASE_PATH: z.string().min(1).default("/api"),
     PUBLIC_DEMO_DATA_NOTICE: z.string().optional(),
+    PUBLIC_GA_MEASUREMENT_ID: z
+      .string()
+      .trim()
+      .optional()
+      .transform((val) => (val && val.length > 0 ? val : undefined)),
   })
   .passthrough();
 
